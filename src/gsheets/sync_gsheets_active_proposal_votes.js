@@ -6,11 +6,10 @@ const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
 
+// DRY/PARAMETERIZE
 const roundNumber = 6
-
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
-
 // TODO - RA: First 4 rounds were done with an ERC20-only strategy
 const marketStrategy = [
     {
@@ -34,10 +33,12 @@ const marketStrategy = [
 const network = '1';
 const provider = snapshot.utils.getProvider(network);
 
+// Let's track the state of various proposals
 var activeProposals = {}
 var proposalVotes = {}
 var proposalScores = {}
 
+// gsheet summaries to make downstream happy
 var proposalSummary = {}
 var roundSummary = {}
 
@@ -98,11 +99,9 @@ const calculateProposalSummary = async (proposals, scores) => {
         if( batchIndex === undefined ) {
             numVoters = Object.keys(proposalVotes[ipfsHash]).length
         } else {
-            numVoters = Object.entries(proposalVotes[ipfsHash]).map((v) => {
-                return v[1].msg.payload.choice == batchIndex ? 1 : 0
-            }).reduce((total, num) => {
-                return total + num
-            })
+            numVoters = Object.entries(proposalVotes[ipfsHash])
+                .map((v) => {return v[1].msg.payload.choice === batchIndex ? 1 : 0})
+                .reduce((total, num) => {return total + num})
         }
         const sumVotes = yesVotes + noVotes
 
@@ -188,31 +187,22 @@ const calculateRoundSummary = async (proposals, scores) => {
     let record = {}
     record['numProposals'] = Object.values(proposals).length
     record['numWallets'] = Object.values(wallets).length
-    record['numVotes'] = Object.entries(walletSummary).map((ws) => {
-        return ws[1]['numVotes']
-    }).reduce((total, num) => {
-        return total + num
-    })
-    record['numYes'] = Object.entries(walletSummary).map((ws) => {
-      return ws[1]['numYes']
-    }).reduce((total, num) => {
-        return total + num
-    })
-    record['numNo'] = Object.entries(walletSummary).map((ws) => {
-        return ws[1]['numNo']
-    }).reduce((total, num) => {
-        return total + num
-    })
-    record['sumYes'] = Object.entries(walletSummary).map((ws) => {
-        return ws[1]['sumYes']
-    }).reduce((total, num) => {
-        return total + num
-    })
-    record['sumNo'] = Object.entries(walletSummary).map((ws) => {
-        return ws[1]['sumNo']
-    }).reduce((total, num) => {
-        return total + num
-    })
+    record['numVotes'] = Object.entries(walletSummary)
+        .map((ws) => {return ws[1]['numVotes']})
+        .reduce((total, num) => {return total + num})
+
+    record['numYes'] = Object.entries(walletSummary)
+        .map((ws) => {return ws[1]['numYes']})
+        .reduce((total, num) => {return total + num})
+    record['numNo'] = Object.entries(walletSummary)
+        .map((ws) => {return ws[1]['numNo']})
+        .reduce((total, num) => {return total + num})
+    record['sumYes'] = Object.entries(walletSummary)
+        .map((ws) => {return ws[1]['sumYes']})
+        .reduce((total, num) => {return total + num})
+    record['sumNo'] = Object.entries(walletSummary)
+        .map((ws) => {return ws[1]['sumNo']})
+        .reduce((total, num) => {return total + num})
 
     return [[
         record['numProposals'],
@@ -313,9 +303,9 @@ const main = async () => {
     await getActiveProposalVotes()
 
     // Output the raw snapshot raw data into gsheets
-    // Object.entries(proposalVotes).map(async (p) => {
-    //     await dumpFromSnapshotRawToGSheet(p[0])
-    // })
+    Object.entries(proposalVotes).map(async (p) => {
+        await dumpFromSnapshotRawToGSheet(p[0])
+    })
 
     // Output the round summary
     proposalSummary = await calculateProposalSummary(activeProposals, proposalScores)

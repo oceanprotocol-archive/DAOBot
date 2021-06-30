@@ -2,4 +2,5 @@
 /.idea/
 /node_modules/
 log_*
+credentials.json
 token.json

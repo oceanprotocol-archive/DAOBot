@@ -2,8 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const fetch = require('cross-fetch')
-
-const AIRTABLE_BASEID =  'appVer8ccYGnqSm2H'
 const base = require('airtable').base(AIRTABLE_BASEID)
 
 const splitArr = (arr, chunk) => {

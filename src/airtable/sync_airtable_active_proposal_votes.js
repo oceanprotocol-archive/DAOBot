@@ -6,8 +6,8 @@ const {getProposalVotes} = require('../snapshot/snapshot_utils');
 const dotenv = require('dotenv');
 dotenv.config();
 
+// DRY/PARAMETERIZE
 const roundNumber = 6
-
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
 const marketStrategy = [

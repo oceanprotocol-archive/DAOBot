@@ -1,5 +1,5 @@
-const {getProposalsByState, updateProposalRecords} = require('./airtable_utils')
-const {buildProposalPayload, local_broadcast_proposal} = require('../snapshot/snapshot_utils')
+const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
+const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
 const {web3} = require('../functions/web3')
 
 const dotenv = require('dotenv');
@@ -20,6 +20,7 @@ const assert = (condition, message) => {
 }
 
 const validateAccceptedProposal = (proposal) => {
+    assert(proposal.get('Overview') !== undefined, '[%s][%s]: Invalid <Overview>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Proposal URL') !== undefined, '[%s][%s]: Invalid <Proposal URL>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Grant Deliverables') !== undefined, '[%s][%s]: Invalid <Grant Deliverables>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Voting Starts') !== undefined, '[%s][%s]: Invalid <Voting Starts>', proposal.id, proposal.get('Name'))
