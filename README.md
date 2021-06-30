@@ -8,4 +8,22 @@ This bot pipes data from a few different sources, so we can efficiently report D
 AIRTABLE_API_KEY=KEY_HERE
 INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
+SNAPSHOT_HUB_URL=https://hub.snapshot.page
 ```
+
+## GSheets
+
+This bot also connects with GSheets.
+- Copy your credentials.json into DAOBot/ root
+- user@vm:in/your/cli/DAOBot/$node src/gsheets/index.js
+- Follow cli prompts. token.json should be generated 
+- Place token.json in DAOBOT/ root
+- Now, run src/gsheets/sync_gsheets_active_proposal_votes.js
+
+## Main entry points
+
+These are the main entry points.
+- src/airtable/sync_airtable_active_proposal_votes.js
+- src/gsheets/sync_gsheets_active_proposal_votes.js
+- src/snapshot/submit_snapshot_accepted_proposals.js
+
