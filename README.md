@@ -22,8 +22,12 @@ This bot also connects with GSheets.
 - Copy your credentials.json into DAOBot/ root
 - user@vm:in/your/cli/DAOBot/$node src/gsheets/index.js
 - Follow cli prompts. token.json should be generated 
-- Place token.json in DAOBOT/ root
-- Now, run src/gsheets/sync_gsheets_active_proposal_votes.js
+- user@vm:in/your/cli/DAOBot/$node src/gsheets/sync_gsheets_active_proposal_votes.js >> log_sync_gsheets_active_proposal_votes.csv
+
+## Airtable
+
+This bot updates Airtable on a cron to display a vote Leaderboard.
+- user@vm:in/your/cli/DAOBot/$node src/airtable/sync_airtable_active_proposal_votes.js >> log_sync_airtable_active_proposal_votes.csv
 
 ## Main entry points
 
