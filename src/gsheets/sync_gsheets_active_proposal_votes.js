@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 global['fetch'] = require('cross-fetch');
 
 const {getProposalsByState} = require('../airtable/airtable_utils');
@@ -314,9 +313,5 @@ const main = async () => {
 
     console.log('Updated GSheets')
 }
-
-// cron.schedule('*/15 * * * * *', () => {
-//     main()
-// });
 
 main()

@@ -1,4 +1,3 @@
-const cron = require('node-cron');
 global['fetch'] = require('cross-fetch');
 
 const {getProposalsByState, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
@@ -100,9 +99,5 @@ const main = async () => {
     await updateProposalRecords(proposalVoteSummary)
     console.log('[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), proposalVoteSummary.length)
 }
-
-// cron.schedule('*/15 * * * * *', () => {
-//     main()
-// });
 
 main()
