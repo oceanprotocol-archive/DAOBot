@@ -1,9 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const fetch = require('cross-fetch')
-const base = require('airtable').base(process.env.AIRTABLE_BASEID)
-
 const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
