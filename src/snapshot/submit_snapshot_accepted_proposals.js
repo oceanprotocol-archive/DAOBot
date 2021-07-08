@@ -3,6 +3,7 @@ dotenv.config();
 
 const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
+const {assert} = require('../functions/utils')
 const {web3} = require('../functions/web3')
 
 const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here';
@@ -12,12 +13,6 @@ web3.eth.defaultAccount = account.address;
 
 var acceptedProposals = {}
 var submittedProposals = []
-
-const assert = (condition, message) => {
-    if (!condition) {
-        throw new Error(message);
-    }
-}
 
 const validateAccceptedProposal = (proposal) => {
     assert(proposal.get('One Liner') !== undefined, '[%s][%s]: Invalid <One Liner>', proposal.id, proposal.get('Name'))

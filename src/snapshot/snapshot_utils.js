@@ -107,4 +107,15 @@ const local_broadcast_proposal = async (web3, account, payload, pSpace=null, pUr
     }
 }
 
-module.exports = {getProposalVotes, buildProposalPayload, local_broadcast_proposal}
+// 1. Get current block height => https://etherscan.io/blocks
+// 2. Get the unix second timestamp in seconds for the target date => https://www.epochconverter.com/
+// 3. Get the average block time in seconds => https://bitinfocharts.com/ethereum/
+const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlockTime) => {
+    const blockNumber = currentBlockHeight
+    const targetTimestamp = targetUnixTimestamp
+    const curTimestamp = Date.now()/1000
+
+    return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
+}
+
+module.exports = {getProposalVotes, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}
