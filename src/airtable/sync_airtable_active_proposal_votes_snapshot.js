@@ -6,7 +6,7 @@ const {getProposalsByState, updateProposalRecords, sumSnapshotVotesToAirtable} =
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
-const roundNumber = 6
+const roundNumber = 7
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
 const marketStrategy = [

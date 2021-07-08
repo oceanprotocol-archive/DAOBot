@@ -48,9 +48,9 @@ const main = async () => {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
-                        // 'Voting Starts': voteStartTime,
-                        // 'Voting Ends': voteEndTime,
-                        // 'Snapshot Block': Number(estimatedBlockHeight),
+                        'Voting Starts': voteStartTime,
+                        'Voting Ends': voteEndTime,
+                        'Snapshot Block': Number(estimatedBlockHeight),
                         'Deployment Ready': 'Yes'
                     }
                 })
@@ -58,9 +58,9 @@ const main = async () => {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
-                        // 'Voting Starts': '',
-                        // 'Voting Ends': '',
-                        // 'Snapshot Block': 0,
+                        'Voting Starts': '',
+                        'Voting Ends': '',
+                        'Snapshot Block': 0,
                         'Deployment Ready': 'No'
                     }
                 })
@@ -76,4 +76,5 @@ const main = async () => {
     }
 }
 
-main()
+// TODO - Update Airtable
+// main()

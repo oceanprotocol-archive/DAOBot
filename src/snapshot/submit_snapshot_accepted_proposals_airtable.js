@@ -27,6 +27,7 @@ const validateAccceptedProposal = (proposal) => {
 // Build payload for proposal, and submit it
 const main = async () => {
     try {
+        // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
         acceptedProposals = await getProposalsByState('AND({Round} = "Test", {Proposal State} = "Accepted", "true")')
 
         // Assert quality
