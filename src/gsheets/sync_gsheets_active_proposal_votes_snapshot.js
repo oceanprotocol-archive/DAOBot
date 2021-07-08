@@ -1,4 +1,6 @@
 global['fetch'] = require('cross-fetch');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const {getProposalsByState} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
@@ -6,7 +8,7 @@ const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
-const roundNumber = 6
+const roundNumber = 7
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
 // TODO - RA: First 4 rounds were done with an ERC20-only strategy
