@@ -32,8 +32,6 @@ const buildProposalPayload = (proposal) => {
     const startTs = Date.parse(proposal.get('Voting Starts'))/1000
     const endTs = Date.parse(proposal.get('Voting Ends'))/1000
     const blockHeight = proposal.get('Snapshot Block')
-    const humanReadableStartDate = new Date(proposal.get('Voting Starts')).toUTCString()
-    const humanReadableEndDate = new Date(proposal.get('Voting Starts')).toUTCString()
     const body = `${proposal.get("One Liner")}
 
 ## Full Proposal
