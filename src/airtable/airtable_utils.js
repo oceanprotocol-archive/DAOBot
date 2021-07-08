@@ -1,8 +1,5 @@
-const dotenv = require('dotenv');
-dotenv.config();
-
 const fetch = require('cross-fetch')
-const base = require('airtable').base(AIRTABLE_BASEID)
+const base = require('airtable').base(process.env.AIRTABLE_BASEID)
 
 const splitArr = (arr, chunk) => {
     let arrSplit = []
@@ -51,7 +48,7 @@ const sumSnapshotVotesToAirtable = async (proposals, scores) => {
 const updateProposalRecords = async (records) => {
     const splitReocrds = splitArr(records, 10)
     await Promise.all(splitReocrds.map(batch =>
-        fetch(`https://api.airtable.com/v0/${AIRTABLE_BASEID}/Proposals`, {
+        fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/Proposals`, {
             method: "patch", // make sure it is a "PATCH request"
             headers: {
                 Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key

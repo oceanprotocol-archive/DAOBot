@@ -1,9 +1,9 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
 const {web3} = require('../functions/web3')
-
-const dotenv = require('dotenv');
-dotenv.config();
 
 const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here';
 const account = web3.eth.accounts.privateKeyToAccount(pk)
@@ -20,7 +20,7 @@ const assert = (condition, message) => {
 }
 
 const validateAccceptedProposal = (proposal) => {
-    assert(proposal.get('Overview') !== undefined, '[%s][%s]: Invalid <Overview>', proposal.id, proposal.get('Name'))
+    assert(proposal.get('One Liner') !== undefined, '[%s][%s]: Invalid <One Liner>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Proposal URL') !== undefined, '[%s][%s]: Invalid <Proposal URL>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Grant Deliverables') !== undefined, '[%s][%s]: Invalid <Grant Deliverables>', proposal.id, proposal.get('Name'))
     assert(proposal.get('Voting Starts') !== undefined, '[%s][%s]: Invalid <Voting Starts>', proposal.id, proposal.get('Name'))
@@ -32,7 +32,7 @@ const validateAccceptedProposal = (proposal) => {
 // Build payload for proposal, and submit it
 const main = async () => {
     try {
-        acceptedProposals = await getProposalsByState('IF({Proposal State} = "Accepted", "true")')
+        acceptedProposals = await getProposalsByState('AND({Round} = "Test", {Proposal State} = "Accepted", "true")')
 
         // Assert quality
         await Promise.all(acceptedProposals.map(async (proposal) => {
@@ -62,10 +62,8 @@ const main = async () => {
             await updateProposalRecords(submittedProposals)
             console.log('[SUCCESS] Submitted [%s] proposals to Snapshot.', submittedProposals.length)
         }
-        if( acceptedProposals.length > 0 )
-            console.log('[WARNING] Could not submit [%s] proposals. Please check logs.', acceptedProposals.length)
-        if( acceptedProposals.length === 0 && submittedProposals.length === 0 )
-            console.log(`[SUCCESS] NO proposals to process`)
+        if( acceptedProposals.length !== submittedProposals.length )
+            console.log('[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.', acceptedProposals.length, submittedProposals.length)
     } catch(err) {
         console.log(err)
     }

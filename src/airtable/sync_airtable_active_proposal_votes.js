@@ -1,9 +1,9 @@
 global['fetch'] = require('cross-fetch');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const {getProposalsByState, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
-const dotenv = require('dotenv');
-dotenv.config();
 
 // DRY/PARAMETERIZE
 const roundNumber = 6
