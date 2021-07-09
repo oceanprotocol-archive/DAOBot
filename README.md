@@ -48,7 +48,7 @@ Instructions
 
 Example Crontab - Sync every 2 minutes 
 ```
-*/2 * * * * /DAOBot/cron_sync_votes_airtable.sh 2>&1
-*/2 * * * * /DAOBot/cron_sync_votes_gsheets.sh 2>&1
+*/2 * * * * sh /DAOBot/cron_sync_votes_airtable.sh 2>&1
+*/2 * * * * sh /DAOBot/cron_sync_votes_gsheets.sh 2>&1
 ```
 
