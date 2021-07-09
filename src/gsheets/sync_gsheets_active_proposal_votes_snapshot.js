@@ -55,8 +55,8 @@ const dumpFromSnapshotRawToGSheet = async (ipfsHash) => {
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash)
-        console.log(newSheets)
+        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=roundNumber)
+        console.log("Created new sheet [%s] at index [%s].", ipfsHash, roundNumber)
     }
 
     // Flatten votes from this proposal
@@ -188,20 +188,20 @@ const calculateRoundSummary = async (proposals, scores) => {
     let record = {}
     record['numProposals'] = Object.values(proposals).length
     record['numWallets'] = Object.values(wallets).length
-    record['numVotes'] = Object.entries(walletSummary)
+    record['numVotes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
         .map((ws) => {return ws[1]['numVotes']})
         .reduce((total, num) => {return total + num})
 
-    record['numYes'] = Object.entries(walletSummary)
+    record['numYes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
         .map((ws) => {return ws[1]['numYes']})
         .reduce((total, num) => {return total + num})
-    record['numNo'] = Object.entries(walletSummary)
+    record['numNo'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
         .map((ws) => {return ws[1]['numNo']})
         .reduce((total, num) => {return total + num})
-    record['sumYes'] = Object.entries(walletSummary)
+    record['sumYes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
         .map((ws) => {return ws[1]['sumYes']})
         .reduce((total, num) => {return total + num})
-    record['sumNo'] = Object.entries(walletSummary)
+    record['sumNo'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
         .map((ws) => {return ws[1]['sumNo']})
         .reduce((total, num) => {return total + num})
 
@@ -223,11 +223,11 @@ const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
 
     // DRY
     // Get the sheet, otherwise create it
-    const sheetName = `Round${roundNumber}Results`
+    const sheetName = `Round ${roundNumber} Results`
     var sheet = await getValues(oAuth, sheetName, 'A1:B3')
     if (sheet === undefined) {
         var newSheets = await addSheet(oAuth, sheetName)
-        console.log(newSheets)
+        console.log("Created new sheet [%s] at index 0.", sheetName)
     }
 
     // Dump flattened data from proposalSummary to sheet

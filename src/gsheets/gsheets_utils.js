@@ -34,13 +34,13 @@ const processRequests = async (oAuth, requests) => {
 }
 
 // Create sheet sheet at index 0 w/ sheet name
-const addSheet = async (oAuth, sheetName) => {
+const addSheet = async (oAuth, sheetName, indexOffset=0) => {
     let requests = []
     requests.push({
         addSheet: {
             properties: {
                 title: sheetName,
-                index: 0,
+                index: indexOffset,
             }
         }
     })

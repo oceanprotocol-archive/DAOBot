@@ -17,7 +17,7 @@ const initOAuthToken = async () => {
 
         // Authorize a client with credentials, then call the Google Sheets API.
         const credentials = JSON.parse(data)
-        console.log(credentials)
+        // console.log(credentials)
 
         const {client_secret, client_id, redirect_uris} = credentials.installed;
         oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
@@ -26,7 +26,7 @@ const initOAuthToken = async () => {
     // Check if we have previously stored a token.
     await fs.readFile(TOKEN_PATH).then( data => {
         // if (err) return
-        console.log(data)
+        // console.log(data)
         oAuth2Client.setCredentials(JSON.parse(data));
     });
 
