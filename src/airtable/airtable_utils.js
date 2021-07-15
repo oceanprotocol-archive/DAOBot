@@ -9,11 +9,12 @@ const splitArr = (arr, chunk) => {
     return arrSplit
 }
 
-const getProposalsByState = async (selectQuery) => {
+const getProposalsByState = async (selectQuery, sortQuery=[]) => {
     try {
         return await base('Proposals').select({
             view: "All Proposals",
-            filterByFormula: selectQuery
+            filterByFormula: selectQuery,
+            sort: sortQuery
         }).firstPage()
     } catch(err) {
         console.log(err)
