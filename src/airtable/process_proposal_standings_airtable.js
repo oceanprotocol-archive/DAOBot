@@ -47,14 +47,14 @@ const hasIncompleteDeliverables = (deliverables) => {
     return incompleteDeliverables
 }
 
-const getIncompleteProjects = async () => {
+const getProjectStandings = async () => {
     allProposals = await getProposalsByState(
         // `OR({Proposal State} = "Funded", {Proposal State} = "Granted", "true")`,
         "{Project Name} = 'Data Union App'",
         sortQuery=[{field: 'Round',direction: 'asc' }]
     )
 
-    let incompleteProjects = {}
+    let projectStandings = {}
     await Promise.all(allProposals.map(async (proposal) => {
         try {
             let record = {
@@ -75,17 +75,15 @@ const getIncompleteProjects = async () => {
                 'Outstanding URL': ""
             }
 
-            // Finally, track incomplete proposals
-            if( incomplete === true || incompleteProjects[projectName] !== undefined ) {
-                if(incompleteProjects[projectName] === undefined) incompleteProjects[projectName] = []
-                incompleteProjects[projectName].push(record)
-            }
+            // Finally, track project standings
+            if(projectStandings[projectName] === undefined) projectStandings[projectName] = []
+            projectStandings[projectName].push(record)
         } catch (err) {
             console.log(err)
         }
     }))
 
-    return incompleteProjects
+    return projectStandings
 }
 
 // https://coderwall.com/p/flonoa/simple-string-format-in-javascript
@@ -97,8 +95,8 @@ String.prototype.format = function() {
     return a
 }
 
-const updateProposalStates = async (incompleteProjects) => {
-    for (const [key, value] of Object.entries(incompleteProjects)) {
+const updateProposalStandings = async (projectStandings) => {
+    for (const [key, value] of Object.entries(projectStandings)) {
         let outstandingURL = ""
         value.map( (proposal) => {
             if( proposal.fields['Project Standing'] === Standings.Poor ) {
@@ -114,19 +112,17 @@ const updateProposalStates = async (incompleteProjects) => {
             delete proposal.fields['Proposal URL']
         })
     }
-    return incompleteProjects
 }
 
 const main = async () => {
-    let incompleteProjects = await getIncompleteProjects()
-    console.log('\n======== Incomplete Projects Found\n', JSON.stringify(incompleteProjects))
+    let projectStandings = await getProjectStandings()
+    console.log('\n======== Project Standings Found\n', JSON.stringify(projectStandings))
 
-    let reportedProposalStates = await updateProposalStates(incompleteProjects)
-    console.log('\n======== Incomplete Projects\n', JSON.stringify(incompleteProjects))
-    console.log('\n======== Reported Project & Proposal States\n', JSON.stringify(reportedProposalStates))
+    await updateProposalStandings(projectStandings)
+    console.log('\n======== Reported Proposal Standings\n', JSON.stringify(projectStandings))
 
     let rows = []
-    for (const [key, value] of Object.entries(incompleteProjects)) {
+    for (const [key, value] of Object.entries(projectStandings)) {
         rows = rows.concat(value)
     }
 
