@@ -2,7 +2,7 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsByState} = require('../airtable/airtable_utils');
+const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
@@ -243,6 +243,7 @@ const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
 
 // DRY
 const getVoterScores = async (provider, voters, blockHeight) => {
+    voteStrategy = getRoundStrategy(roundNumber)
 
     return snapshot.utils.getScores(
         space,
@@ -258,7 +259,7 @@ const getVoterScores = async (provider, voters, blockHeight) => {
 
 // DRY
 const getActiveProposalVotes = async () => {
-    activeProposals = await getProposalsByState(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
         try {

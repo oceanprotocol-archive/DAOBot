@@ -9,7 +9,7 @@ const splitArr = (arr, chunk) => {
     return arrSplit
 }
 
-const getProposalsByState = async (selectQuery) => {
+const getProposalsSelectQuery = async (selectQuery, sortQuery=[]) => {
     try {
         return await base('Proposals').select({
             view: "All Proposals",
@@ -65,4 +65,4 @@ const updateProposalRecords = async (records) => {
     ))
 }
 
-module.exports = {getProposalsByState, updateProposalRecords, sumSnapshotVotesToAirtable}
+module.exports = {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable}
