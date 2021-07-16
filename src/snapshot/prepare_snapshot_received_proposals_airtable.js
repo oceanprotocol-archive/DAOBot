@@ -13,6 +13,7 @@ const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI,OCEAN_ERC20_0x);
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
+const roundNumber = 7
 const voteStartTime = 'July 8, 2021 23:59'
 const voteEndTime = 'July 12, 2021 12:00'
 const currentBlockHeight = 12788177
@@ -32,7 +33,7 @@ const getWalletBalance = async (wallet0x) => {
 }
 
 const main = async () => {
-    let proposals = await getProposalsSelectQuery('AND({Round} = "7", {Proposal State} = "Received", "true")')
+    let proposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Received", "true")`)
     let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, targetTimestamp, avgBlockTime)
     let recordsPayload = []
 
