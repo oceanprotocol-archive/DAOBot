@@ -2,7 +2,7 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsByState, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
@@ -53,7 +53,7 @@ const getVoterScores = async (provider, voters, blockHeight) => {
 
 // DRY
 const getActiveProposalVotes = async () => {
-    activeProposals = await getProposalsByState(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
         try {

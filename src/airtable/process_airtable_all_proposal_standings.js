@@ -2,13 +2,11 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsByState, updateProposalRecords} = require('./airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
 
 var currentRound = 8
 
 // Let's track the state of various proposals
-var allProposals = {}
-
 const Standings = {
     Good: 'Good',
     Progress: 'In Progress',
@@ -27,9 +25,11 @@ const getProjectStanding = (round, incomplete) => {
 // Drops every line that it can't find a checklist
 const splitDeliverableChecklist = (deliverableChecklist) => {
     let deliverables = []
+
+    if( deliverableChecklist.length === 0 ) return deliverables
+
     deliverables = deliverableChecklist.split('\n')
-    return deliverables.filter(function(deliverable)
-    {
+    return deliverables.filter(function (deliverable) {
         return deliverable.indexOf('[]') === 0 || deliverable.indexOf('[ ]') === 0 || deliverable.indexOf('[x]') === 0
     });
 }
@@ -48,40 +48,37 @@ const hasIncompleteDeliverables = (deliverables) => {
 }
 
 const getProjectStandings = async () => {
-    allProposals = await getProposalsByState(
-        // `OR({Proposal State} = "Funded", {Proposal State} = "Granted", "true")`,
-        "{Project Name} = 'Data Union App'",
-        sortQuery=[{field: 'Round',direction: 'asc' }]
-    )
-
     let projectStandings = {}
-    await Promise.all(allProposals.map(async (proposal) => {
-        try {
-            let record = {
-                id: proposal.id,
-                fields: {}
-            }
-            let projectName = proposal.get('Project Name')
-            let proposalURL = proposal.get('Proposal URL')
-            let round = proposal.get('Round')
-            let deliverableChecklist = proposal.get('Deliverable Checklist')
-            let deliverables = splitDeliverableChecklist(deliverableChecklist)
-            let incomplete = hasIncompleteDeliverables(deliverables)
+    for (i=1; i<currentRound; i++) {
+        let roundProposals = await getProposalsSelectQuery(selectionQuery = `AND({Round} = "${i}", NOT({Proposal State} = "Rejected"), "true")`)
+        await Promise.all(roundProposals.map(async (proposal) => {
+            try {
+                let record = {
+                    id: proposal.id,
+                    fields: {}
+                }
+                let projectName = proposal.get('Project Name')
+                let proposalURL = proposal.get('Proposal URL')
+                let round = proposal.get('Round')
+                let deliverableChecklist = proposal.get('Deliverable Checklist') || []
+                let deliverables = splitDeliverableChecklist(deliverableChecklist)
+                let incomplete = hasIncompleteDeliverables(deliverables)
 
-            // Fields that will be passed to further logic
-            record.fields = {
-                'Project Standing': getProjectStanding(round, incomplete),
-                'Proposal URL': proposalURL,
-                'Outstanding URL': ""
-            }
+                // Fields that will be passed to further logic
+                record.fields = {
+                    'Project Standing': getProjectStanding(round, incomplete),
+                    'Proposal URL': proposalURL,
+                    'Outstanding Proposals': ""
+                }
 
-            // Finally, track project standings
-            if(projectStandings[projectName] === undefined) projectStandings[projectName] = []
-            projectStandings[projectName].push(record)
-        } catch (err) {
-            console.log(err)
-        }
-    }))
+                // Finally, track project standings
+                if (projectStandings[projectName] === undefined) projectStandings[projectName] = []
+                projectStandings[projectName].push(record)
+            } catch (err) {
+                console.log(err)
+            }
+        }))
+    }
 
     return projectStandings
 }
@@ -102,10 +99,10 @@ const updateProposalStandings = async (projectStandings) => {
             if( proposal.fields['Project Standing'] === Standings.Poor ) {
                 // RA: replace String.prototype.format above if required
                 outstandingURL += "- {0}\n".format(proposal.fields['Proposal URL'])
-                proposal.fields['Outstanding URL'] = outstandingURL
+                proposal.fields['Outstanding Proposals'] = outstandingURL
             } else if( proposal.fields['Project Standing'] !== Standings.Poor && outstandingURL.length > 0 ) {
                 proposal.fields['Project Standing'] = Standings.Poor
-                proposal.fields['Outstanding URL'] = outstandingURL
+                proposal.fields['Outstanding Proposals'] = outstandingURL
             }
 
             // we drop the Proposal URL from being sent back up to Airtable to avoid any issues
