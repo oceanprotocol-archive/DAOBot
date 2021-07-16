@@ -13,7 +13,8 @@ const getProposalsSelectQuery = async (selectQuery, sortQuery=[]) => {
     try {
         return await base('Proposals').select({
             view: "All Proposals",
-            filterByFormula: selectQuery
+            filterByFormula: selectQuery,
+            sort: sortQuery
         }).firstPage()
     } catch(err) {
         console.log(err)
