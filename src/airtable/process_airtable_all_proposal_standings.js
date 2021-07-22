@@ -8,17 +8,38 @@ var currentRound = 8
 
 // Let's track the state of various proposals
 const Standings = {
-    Good: 'Good',
+    Unreported: 'Unreported',
+    Completed: 'Completed',
     Progress: 'In Progress',
-    Poor: 'Poor'
+    Dispute: 'In Dispute',
+    Incomplete: 'Incomplete & Inactive',
+    Refunded: 'Funds Returned'
 };
 
-const getProjectStanding = (round, incomplete) => {
-    if( round === "Test" ) round = 1
+const Disputed = {
+    Ongoing: 'Ongoing',
+    Resolved: 'Resolved'
+}
 
-    if( incomplete === false ) return Standings.Good
-    else if( currentRound - round >= 3 && incomplete === true ) return Standings.Poor
-    else if( currentRound - round >= 1 && incomplete === true ) return Standings.Progress
+// Project standing has a basic set of rules/priorities.
+// TODO - Reimplement in https://xstate.js.org/docs/
+const getProjectStanding = (proposalState, curStanding, deliverableChecklist, incomplete, timedOut, refunded) => {
+    let newStanding = undefined
+
+    if( refunded === true ) {
+        newStanding = Standings.Refunded
+    }
+    else if( incomplete === true && timedOut === true ) {
+        newStanding = Standings.Incomplete
+    }
+    else if( deliverableChecklist.length > 0 ) {
+        newStanding = incomplete === true ? Standings.Progress : Standings.Completed
+    }
+    else {
+        newStanding = Standings.Unreported
+    }
+
+    return newStanding
 }
 
 // Splits deliverables rich text into a list
@@ -47,10 +68,17 @@ const hasIncompleteDeliverables = (deliverables) => {
     return incompleteDeliverables
 }
 
+const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
+    let deliverableUpdate = new Date(lastDeliverableUpdate)
+    let timeOutDate = new Date(deliverableUpdate.setMonth(deliverableUpdate.getMonth() + 3))
+    return currentStanding !== Standings.Unreported && Date.now() > timeOutDate
+}
+
+// Step 1 - Identify all proposal standings
 const getProjectStandings = async () => {
     let projectStandings = {}
     for (i=1; i<currentRound; i++) {
-        let roundProposals = await getProposalsSelectQuery(selectionQuery = `AND({Round} = "${i}", NOT({Proposal State} = "Rejected"), "true")`)
+        let roundProposals = await getProposalsSelectQuery(selectionQuery = `{Round} = "${i}"`)
         await Promise.all(roundProposals.map(async (proposal) => {
             try {
                 let record = {
@@ -59,14 +87,21 @@ const getProjectStandings = async () => {
                 }
                 let projectName = proposal.get('Project Name')
                 let proposalURL = proposal.get('Proposal URL')
-                let round = proposal.get('Round')
+                let proposalState = proposal.get('Proposal State')
+                let currentStanding = proposal.get('Proposal Standing')
                 let deliverableChecklist = proposal.get('Deliverable Checklist') || []
+                let deliverableUpdate = proposal.get('Last Deliverable Update')
+                let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
+                let disputed = proposal.get('Disputed Status')
+                let timedOut = hasTimedOut(currentStanding, deliverableUpdate)
                 let deliverables = splitDeliverableChecklist(deliverableChecklist)
                 let incomplete = hasIncompleteDeliverables(deliverables)
+                let newStanding = getProjectStanding(proposalState, currentStanding, deliverables, incomplete, timedOut, refunded)
 
                 // Fields that will be passed to further logic
                 record.fields = {
-                    'Project Standing': getProjectStanding(round, incomplete),
+                    'Proposal Standing': newStanding, // || currentStanding,
+                    'Disputed Status': disputed,
                     'Proposal URL': proposalURL,
                     'Outstanding Proposals': ""
                 }
@@ -92,17 +127,27 @@ String.prototype.format = function() {
     return a
 }
 
+// Step 2 - Resolve & Report standings
 const updateProposalStandings = async (projectStandings) => {
     for (const [key, value] of Object.entries(projectStandings)) {
         let outstandingURL = ""
+        let lastStanding = undefined
         value.map( (proposal) => {
-            if( proposal.fields['Project Standing'] === Standings.Poor ) {
+            // If lastStanding was good, check for current proposal standing being bad
+            if( lastStanding !== Standings.Incomplete || lastStanding !== Standings.Dispute ) {
+                if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
+                else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
+            }
+
+            // If any proposal is outstanding, set the whole project state
+            if( proposal.fields['Proposal Standing'] === Standings.Incomplete || proposal.fields['Disputed Status'] === Disputed.Ongoing ) {
                 // RA: replace String.prototype.format above if required
                 outstandingURL += "- {0}\n".format(proposal.fields['Proposal URL'])
                 proposal.fields['Outstanding Proposals'] = outstandingURL
-            } else if( proposal.fields['Project Standing'] !== Standings.Poor && outstandingURL.length > 0 ) {
-                proposal.fields['Project Standing'] = Standings.Poor
+                proposal.fields['Proposal Standing'] = lastStanding
+            } else if( proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0 ) {
                 proposal.fields['Outstanding Proposals'] = outstandingURL
+                proposal.fields['Proposal Standing'] = lastStanding
             }
 
             // we drop the Proposal URL from being sent back up to Airtable to avoid any issues
@@ -112,9 +157,11 @@ const updateProposalStandings = async (projectStandings) => {
 }
 
 const main = async () => {
+    // Step 1 - Identify all proposal standings
     let projectStandings = await getProjectStandings()
-    console.log('\n======== Project Standings Found\n', JSON.stringify(projectStandings))
+    console.log('\n======== Proposal Standings Found\n', JSON.stringify(projectStandings))
 
+    // Step 2 - Resolve & Report standings
     await updateProposalStandings(projectStandings)
     console.log('\n======== Reported Proposal Standings\n', JSON.stringify(projectStandings))
 
