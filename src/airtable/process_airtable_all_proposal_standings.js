@@ -35,6 +35,11 @@ const main = async () => {
         rows = rows.concat(value)
     }
 
+    // drop all extra columns
+    rows.forEach((x) => {
+        if(x.fields['Proposal URL']) delete x.fields['Proposal URL']
+    })
+
     // Finally, update all DB records
     await updateProposalRecords(rows)
     console.log('\n[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), Object.entries(rows).length)

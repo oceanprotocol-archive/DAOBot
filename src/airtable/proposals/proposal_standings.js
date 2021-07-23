@@ -92,12 +92,11 @@ const getProposalRecord = (proposal) => {
     return {
         id: proposal.id,
         fields: {
+            'Proposal URL': proposalURL,
             'Proposal State': proposalState,
             'Proposal Standing': newStanding,
             'Disputed Status': disputed,
-            'Proposal URL': proposalURL,
-            'Outstanding Proposals': "",
-
+            'Outstanding Proposals': undefined
         }
     }
 }
@@ -145,9 +144,6 @@ const processHistoricalStandings = (proposalStandings) => {
                 proposal.fields['Outstanding Proposals'] = outstandingURL
                 proposal.fields['Proposal Standing'] = lastStanding
             }
-
-            // we drop the Proposal URL from being sent back up to Airtable to avoid any issues
-            delete proposal.fields['Proposal URL']
         })
     }
 }
@@ -168,7 +164,7 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
         let latestProposal = latestProposals[key]
         if (latestProposal !== undefined) {
             value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
-        value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
+            value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
         } else {
             value[0].fields['Proposal Standing'] = undefined
             value[0].fields['Outstanding Proposals'] = undefined
