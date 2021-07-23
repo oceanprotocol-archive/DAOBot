@@ -23,7 +23,8 @@
     "node-fetch": "^2.6.1",
     "node-metamask": "^1.1.2",
     "typescript": "^4.2.4",
-    "web3": "^1.2.11"
+    "web3": "^1.2.11",
+    "xstate": "^4.23.0"
   },
   "devDependencies": {
     "chai": "^4.3.4",

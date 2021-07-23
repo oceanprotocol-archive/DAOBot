@@ -1,6 +1,6 @@
 # Airtable Scripts
 
-## process_all_proposal_standings.js
+## process_airtable_all_proposal_standings.js
 Below is the basic set of rules.
 
 ####Step 1 - Identify all proposal standings
@@ -9,7 +9,8 @@ Below is the basic set of rules.
 - For each proposal, update it's own record & state.
 - Push proposal to project[proposal_name] dict[array[]]
 
-####Step 2 - Resolve & Report standings
+####Step 2 - Resolve historical standings
+- Verify "Outstanding Proposals" and the "Worst State" is replicated across all proposals.
 - Iterate via each project.proposals
 - If proposal is incomplete, or in dispute, append portURL into outstandingURls
 - If outstandingURL.length > 0, report outstandingURLs
