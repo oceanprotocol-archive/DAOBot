@@ -1,6 +1,6 @@
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {Standings, Disputed, getProposalRecord, processProposalStandings, processHistoricalStandings} = require('../../airtable/proposal_standings')
+const {Standings, Disputed, getProposalRecord, processProposalStandings, processHistoricalStandings} = require('../../airtable/proposals/proposal_standings')
 
 var record = undefined
 var allProposals = []

@@ -2,7 +2,7 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable_utils')
 
 // Let's track the state of various proposals
 const Standings = {
@@ -21,7 +21,7 @@ const Disputed = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (proposalState, curStanding, deliverableChecklist, incomplete, timedOut, refunded) => {
+const getProjectStanding = (deliverableChecklist, incomplete, timedOut, refunded) => {
     let newStanding = undefined
 
     if( refunded === true ) newStanding = Standings.Refunded
@@ -86,7 +86,7 @@ const getProposalRecord = (proposal) => {
     let timedOut = hasTimedOut(currentStanding, deliverableUpdate)
     let deliverables = splitDeliverableChecklist(deliverableChecklist)
     let incomplete = hasIncompleteDeliverables(deliverables)
-    let newStanding = getProjectStanding(proposalState, currentStanding, deliverables, incomplete, timedOut, refunded)
+    let newStanding = getProjectStanding(deliverables, incomplete, timedOut, refunded)
 
     return {
         id: proposal.id,

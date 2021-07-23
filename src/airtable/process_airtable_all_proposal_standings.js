@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {updateProposalRecords} = require('./airtable_utils')
-const {getAllProposals, processProposalStandings, processHistoricalStandings} = require('./proposal_standings')
+const {getAllProposals, processProposalStandings, processHistoricalStandings} = require('./proposals/proposal_standings')
 
 var currentRound = 8
 
