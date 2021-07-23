@@ -15,6 +15,11 @@ const Disputed = {
     Resolved: 'Resolved'
 }
 
+const Earmarks = {
+    NewEntrants: 'New Entrants',
+    Outreach: 'Outreach'
+}
+
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
 const getProjectStanding = (deliverableChecklist, incomplete, timedOut, refunded) => {
@@ -61,9 +66,9 @@ const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
 }
 
 // Step 1 - Get all proposal standings
-const getAllProposals = async (currentRound) => {
+const getAllRoundProposals = async (maxRound, minRound=1) => {
     let allProposals = []
-    for (i=1; i<currentRound; i++) {
+    for (i=minRound; i<=maxRound; i++) {
         let roundProposals = await getProposalsSelectQuery(selectionQuery = `{Round} = "${i}"`)
         allProposals = allProposals.concat(roundProposals)
     }
@@ -87,14 +92,17 @@ const getProposalRecord = (proposal) => {
     return {
         id: proposal.id,
         fields: {
-            'Proposal Standing': newStanding, // || currentStanding,
+            'Proposal State': proposalState,
+            'Proposal Standing': newStanding,
             'Disputed Status': disputed,
             'Proposal URL': proposalURL,
-            'Outstanding Proposals': ""
+            'Outstanding Proposals': "",
+
         }
     }
 }
 
+// Returns all Proposal Standings, indexed by Project Name
 const processProposalStandings = (allProposals) => {
     let proposalStandings = {}
     Promise.all(allProposals.map( (proposal) => {
@@ -113,31 +121,24 @@ const processProposalStandings = (allProposals) => {
     return proposalStandings
 }
 
-// https://coderwall.com/p/flonoa/simple-string-format-in-javascript
-String.prototype.format = function() {
-    a = this;
-    for (k in arguments) {
-        a = a.replace("{" + k + "}", arguments[k])
-    }
-    return a
-}
-
 // Step 2 - Resolve historical standings
 const processHistoricalStandings = (proposalStandings) => {
     for (const [key, value] of Object.entries(proposalStandings)) {
         let outstandingURL = ""
         let lastStanding = undefined
         value.map( (proposal) => {
-            // If lastStanding was good, check for current proposal standing being bad
+            // DISPUTES: If a proposal is under dispute, the project standing becomes poor
+            // INCOMPLETION: If a proposal is incomplete/timedout, the project standing becomes poor
             if( lastStanding !== Standings.Incomplete || lastStanding !== Standings.Dispute ) {
                 if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
                 else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
             }
 
-            // If any proposal is outstanding, set the whole project state
+            // OUTSTANDING PROPOSAL URLS:
+            // Collect the URL of proposals that are in poor condition.
+            // Report the URL of all proposals that are in poor condition.
             if( proposal.fields['Proposal Standing'] === Standings.Incomplete || proposal.fields['Disputed Status'] === Disputed.Ongoing ) {
-                // RA: replace String.prototype.format above if required
-                outstandingURL += "- {0}\n".format(proposal.fields['Proposal URL'])
+                outstandingURL += "- " + proposal.fields['Proposal URL'] + "\n"
                 proposal.fields['Outstanding Proposals'] = outstandingURL
                 proposal.fields['Proposal Standing'] = lastStanding
             } else if( proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0 ) {
@@ -151,4 +152,28 @@ const processHistoricalStandings = (proposalStandings) => {
     }
 }
 
-module.exports = {Standings, Disputed, getAllProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, };
+// Step 3 - Report the latest (top of stack) proposal standing
+const getProjectsLatestProposal = (proposalStandings) => {
+    let latestProposals = {}
+    for (const [key, value] of Object.entries(proposalStandings)) {
+        latestProposals[key] = value[value.length-1]
+    }
+
+    return latestProposals
+}
+
+// Update the Current Round's proposal records, to reflect the overall Project Standing.
+const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => {
+    for (const [key, value] of Object.entries(currentRoundProposals)) {
+        let latestProposal = latestProposals[key]
+        if (latestProposal !== undefined) {
+            value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
+        value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
+        } else {
+            value[0].fields['Proposal Standing'] = undefined
+            value[0].fields['Outstanding Proposals'] = undefined
+        }
+    }
+}
+
+module.exports = {Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings};

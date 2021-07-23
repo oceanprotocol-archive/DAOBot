@@ -15,6 +15,6 @@ Below is the basic set of rules.
 - If proposal is incomplete, or in dispute, append portURL into outstandingURls
 - If outstandingURL.length > 0, report outstandingURLs
 
-####Step 3 - Report new proposal standings
+####Step 3 - Report latest proposal standings
 - For returning teams, make sure they are in good standing
 - For each project, use the latest proposal state

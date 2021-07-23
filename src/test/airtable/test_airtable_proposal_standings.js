@@ -4,13 +4,28 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {Standings, Disputed, getProposalRecord, processProposalStandings, processHistoricalStandings} = require('../../airtable/proposals/proposal_standings')
+const {Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
 
-var record = undefined
+var currentProposals = undefined
 var allProposals = []
 
 beforeEach(async function() {
-    record = undefined
+    currentProposals = [{
+        id: 'proposal_5',
+        fields: {
+            'Project Name': 'test',
+            'Proposal URL': 'www.testurl.com',
+            'Proposal State': 'myState',
+            'Proposal Standing': undefined,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'May 01, 2021',
+            'Refund Transaction': undefined,
+            'Disputed Status': undefined,
+        },
+        get: function (key) {
+            return this.fields[key];
+        }
+    }]
     allProposals = [{
         id: 'proposal_1',
         fields: {
@@ -21,7 +36,7 @@ beforeEach(async function() {
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Jan 01, 2021',
             'Refund Transaction': undefined,
-            'Disputed Status': '',
+            'Disputed Status': undefined,
         },
         get: function (key) {
             return this.fields[key];
@@ -36,7 +51,7 @@ beforeEach(async function() {
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Feb 01, 2021',
             'Refund Transaction': '0xRefundTx',
-            'Disputed Status': '',
+            'Disputed Status': undefined,
         },
         get: function (key) {
             return this.fields[key];
@@ -51,7 +66,7 @@ beforeEach(async function() {
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Mar 01, 2021',
             'Refund Transaction': undefined,
-            'Disputed Status': '',
+            'Disputed Status': undefined,
         },
         get: function (key) {
             return this.fields[key];
@@ -66,7 +81,7 @@ beforeEach(async function() {
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Apr 01, 2021',
             'Refund Transaction': undefined,
-            'Disputed Status': '',
+            'Disputed Status': undefined,
         },
         get: function (key) {
             return this.fields[key];
@@ -126,14 +141,14 @@ describe('Calculating Project Standings', function() {
         should.equal(allProposals.length, 4);
     });
 
-    it('Validate complete & refunded standing', async function() {
+    it('Validates proposals that are complete & refunded', async function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
         })
 
         // Process proposals and historical standings
-        let proposalStandings = await processProposalStandings(allProposals);
+        let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
         // Verify every proposal in history is completed or refunded
@@ -143,7 +158,7 @@ describe('Calculating Project Standings', function() {
         })
     });
 
-    it('Validate complete & refunded => invalid', async function() {
+    it('Validates incomplete proposal impacting rest of project', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -152,7 +167,7 @@ describe('Calculating Project Standings', function() {
         allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
 
         // Process all proposals
-        let proposalStandings = await processProposalStandings(allProposals);
+        let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
         // Validate that all proposals are Incomplete
@@ -160,5 +175,59 @@ describe('Calculating Project Standings', function() {
         proposalStandings[projectName].forEach((x) => {
             should.equal(x.fields['Proposal Standing'], Standings.Incomplete);
         })
+    });
+
+    it('Validates incomplete standing is reflected on Submitted Proposals, before receiving funding.', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate that all proposals are Incomplete
+        let projectName = allProposals[0].get('Project Name')
+        proposalStandings[projectName].forEach((x) => {
+            should.equal(x.fields['Proposal Standing'], Standings.Incomplete);
+        })
+
+        // Step 3 - Report the latest (top of stack) proposal standing
+        // Retrieve the last proposals from projectStandings
+        let latestProposals = getProjectsLatestProposal(proposalStandings)
+        should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
+    });
+
+    it('Validate exist latest project record', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate that all proposals are Incomplete
+        let projectName = allProposals[0].get('Project Name')
+        proposalStandings[projectName].forEach((x) => {
+            should.equal(x.fields['Proposal Standing'], Standings.Incomplete);
+        })
+
+        // Step 3 - Report the latest (top of stack) proposal standing from each project
+        // Validate the top proposal we get == is the last proposal inside projectStandings
+        // Update the Submitted Proposals for funding, to reflect the Project Standing
+        let latestProposals = getProjectsLatestProposal(proposalStandings)
+        should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
+
+        let currentProposalStandings = processProposalStandings(currentProposals)
+        updateCurrentRoundStandings(currentProposalStandings, latestProposals)
+        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], latestProposals[projectName].fields['Proposal Standing'])
+        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], Standings.Incomplete);
     });
 });
