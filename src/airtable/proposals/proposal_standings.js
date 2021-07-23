@@ -22,12 +22,12 @@ const Earmarks = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (deliverableChecklist, incomplete, timedOut, refunded) => {
+const getProjectStanding = (deliverableChecklist, completed, timedOut, refunded) => {
     let newStanding = undefined
 
     if( refunded === true ) newStanding = Standings.Refunded
-    else if( incomplete === true && timedOut === true ) newStanding = Standings.Incomplete
-    else if( deliverableChecklist.length > 0 ) newStanding = incomplete === true ? Standings.Progress : Standings.Completed
+    else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
+    else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
     else newStanding = Standings.Unreported
 
     return newStanding
@@ -46,23 +46,23 @@ const splitDeliverableChecklist = (deliverableChecklist) => {
     });
 }
 
-const hasIncompleteDeliverables = (deliverables) => {
-    let incompleteDeliverables = false
+const areDeliverablesComplete = (deliverables) => {
+    let completed = true
 
-    if(deliverables.length === 0)  incompleteDeliverables = true
+    if(deliverables.length === 0)  completed = false
     else {
         deliverables.map((deliverable) => {
-            if (deliverable.indexOf('[x]') !== 0) incompleteDeliverables = true
+            if (deliverable.indexOf('[x]') !== 0) completed = false
         })
     }
 
-    return incompleteDeliverables
+    return completed
 }
 
 const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
     let deliverableUpdate = new Date(lastDeliverableUpdate)
     let timeOutDate = new Date(deliverableUpdate.setMonth(deliverableUpdate.getMonth() + 3))
-    return currentStanding !== Standings.Unreported && Date.now() > timeOutDate
+    return Date.now() > timeOutDate
 }
 
 // Step 1 - Get all proposal standings
@@ -84,10 +84,10 @@ const getProposalRecord = (proposal) => {
     let deliverableUpdate = proposal.get('Last Deliverable Update')
     let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
     let disputed = proposal.get('Disputed Status')
-    let timedOut = hasTimedOut(currentStanding, deliverableUpdate)
+    let timedOut = hasTimedOut(currentStanding, deliverableUpdate) && currentStanding !== Standings.Unreported
     let deliverables = splitDeliverableChecklist(deliverableChecklist)
-    let incomplete = hasIncompleteDeliverables(deliverables)
-    let newStanding = getProjectStanding(deliverables, incomplete, timedOut, refunded)
+    let completed = areDeliverablesComplete(deliverables)
+    let newStanding = getProjectStanding(deliverables, completed, timedOut, refunded)
 
     return {
         id: proposal.id,
