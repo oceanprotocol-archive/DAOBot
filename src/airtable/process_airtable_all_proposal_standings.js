@@ -74,46 +74,55 @@ const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
     return currentStanding !== Standings.Unreported && Date.now() > timeOutDate
 }
 
-// Step 1 - Identify all proposal standings
-const getProjectStandings = async () => {
-    let projectStandings = {}
+// Step 1 - Get all proposal standings
+const getAllProposals = async () => {
+    let allProposals = []
     for (i=1; i<currentRound; i++) {
         let roundProposals = await getProposalsSelectQuery(selectionQuery = `{Round} = "${i}"`)
-        await Promise.all(roundProposals.map(async (proposal) => {
-            try {
-                let record = {
-                    id: proposal.id,
-                    fields: {}
-                }
-                let projectName = proposal.get('Project Name')
-                let proposalURL = proposal.get('Proposal URL')
-                let proposalState = proposal.get('Proposal State')
-                let currentStanding = proposal.get('Proposal Standing')
-                let deliverableChecklist = proposal.get('Deliverable Checklist') || []
-                let deliverableUpdate = proposal.get('Last Deliverable Update')
-                let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
-                let disputed = proposal.get('Disputed Status')
-                let timedOut = hasTimedOut(currentStanding, deliverableUpdate)
-                let deliverables = splitDeliverableChecklist(deliverableChecklist)
-                let incomplete = hasIncompleteDeliverables(deliverables)
-                let newStanding = getProjectStanding(proposalState, currentStanding, deliverables, incomplete, timedOut, refunded)
-
-                // Fields that will be passed to further logic
-                record.fields = {
-                    'Proposal Standing': newStanding, // || currentStanding,
-                    'Disputed Status': disputed,
-                    'Proposal URL': proposalURL,
-                    'Outstanding Proposals': ""
-                }
-
-                // Finally, track project standings
-                if (projectStandings[projectName] === undefined) projectStandings[projectName] = []
-                projectStandings[projectName].push(record)
-            } catch (err) {
-                console.log(err)
-            }
-        }))
+        allProposals.push(roundProposals)
     }
+
+    return allProposals
+}
+
+const getProposalRecord = (proposal) => {
+    let proposalURL = proposal.get('Proposal URL')
+    let proposalState = proposal.get('Proposal State')
+    let currentStanding = proposal.get('Proposal Standing')
+    let deliverableChecklist = proposal.get('Deliverable Checklist') || []
+    let deliverableUpdate = proposal.get('Last Deliverable Update')
+    let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
+    let disputed = proposal.get('Disputed Status')
+    let timedOut = hasTimedOut(currentStanding, deliverableUpdate)
+    let deliverables = splitDeliverableChecklist(deliverableChecklist)
+    let incomplete = hasIncompleteDeliverables(deliverables)
+    let newStanding = getProjectStanding(proposalState, currentStanding, deliverables, incomplete, timedOut, refunded)
+
+    return {
+        id: proposal.id,
+        fields: {
+            'Proposal Standing': newStanding, // || currentStanding,
+            'Disputed Status': disputed,
+            'Proposal URL': proposalURL,
+            'Outstanding Proposals': ""
+        }
+    }
+}
+
+const processProjectStandings = async (allProposals) => {
+    let projectStandings = {}
+    await Promise.all(allProposals.map(async (proposal) => {
+        try {
+            let projectName = proposal.get('Project Name')
+            let record = getProposalRecord(proposal)
+
+            // Finally, track project standings
+            if (projectStandings[projectName] === undefined) projectStandings[projectName] = []
+            projectStandings[projectName].push(record)
+        } catch (err) {
+            console.log(err)
+        }
+    }))
 
     return projectStandings
 }
@@ -156,22 +165,25 @@ const updateProposalStandings = async (projectStandings) => {
     }
 }
 
-const main = async () => {
-    // Step 1 - Identify all proposal standings
-    let projectStandings = await getProjectStandings()
-    console.log('\n======== Proposal Standings Found\n', JSON.stringify(projectStandings))
+// const main = async () => {
+//     // Step 1 - Identify all proposal standings
+//     let allProposals = await getAllProposals()
+//     let projectStandings = await processProjectStandings(allProposals)
+//     console.log('\n======== Proposal Standings Found\n', JSON.stringify(projectStandings))
+//
+//     // Step 2 - Resolve & Report standings
+//     await updateProposalStandings(projectStandings)
+//     console.log('\n======== Reported Proposal Standings\n', JSON.stringify(projectStandings))
+//
+//     let rows = []
+//     for (const [key, value] of Object.entries(projectStandings)) {
+//         rows = rows.concat(value)
+//     }
+//
+//     await updateProposalRecords(rows)
+//     console.log('\n[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), Object.entries(rows).length)
+// }
+//
+// main()
 
-    // Step 2 - Resolve & Report standings
-    await updateProposalStandings(projectStandings)
-    console.log('\n======== Reported Proposal Standings\n', JSON.stringify(projectStandings))
-
-    let rows = []
-    for (const [key, value] of Object.entries(projectStandings)) {
-        rows = rows.concat(value)
-    }
-
-    await updateProposalRecords(rows)
-    console.log('\n[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), Object.entries(rows).length)
-}
-
-main()
+module.exports = {Standings, Disputed, getAllProposals, processProjectStandings, getProposalRecord};
