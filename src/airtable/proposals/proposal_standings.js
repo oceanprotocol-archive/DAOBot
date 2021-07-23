@@ -1,8 +1,4 @@
-global['fetch'] = require('cross-fetch');
-const dotenv = require('dotenv');
-dotenv.config();
-
-const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable_utils')
+const {getProposalsSelectQuery} = require('../airtable_utils')
 
 // Let's track the state of various proposals
 const Standings = {

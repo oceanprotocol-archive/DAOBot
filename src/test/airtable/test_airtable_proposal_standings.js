@@ -1,3 +1,7 @@
+global['fetch'] = require('cross-fetch');
+const dotenv = require('dotenv');
+dotenv.config();
+
 const should = require('chai').should();
 const expect = require('chai').expect;
 const {Standings, Disputed, getProposalRecord, processProposalStandings, processHistoricalStandings} = require('../../airtable/proposals/proposal_standings')
