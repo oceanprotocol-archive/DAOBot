@@ -136,12 +136,12 @@ describe('Calculating Proposal Standings', function() {
     });
 });
 
-describe('Calculating Project Standings', function() {
+describe('Process Project Standings', function() {
     it('Sample data includes 4 proposals from one project', function() {
         should.equal(allProposals.length, 4);
     });
 
-    it('Validates proposals that are complete & refunded', async function() {
+    it('All proposalStandings are Completed or Refunded', async function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -158,7 +158,7 @@ describe('Calculating Project Standings', function() {
         })
     });
 
-    it('Validates incomplete proposal impacting rest of project', function() {
+    it('If proposalStanding is Incomplete then remainder of projectStanding is Incomplete', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -177,7 +177,7 @@ describe('Calculating Project Standings', function() {
         })
     });
 
-    it('Validates incomplete standing is reflected on Submitted Proposals, before receiving funding.', function() {
+    it('Validate latestProposal === lastProposal in allProposals ', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -198,10 +198,11 @@ describe('Calculating Project Standings', function() {
         // Step 3 - Report the latest (top of stack) proposal standing
         // Retrieve the last proposals from projectStandings
         let latestProposals = getProjectsLatestProposal(proposalStandings)
+        should.equal(latestProposals[projectName].length, 1);
         should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
     });
 
-    it('Validate exist latest project record', function() {
+    it('Validate currentProposalStanding === latestProposalStading', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
