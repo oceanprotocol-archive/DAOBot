@@ -4,7 +4,7 @@ dotenv.config();
 const fetch = require('cross-fetch')
 const base = require('airtable').base(process.env.AIRTABLE_BASEID)
 
-const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {web3} = require('../functions/web3')
 
 OCEAN_ERC20_0x = '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'

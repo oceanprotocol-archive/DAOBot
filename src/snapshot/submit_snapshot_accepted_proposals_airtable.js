@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
 const {assert} = require('../functions/utils')
 const {web3} = require('../functions/web3')
@@ -28,7 +28,7 @@ const validateAccceptedProposal = (proposal) => {
 const main = async () => {
     try {
         // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
-        acceptedProposals = await getProposalsByState('AND({Round} = "Test", {Proposal State} = "Accepted", "true")')
+        acceptedProposals = await getProposalsSelectQuery('AND({Round} = "Test", {Proposal State} = "Accepted", "true")')
 
         // Assert quality
         await Promise.all(acceptedProposals.map(async (proposal) => {

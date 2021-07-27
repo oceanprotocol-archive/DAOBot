@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsByState, updateProposalRecords} = require('../airtable/airtable_utils')
+const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
 
@@ -32,7 +32,7 @@ const getWalletBalance = async (wallet0x) => {
 }
 
 const main = async () => {
-    let proposals = await getProposalsByState('AND({Round} = "7", {Proposal State} = "Received", "true")')
+    let proposals = await getProposalsSelectQuery('AND({Round} = "7", {Proposal State} = "Received", "true")')
     let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, targetTimestamp, avgBlockTime)
     let recordsPayload = []
 
