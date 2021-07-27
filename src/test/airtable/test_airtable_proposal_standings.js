@@ -198,7 +198,6 @@ describe('Process Project Standings', function() {
         // Step 3 - Report the latest (top of stack) proposal standing
         // Retrieve the last proposals from projectStandings
         let latestProposals = getProjectsLatestProposal(proposalStandings)
-        should.equal(latestProposals[projectName].length, 1);
         should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
     });
 
