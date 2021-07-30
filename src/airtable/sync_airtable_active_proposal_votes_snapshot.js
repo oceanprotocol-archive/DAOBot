@@ -4,9 +4,8 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
 const {getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getCurrentRound} = require('./rounds/funding_rounds')
 
-// DRY/PARAMETERIZE
-const roundNumber = 7
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
 const marketStrategy = [
@@ -52,8 +51,11 @@ const getVoterScores = async (provider, voters, blockHeight) => {
 }
 
 // DRY
-const getActiveProposalVotes = async () => {
-    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+const getActiveProposalVotes = async () => {// DRY/PARAMETERIZE
+    const curRound = await getCurrentRound()
+    const curRoundNumber = curRound.get('Round')
+
+    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
         try {
