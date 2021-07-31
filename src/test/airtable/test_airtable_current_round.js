@@ -2,8 +2,9 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
+const expect = require('chai').expect;
 const should = require('chai').should();
-const {getCurrentRound} = require('../../airtable/rounds/funding_rounds')
+const {getCurrentRound, filterCurrentRound} = require('../../airtable/rounds/funding_rounds')
 const {getRoundsSelectQuery} = require('../../airtable/airtable_utils')
 
 var allRounds = []
@@ -12,7 +13,8 @@ beforeEach(async function() {
     allRounds = [{
         id: 'round7',
         fields: {
-            'Round': 'Round 7',
+            'Name': 'Round 7',
+            'Round': '7',
             'Start Date': 'June 8, 2021 00:00',
             'Proposals Due By': 'July 6, 2021 23:59',
             'Voting Starts': 'July 8, 2021 23:59',
@@ -31,7 +33,8 @@ beforeEach(async function() {
     },{
         id: 'round8',
         fields: {
-            'Round': 'Round 8',
+            'Nmae': 'Round 8',
+            'Round': '8',
             'Start Date': 'July 13, 2021 00:00',
             'Proposals Due By': 'August 3, 2021 23:59',
             'Voting Starts': 'August 5, 2021 23:59',
@@ -50,7 +53,8 @@ beforeEach(async function() {
     },{
         id: 'round9',
         fields: {
-            'Round': 'Round 8',
+            'Name': 'Round 9',
+            'Round': '9',
             'Start Date': 'August 10, 2021 00:00',
             'Proposals Due By': 'September 7, 2021 23:59',
             'Voting Starts': 'September 9, 2021 23:59',
@@ -82,7 +86,7 @@ describe('Get Current Round', function() {
         const originalDateNow = Date.now
         Date.now = mockDateNow
 
-        let currentRound = getCurrentRound(allRounds)
+        let currentRound = filterCurrentRound(allRounds)
 
         Date.now = originalDateNow
         should.equal(currentRound.id, allRounds[1].id);
@@ -99,17 +103,24 @@ describe.skip('Airtable test', () => {
     });
 
     it('Finds Current Round from many "Funding Round" records', async () => {
-        let mockDateMay = '2021-08-04'
-        let roundsFound = await getRoundsSelectQuery(`{Proposals Due By} <= "${mockDateMay}"`)
-        let currentRound = getCurrentRound(roundsFound)
+        const mockDateMay = '2021-08-04'
+        const roundsFound = await getRoundsSelectQuery(`{Proposals Due By} <= "${mockDateMay}"`)
+        const currentRound = filterCurrentRound(roundsFound)
 
         should.equal(currentRound.get('Round'), allRounds[1].get('Round'));
     });
 
     it('Validates there is only one record from Airtable based on today', async () => {
-        let now = new Date().toISOString().split('T')[0]
-        let roundsMatch = await getRoundsSelectQuery(`AND({Start Date} <= "${now}", {Voting Ends} >= "${now}", "true")`)
+        const now = new Date().toISOString().split('T')[0]
+        const roundsMatch = await getRoundsSelectQuery(`AND({Start Date} <= "${now}", {Voting Ends} >= "${now}", "true")`)
 
         should.equal(roundsMatch.length, 1);
+    });
+
+    it('Validates getCurrentRecord returns a single record', async () => {
+        const currentRound = await getCurrentRound()
+
+        should.exist(currentRound);
+        expect(currentRound).not.to.be.undefined;
     });
 });

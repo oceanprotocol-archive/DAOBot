@@ -15,8 +15,8 @@ const filterCurrentRound = (roundsArr) => {
 }
 
 const getCurrentRound = async () => {
-    const now = new Date().toISOString().split('T')[0]
-    const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${now}", {Voting Ends} >= "${now}", "true")`)
+    const nowDateString = new Date(Date.now()).toISOString().split('T')[0]
+    const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`)
     return filterCurrentRound(roundParameters)
 }
 
