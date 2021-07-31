@@ -32,15 +32,17 @@ const main = async () => {
     const curRound = await getCurrentRound()
     const curRoundNumber = curRound.get('Round')
 
-    // const voteStartTime = 'July 8, 2021 23:59'
-    // const voteEndTime = 'July 12, 2021 12:00'
-    // const currentBlockHeight = 12788177
-    // const targetTimestamp = 1625788799 // Jul 8 2021 23:59:59
     const voteStartTime = curRound.get('Voting Starts')
     const voteEndTime = curRound.get('Voting Ends')
 
+    const currentBlock = await web3.eth.getBlock("latest")
+    const currentBlockHeight = currentBlock.number
+
+    const startDate = new Date(voteStartTime)
+    const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
+
     let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Received", "true")`)
-    let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, targetTimestamp, avgBlockTime)
+    let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, voteStartTimestamp, avgBlockTime)
     let recordsPayload = []
 
     await Promise.all(proposals.map(async (proposal) => {
@@ -80,5 +82,4 @@ const main = async () => {
     }
 }
 
-// TODO - Update Airtable
-// main()
+main()
