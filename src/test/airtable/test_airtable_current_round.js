@@ -93,8 +93,8 @@ describe('Get Current Round', function() {
     });
 });
 
-// Tests against Airtable against DB
-describe.skip('Airtable test', () => {
+// Tests against Airtable DB
+describe('Airtable test', () => {
     it('Finds "Round 8" record from "Funding Rounds" automatically', async () => {
         let mockDateMay = '2021-08-04'
         let roundsFound = await getRoundsSelectQuery(`AND({Proposals Due By} <= "${mockDateMay}", {Voting Ends} >= "${mockDateMay}", "true")`)

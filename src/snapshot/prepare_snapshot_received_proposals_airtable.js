@@ -14,7 +14,7 @@ const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI,OCEAN_ERC20_0x);
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
-const avgBlockTime = 13
+const avgBlockTime = 13.4
 
 const getWalletBalance = async (wallet0x) => {
     let balance = 0
