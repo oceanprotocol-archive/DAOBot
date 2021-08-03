@@ -31,8 +31,8 @@ describe('Airtable test', () => {
 
         should.equal(voteStartTime, '2021-08-05T23:59:00.000Z');
         should.equal(voteEndTime, '2021-08-09T23:59:00.000Z');
-        expect(currentBlockHeight).to.be.strin;
-        expect(startTimestamp).not.to.be.undefined;
+        expect(currentBlockHeight).to.be.a('number');
+        expect(startTimestamp).to.be.a('number');
 
         // Reset Date.now
         Date.now = originalDateNow
