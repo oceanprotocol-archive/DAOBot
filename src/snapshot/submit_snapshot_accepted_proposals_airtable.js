@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
+const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
 const {assert} = require('../functions/utils')
 const {web3} = require('../functions/web3')
@@ -27,8 +28,11 @@ const validateAccceptedProposal = (proposal) => {
 // Build payload for proposal, and submit it
 const main = async () => {
     try {
+        const curRound = await getCurrentRound()
+        const curRoundNumber = curRound.get('Round')
+
         // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
-        acceptedProposals = await getProposalsSelectQuery('AND({Round} = "Test", {Proposal State} = "Accepted", "true")')
+        acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
 
         // Assert quality
         await Promise.all(acceptedProposals.map(async (proposal) => {

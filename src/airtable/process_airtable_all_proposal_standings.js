@@ -4,12 +4,14 @@ dotenv.config();
 
 const {updateProposalRecords} = require('./airtable_utils')
 const {getAllRoundProposals, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings} = require('./proposals/proposal_standings')
-
-var curRound = 8
+const {getCurrentRound} = require('./rounds/funding_rounds')
 
 const main = async () => {
+    const curRound = await getCurrentRound()
+    const curRoundNumber = curRound.get('Round')
+
     // Step 1 - Identify all proposal standings
-    let allProposals = await getAllRoundProposals(curRound-1)
+    let allProposals = await getAllRoundProposals(curRoundNumber-1)
     let proposalStandings = await processProposalStandings(allProposals)
     console.log('\n======== Proposal Standings Found\n', JSON.stringify(proposalStandings))
 
@@ -26,7 +28,7 @@ const main = async () => {
     // Step 3 - Report the latest (top of stack) proposal standing
     let latestProposalStandings = getProjectsLatestProposal(proposalStandings)
 
-    let currentRoundProposals = await getAllRoundProposals(curRound, curRound)
+    let currentRoundProposals = await getAllRoundProposals(curRoundNumber, curRoundNumber)
     let currentProposalStandings = processProposalStandings(currentRoundProposals)
     updateCurrentRoundStandings(currentProposalStandings, latestProposalStandings)
 
