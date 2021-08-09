@@ -2,7 +2,7 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
+const {getProposalsSelectQuery, getRoundsSelectQuery, updateProposalRecords} = require('./airtable_utils')
 const {getCurrentRound} = require('./rounds/funding_rounds')
 const {getWinningProposals, calculateFinalResults, getDownvotedProposals} = require('./rounds/funding_rounds')
 
@@ -11,7 +11,7 @@ const main = async () => {
     const curRoundNumber = curRound.get('Round')
 
     // Step 1 - Identify all winning and downvoted proposals
-    const activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+    const activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
     const downvotedProposals = getDownvotedProposals(activeProposals)
     const winningProposals = getWinningProposals(activeProposals)
     const finalResults = calculateFinalResults(winningProposals, curRound)
