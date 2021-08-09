@@ -26,7 +26,14 @@ const getWinningProposals = (proposals) => {
 }
 
 const getDownvotedProposals = (proposals) => {
-    return proposals.filter(p => p.get('Voted Yes') < p.get('Voted No'))
+    let downvotedProposals = proposals.filter(p => p.get('Voted Yes') < p.get('Voted No'))
+    downvotedProposals.map(p => {
+        p.fields['OCEAN Requested'] = 0
+        p.fields['USD Granted'] = 0
+        p.fields['OCEAN Granted'] = 0
+        p.fields['Proposal State'] = 'Down Voted'
+    })
+    return downvotedProposals
 }
 
 const calculateWinningProposals = (proposals, fundsAvailableUSD, oceanPrice) => {
@@ -35,12 +42,16 @@ const calculateWinningProposals = (proposals, fundsAvailableUSD, oceanPrice) => 
     for(let p of proposals) {
         if( fundsLeft > 0 ) {
             let usdRequested = p.get('USD Requested')
-            let usdGranted = fundsLeft - usdRequested > 0 ? usdRequested : fundsLeft
-            p.fields['USD Granted'] = usdGranted
-            p.fields['OCEAN Granted'] = usdGranted / oceanPrice
+            let grantCarry = p.get('USD Granted') || 0
+            let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
+            p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
+            p.fields['USD Granted'] = usdGranted + grantCarry
+            p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
+            p.fields['Proposal State'] = 'Granted'
             fundsLeft -= usdGranted
 
-            if (usdRequested === usdGranted)
+            // If we reached the total, then it won via this grant pot
+            if (usdRequested === (usdGranted + grantCarry))
                 winningProposals.push(p)
         } else {
             break
@@ -69,6 +80,12 @@ const calculateFinalResults = (proposals, fundingRound) => {
     let remainder = general.filter(p => generalWinnerIds.lastIndexOf(p['id']) === -1 )
     let partiallyFunded = remainder.filter(p => p.get('USD Granted') > 0)
     let notFunded = remainder.filter(p => p.get('USD Granted') === undefined || p.get('USD Granted') === 0)
+    notFunded.map(p => {
+        p.fields['OCEAN Requested'] = 0
+        p.fields['USD Granted'] = 0
+        p.fields['OCEAN Granted'] = 0
+        p.fields['Proposal State'] = 'Not Granted'
+    })
 
     return {
         earmarkedResults: earmarkedResults,

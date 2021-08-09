@@ -171,17 +171,50 @@ describe('Calculating Winners', function() {
         should.equal(earmarks[1].get('OCEAN Granted'), 1000)
     });
 
-    it('Validates 1 winning earmark + 1 partial funding', function() {
-        let oceanPrice = fundingRound.get('OCEAN Price')
+    it('Validates all Final Result parameters are correct.', function() {
+        let downvotedProposals = getDownvotedProposals(allProposals)
+        should.equal(downvotedProposals.length, 1)
 
         allProposals[0].fields['Earmarks'] = 'New Proposal'
         allProposals[1].fields['Earmarks'] = 'New Proposal'
         let winningProposals = getWinningProposals(allProposals)
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
+        // Validate all winning, not funded, and downvoted proposals add up
         should.equal(finalResults.earmarkedResults.winningProposals.length, 1)
         should.equal(finalResults.generalResults.winningProposals.length, 3)
         should.equal(finalResults.partiallyFunded.length, 1)
         should.equal(finalResults.notFunded.length, 2)
+
+        should.equal(
+            finalResults.earmarkedResults.winningProposals.length +
+            finalResults.generalResults.winningProposals.length +
+            finalResults.partiallyFunded.length +
+            finalResults.notFunded.length +
+            downvotedProposals.length,
+            allProposals.length
+        )
+
+        // Validate all winning, not funded, and downvoted proposals have the right Proposal State
+        should.equal(finalResults.earmarkedResults.winningProposals[0].fields['Proposal State'], 'Granted')
+        should.equal(finalResults.generalResults.winningProposals[0].fields['Proposal State'], 'Granted')
+        should.equal(finalResults.partiallyFunded[0].fields['Proposal State'], 'Granted')
+        should.equal(finalResults.notFunded[0].fields['Proposal State'], 'Not Granted')
+        should.equal(downvotedProposals[0].fields['Proposal State'], 'Down Voted')
+
+        // Validate USD amount adds up
+        const earmarkedUSDGranted = finalResults.earmarkedResults.winningProposals.reduce(
+            (total, p) => total + p.get('USD Granted'), 0
+        )
+        const generalUSDGranted = finalResults.generalResults.winningProposals.reduce(
+            (total, p) => total + p.get('USD Granted'), 0
+        )
+        const partialUSDGranted = finalResults.partiallyFunded.reduce(
+            (total, p) => total + p.get('USD Granted'), 0
+        )
+        should.equal(
+            earmarkedUSDGranted+generalUSDGranted+partialUSDGranted,
+            fundingRound.get('Funding Available USD')
+        )
     });
 });
