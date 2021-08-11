@@ -230,4 +230,43 @@ describe('Process Project Standings', function() {
         should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], latestProposals[projectName].fields['Proposal Standing'])
         should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], Standings.Incomplete);
     });
+
+    it('Should validate bad project standings are addressed', function() {
+        // Initialize Proposal[1] to not be refunded
+        // Process all proposals
+        allProposals[1].fields['Refund Transaction'] = undefined
+
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate proposals are incomplete and bad URLs are reporting properly
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Incomplete)
+
+        let badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
+        let badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+        let badUrl0Count = badUrl0.split('\n')
+        let badUrl1Count = badUrl1.split('\n')
+        should.equal(badUrl0Count.length, 2)
+        should.equal(badUrl1Count.length, 3)
+
+        // Update initial proposal to be completed
+        allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        // Process standings again
+        proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate first proposal is completed, and [Oustanding URLs] is correct.
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Incomplete)
+
+        badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
+        badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+        badUrl0Count = badUrl0.split('\n')
+        should.equal(badUrl0Count.length, 1)
+
+        badUrl1Count = badUrl1.split('\n')
+        should.equal(badUrl1Count.length, 2)
+    });
 });
