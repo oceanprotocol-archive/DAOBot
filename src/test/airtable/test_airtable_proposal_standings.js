@@ -177,7 +177,7 @@ describe('Process Project Standings', function() {
         })
     });
 
-    it('Validate latestProposal === lastProposal in allProposals ', function() {
+    it('Validate [latestProposal] is head of indexed proposals ', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -201,7 +201,7 @@ describe('Process Project Standings', function() {
         should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
     });
 
-    it('Validate currentProposalStanding === latestProposalStading', function() {
+    it('Validate [currentProposalStanding] maps to head of indexed proposals', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -213,15 +213,8 @@ describe('Process Project Standings', function() {
         let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
-        // Validate that all proposals are Incomplete
-        let projectName = allProposals[0].get('Project Name')
-        proposalStandings[projectName].forEach((x) => {
-            should.equal(x.fields['Proposal Standing'], Standings.Incomplete);
-        })
-
         // Step 3 - Report the latest (top of stack) proposal standing from each project
-        // Validate the top proposal we get == is the last proposal inside projectStandings
-        // Update the Submitted Proposals for funding, to reflect the Project Standing
+        // latestProposal should equal head of each project
         let latestProposals = getProjectsLatestProposal(proposalStandings)
         should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
 
@@ -231,7 +224,7 @@ describe('Process Project Standings', function() {
         should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], Standings.Incomplete);
     });
 
-    it('Should validate bad project standings are addressed', function() {
+    it('Validates [Bad Project State] is cleaned up', function() {
         // Initialize Proposal[1] to not be refunded
         // Process all proposals
         allProposals[1].fields['Refund Transaction'] = undefined
@@ -270,7 +263,7 @@ describe('Process Project Standings', function() {
         should.equal(badUrl1Count.length, 2)
     });
 
-    it('Validates disputed proposals are enforced', function() {
+    it('Validates [Ongoing Disputed Proposals] are a bad state. Not Eligible for grants.', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -287,7 +280,7 @@ describe('Process Project Standings', function() {
         }
     });
 
-    it('Validates completed disputed proposals are not blocking', function() {
+    it('Validates [Completed Disputes] is a good state.', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
