@@ -269,4 +269,39 @@ describe('Process Project Standings', function() {
         badUrl1Count = badUrl1.split('\n')
         should.equal(badUrl1Count.length, 2)
     });
+
+    it('Validates disputed proposals are enforced', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Disputed Status'] = Disputed.Ongoing
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        for (let i = 1; i < proposalStandings.length; i++) {
+            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Dispute)
+        }
+    });
+
+    it('Validates completed disputed proposals are not blocking', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Disputed Status'] = Disputed.Resolved
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        for (let i = 1; i < proposalStandings.length; i++) {
+            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Completed)
+        }
+    });
+
 });
