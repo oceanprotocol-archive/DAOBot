@@ -11,8 +11,8 @@ INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
 ```
-## OceanDAO Airtable Data
-Anyone can access the historical data for OceanDAO.
+## How To: Access OceanDAO Airtable Data
+Anyone can access the live data for OceanDAO.
 
 You can view the [Proposals Airtable through this link](https://airtable.com/shrd5s7HSXc2vC1iC)
 
