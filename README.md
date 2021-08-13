@@ -11,13 +11,26 @@ INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
 ```
+## OceanDAO Airtable Data
+Anyone can access the historical data for OceanDAO.
 
-## Airtable
+You can view the [Proposals Airtable through this link](https://airtable.com/shrd5s7HSXc2vC1iC)
+
+You can use our [Airtable API Endpoint via this link](https://airtable.com/appVer8ccYGnqSm2H/api/docs#javascript/introduction) and access it via `curl`.
+
+This bot sits on a cron, and updates Airtable to display a voting Leaderboard.
+Run the sync_airtable.js script using `node` inside the CLI.
+
+`user@vm:in/your/cli/DAOBot/$ node src/airtable/sync_airtable_active_proposal_votes.js >> log_sync_airtable_active_proposal_votes.csv`
+
+## Airtable - Configure DAOBot to use your Airtable 
 
 Configure your AIRTABLE_API_KEY + AIRTABLE_BASEID to execute the airtable/db sync.
 - Then simply run src/airtable/sync_airtable_active_proposal_votes.js 
 
-## GSheets
+## GSheets - Point DAOBot to GSheet, get Vote Results
+You can use DAOBot to dump votes from Snapshot, onto GSheets.
+You can [instantly setup your GSheet, to render inside Notion.](https://www.notion.vip/charts/)
 
 This bot also connects with GSheets.
 - Copy your credentials.json into DAOBot/ root
@@ -25,19 +38,15 @@ This bot also connects with GSheets.
 - Follow cli prompts. token.json should be generated 
 - user@vm:in/your/cli/DAOBot/$node src/gsheets/sync_gsheets_active_proposal_votes.js >> log_sync_gsheets_active_proposal_votes.csv
 
-## Airtable
+## RUN/CRON - DAOBot Main entry points
 
-This bot updates Airtable on a cron to display a vote Leaderboard.
-- user@vm:in/your/cli/DAOBot/$node src/airtable/sync_airtable_active_proposal_votes.js >> log_sync_airtable_active_proposal_votes.csv
-
-## Main entry points
-
-These are the main entry points.
+These are the scripts that you should run to execute DAOBt.
+More Coming... Read each script for more details.
 - src/airtable/sync_airtable_active_proposal_votes.js
 - src/gsheets/sync_gsheets_active_proposal_votes.js
 - src/snapshot/submit_snapshot_accepted_proposals.js
 
-## Configure Crontab
+## CRON - Configure DAOBOT Crontab
 
 The bash scripts located in the root `/DAOBot/` directory should allow you to run the node sync-scripts, from cron.
 
