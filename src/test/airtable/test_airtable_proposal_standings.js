@@ -216,12 +216,12 @@ describe('Process Project Standings', function() {
         // Step 3 - Report the latest (top of stack) proposal standing from each project
         // latestProposal should equal head of each project
         let latestProposals = getProjectsLatestProposal(proposalStandings)
-        should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
+        should.equal(latestProposals['test']['id'], allProposals[allProposals.length-1]['id']);
 
         let currentProposalStandings = processProposalStandings(currentProposals)
         updateCurrentRoundStandings(currentProposalStandings, latestProposals)
-        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], latestProposals[projectName].fields['Proposal Standing'])
-        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], Standings.Incomplete);
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], latestProposals['test'].fields['Proposal Standing'])
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
     });
 
     it('Validates [Bad Project State] is cleaned up', function() {
