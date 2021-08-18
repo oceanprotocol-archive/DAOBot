@@ -4,8 +4,9 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults} = require('../../airtable/rounds/funding_rounds')
+const {getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet} = require('../../airtable/rounds/funding_rounds')
 
+const fundingRound = 8
 var fundingRound = {}
 var allProposals = []
 
@@ -119,7 +120,7 @@ describe('Calculating Winners', function() {
     });
 
     it('Retrieves all winning proposals sorted by vote count', function() {
-        let winningProposals = getWinningProposals(allProposals)
+        let winningProposals = getWinningProposals(allProposals, fundingRound)
 
         should.equal(winningProposals.length, 7)
         should.equal(winningProposals[0].id, 'proposal_1')
@@ -177,7 +178,7 @@ describe('Calculating Winners', function() {
 
         allProposals[0].fields['Earmarks'] = 'New Proposal'
         allProposals[1].fields['Earmarks'] = 'New Proposal'
-        let winningProposals = getWinningProposals(allProposals)
+        let winningProposals = getWinningProposals(allProposals, fundingRound)
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
         // Validate all winning, not funded, and downvoted proposals add up
@@ -216,5 +217,28 @@ describe('Calculating Winners', function() {
             earmarkedUSDGranted+generalUSDGranted+partialUSDGranted,
             fundingRound.get('Funding Available USD')
         )
+    });
+
+    it('Validates gsheet output is correct.', async function() {
+        let downvotedProposals = getDownvotedProposals(allProposals)
+        should.equal(downvotedProposals.length, 1)
+
+        allProposals[0].fields['Earmarks'] = 'New Proposal'
+        allProposals[1].fields['Earmarks'] = 'New Proposal'
+        let winningProposals = getWinningProposals(allProposals, fundingRound)
+        let finalResults = calculateFinalResults(winningProposals, fundingRound)
+
+        let downvotedResults = await dumpResultsToGSheet(downvotedProposals)
+        let earmarkedResults = await dumpResultsToGSheet(finalResults.earmarkedResults.winningProposals)
+        let generalResults = await dumpResultsToGSheet(finalResults.generalResults.winningProposals)
+        let partiallyFundedResults = await dumpResultsToGSheet(finalResults.partiallyFunded)
+        let notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
+
+        // Validate all winning, not funded, and downvoted proposals add up
+        should.equal(downvotedResults.length, 2)
+        should.equal(earmarkedResults.length, 2)
+        should.equal(generalResults.length, 5)
+        should.equal(partiallyFundedResults.length, 1)
+        should.equal(notFundedResults.length, 3)
     });
 });

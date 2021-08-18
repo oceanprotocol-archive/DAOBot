@@ -20,9 +20,17 @@ const getCurrentRound = async () => {
     return filterCurrentRound(roundParameters)
 }
 
-const getWinningProposals = (proposals) => {
+const getWinningProposals = (proposals, curFundingRound) => {
     let winners = proposals.filter(p => p.get('Voted Yes') > p.get('Voted No'))
-    return winners.sort((a,b) => {return (b.get('Voted Yes') - b.get('Voted No')) - (a.get('Voted Yes') - a.get('Voted No'))})
+
+    // TODO - RA: Improve strategy/count configurations/versioning per funding round
+    if( curFundingRound <= 8 ) {
+        // This is the winner Y/N ranking sort formula for R8 and before
+        return winners.sort((a, b) => {return b.get('Voted Yes') - a.get('Voted Yes')})
+    } else {
+        // This is the winner Y/N ranking sort formula for R9 and onwards
+        return winners.sort((a, b) => {return (b.get('Voted Yes') - b.get('Voted No')) - (a.get('Voted Yes') - a.get('Voted No'))})
+    }
 }
 
 const getDownvotedProposals = (proposals) => {
@@ -95,4 +103,31 @@ const calculateFinalResults = (proposals, fundingRound) => {
     }
 }
 
-module.exports = {getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults};
+const dumpResultsToGSheet = async (results) => {
+    // Flatten proposals into gsheet dump
+    var flatObj = Object.entries(results).map((res) => {
+        try {
+            let proposal = res[1]
+            let pctYes = proposal.get('Voted Yes') / (proposal.get('Voted Yes') + proposal.get('Voted No'))
+            let greaterThan50Yes = pctYes >= 0.50 ? true : false
+            return [
+                proposal.get('Project Name'),
+                proposal.get('Voted Yes'),
+                proposal.get('Voted No'),
+                pctYes,
+                greaterThan50Yes,
+                proposal.get('USD Requested'),
+                proposal.get('OCEAN Requested'),
+                proposal.get('OCEAN Granted'),
+            ]
+        } catch(err) {
+            console.log(err)
+        }
+    })
+
+    // Dump flattened data from snapshot to sheet
+    flatObj.splice(0,0, ['Project Name','Yes Votes','No Votes','Pct Yes','>50% Yes?','USD Requested','OCEAN Requested','OCEAN Granted'])
+    return flatObj
+}
+
+module.exports = {getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};

@@ -302,8 +302,9 @@ const getActiveProposalVotes = async () => {
 }
 
 const main = async () => {
-    const curRound = await getCurrentRound()
-    curRoundNumber = curRound.get('Round')
+    // const curRound = await getCurrentRound()
+    // curRoundNumber = curRound.get('Round')
+    curRoundNumber = 8
 
     // Retrieve all active proposals from Airtable
     await getActiveProposalVotes()
