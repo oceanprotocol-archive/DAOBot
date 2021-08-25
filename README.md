@@ -33,9 +33,9 @@ You can use DAOBot to dump votes from Snapshot, onto GSheets.
 You can [instantly setup your GSheet, to render inside Notion.](https://www.notion.vip/charts/)
 
 This bot also connects with GSheets.
-1. Copy your credentials.json into DAOBot/ root
+1. Copy your credentials.json into DAOBot/ root  
 `user@vm:in/your/cli/DAOBot/$node src/gsheets/index.js`
-2. Follow cli prompts. token.json should be generated 
+2. Follow cli prompts. token.json should be generated  
 `user@vm:in/your/cli/DAOBot/$node src/gsheets/sync_gsheets_active_proposal_votes.js >> log_sync_gsheets_active_proposal_votes.csv`
 
 ## ⏲️ CRON - Configure DAOBOT Crontab
