@@ -1,4 +1,4 @@
-# OceanDAO Bot
+## 🤖 OceanDAO Bot
 
 This bot pipes data from a few different sources, so we can efficiently report DAO-Related informaiton.
 - Make sure you have `node` and `npm`
