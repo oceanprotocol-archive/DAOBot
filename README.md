@@ -11,7 +11,7 @@ INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
 ```
-## How To: Access OceanDAO Airtable Data
+## ❓ How To: Access OceanDAO Airtable Data
 Anyone can access the live data for OceanDAO.
 
 You can view the [Proposals Airtable through this link](https://airtable.com/shrd5s7HSXc2vC1iC)
@@ -38,15 +38,7 @@ This bot also connects with GSheets.
 - Follow cli prompts. token.json should be generated 
 - user@vm:in/your/cli/DAOBot/$node src/gsheets/sync_gsheets_active_proposal_votes.js >> log_sync_gsheets_active_proposal_votes.csv
 
-## RUN/CRON - DAOBot Main entry points
-
-These are the scripts that you should run to execute DAOBt.
-More Coming... Read each script for more details.
-- src/airtable/sync_airtable_active_proposal_votes.js
-- src/gsheets/sync_gsheets_active_proposal_votes.js
-- src/snapshot/submit_snapshot_accepted_proposals.js
-
-## CRON - Configure DAOBOT Crontab
+## ⏲️ CRON - Configure DAOBOT Crontab
 
 The bash scripts located in the root `/DAOBot/` directory should allow you to run the node sync-scripts, from cron.
 
@@ -61,3 +53,28 @@ Example Crontab - Sync every 2 minutes
 */2 * * * * sh /DAOBot/cron_sync_votes_gsheets.sh 2>&1
 ```
 
+## RUN/CRON - DAOBot Main entry points
+
+These are the scripts that you should run to execute DAOBt.
+More Coming... Read each script for more details.
+- src/airtable/sync_airtable_active_proposal_votes.js
+- src/gsheets/sync_gsheets_active_proposal_votes.js
+- src/snapshot/submit_snapshot_accepted_proposals.js
+
+## 🏛 License
+
+```text
+Copyright 2021 Ocean Protocol Foundation Ltd.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
