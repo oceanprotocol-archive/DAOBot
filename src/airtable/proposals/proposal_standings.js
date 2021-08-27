@@ -126,9 +126,10 @@ const processHistoricalStandings = (proposalStandings) => {
         let outstandingURL = ""
         let lastStanding = undefined
         value.map( (proposal) => {
+            proposal.fields['Outstanding Proposals'] = ''
             // DISPUTES: If a proposal is under dispute, the project standing becomes poor
             // INCOMPLETION: If a proposal is incomplete/timedout, the project standing becomes poor
-            if( lastStanding !== Standings.Incomplete || lastStanding !== Standings.Dispute ) {
+            if( lastStanding !== Standings.Incomplete && lastStanding !== Standings.Dispute ) {
                 if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
                 else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
             }

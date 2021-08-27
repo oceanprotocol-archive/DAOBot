@@ -177,7 +177,7 @@ describe('Process Project Standings', function() {
         })
     });
 
-    it('Validate latestProposal === lastProposal in allProposals ', function() {
+    it('Validate [latestProposal] is head of indexed proposals ', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -201,7 +201,7 @@ describe('Process Project Standings', function() {
         should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
     });
 
-    it('Validate currentProposalStanding === latestProposalStading', function() {
+    it('Validate [currentProposalStanding] maps to head of indexed proposals', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -213,21 +213,88 @@ describe('Process Project Standings', function() {
         let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
-        // Validate that all proposals are Incomplete
-        let projectName = allProposals[0].get('Project Name')
-        proposalStandings[projectName].forEach((x) => {
-            should.equal(x.fields['Proposal Standing'], Standings.Incomplete);
-        })
-
         // Step 3 - Report the latest (top of stack) proposal standing from each project
-        // Validate the top proposal we get == is the last proposal inside projectStandings
-        // Update the Submitted Proposals for funding, to reflect the Project Standing
+        // latestProposal should equal head of each project
         let latestProposals = getProjectsLatestProposal(proposalStandings)
-        should.equal(latestProposals[projectName]['id'], allProposals[allProposals.length-1]['id']);
+        should.equal(latestProposals['test']['id'], allProposals[allProposals.length-1]['id']);
 
         let currentProposalStandings = processProposalStandings(currentProposals)
         updateCurrentRoundStandings(currentProposalStandings, latestProposals)
-        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], latestProposals[projectName].fields['Proposal Standing'])
-        should.equal(currentProposalStandings[projectName][0].fields['Proposal Standing'], Standings.Incomplete);
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], latestProposals['test'].fields['Proposal Standing'])
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
     });
+
+    it('Validates [Bad Project State] is cleaned up', function() {
+        // Initialize Proposal[1] to not be refunded
+        // Process all proposals
+        allProposals[1].fields['Refund Transaction'] = undefined
+
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate proposals are incomplete and bad URLs are reporting properly
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Incomplete)
+
+        let badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
+        let badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+        let badUrl0Count = badUrl0.split('\n')
+        let badUrl1Count = badUrl1.split('\n')
+        should.equal(badUrl0Count.length, 2)
+        should.equal(badUrl1Count.length, 3)
+
+        // Update initial proposal to be completed
+        allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        // Process standings again
+        proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Validate first proposal is completed, and [Oustanding URLs] is correct.
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Incomplete)
+
+        badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
+        badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+        badUrl0Count = badUrl0.split('\n')
+        should.equal(badUrl0Count.length, 1)
+
+        badUrl1Count = badUrl1.split('\n')
+        should.equal(badUrl1Count.length, 2)
+    });
+
+    it('Validates [Ongoing Disputed Proposals] are a bad state. Not Eligible for grants.', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Disputed Status'] = Disputed.Ongoing
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        for (let i = 1; i < proposalStandings.length; i++) {
+            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Dispute)
+        }
+    });
+
+    it('Validates [Completed Disputes] is a good state.', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Disputed Status'] = Disputed.Resolved
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        for (let i = 1; i < proposalStandings.length; i++) {
+            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Completed)
+        }
+    });
+
 });

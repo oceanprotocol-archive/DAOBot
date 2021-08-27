@@ -95,18 +95,34 @@ describe('Get Current Round', function() {
 
 // Tests against Airtable DB
 describe('Airtable test', () => {
-    it('Finds "Round 8" record from "Funding Rounds" automatically', async () => {
-        let mockDateMay = '2021-08-04'
+    it('Validates "Round 8" record from "Funding Rounds" automatically', async () => {
+        const mockDateMay = '2021-08-04'
+        function mockDateNow() {
+            return 'Aug 04, 2021 12:00'
+        }
+
+        const originalDateNow = Date.now
+        Date.now = mockDateNow
+
         let roundsFound = await getRoundsSelectQuery(`AND({Proposals Due By} <= "${mockDateMay}", {Voting Ends} >= "${mockDateMay}", "true")`)
 
+        Date.now = originalDateNow
         should.equal(roundsFound[0].get('Round'), allRounds[1].get('Round'));
     });
 
-    it('Finds Current Round from many "Funding Round" records', async () => {
+    it('Validates Current Round from many "Funding Round" records', async () => {
         const mockDateMay = '2021-08-04'
+        function mockDateNow() {
+            return 'Aug 04, 2021 12:00'
+        }
+
+        const originalDateNow = Date.now
+        Date.now = mockDateNow
+
         const roundsFound = await getRoundsSelectQuery(`{Proposals Due By} <= "${mockDateMay}"`)
         const currentRound = filterCurrentRound(roundsFound)
 
+        Date.now = originalDateNow
         should.equal(currentRound.get('Round'), allRounds[1].get('Round'));
     });
 
