@@ -5,22 +5,36 @@ const fetch = require('cross-fetch')
 
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org';
 const space = 'officialoceandao.eth'
-const strategies = [{
-    "network": 1,
-    "name": "ocean-marketplace",
-    "params": {
-        "symbol": "OCEAN",
-        "address": "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-        "decimals": 18
-    }
-}, {
-    "name": "erc20-balance-of",
-    "params": {
-        "symbol": "OCEAN",
-        "address": "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-        "decimals": 18
+
+const strategy_v0_1 = [{
+    name: "erc20-balance-of",
+    params: {
+        symbol: "OCEAN",
+        address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+        decimals: 18
     }
 }]
+
+const strategy_v0_2 = [{
+        name: "ocean-marketplace",
+        params: {
+            symbol: "OCEAN",
+            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+            decimals: 18
+        }
+}, {
+    name: "erc20-balance-of",
+    params: {
+        symbol: "OCEAN",
+        address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+        decimals: 18
+    }
+}]
+
+const getVoteCountStrategy = (round) => {
+    if(round < 5) return strategy_v0_1
+    return strategy_v0_2
+}
 
 const getProposalVotes = async (ipfsHash) => {
     const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
@@ -116,4 +130,4 @@ const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlock
     return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
 }
 
-module.exports = {getProposalVotes, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}
+module.exports = {getVoteCountStrategy, getProposalVotes, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}

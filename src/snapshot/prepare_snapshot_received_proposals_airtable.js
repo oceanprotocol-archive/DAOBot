@@ -43,6 +43,7 @@ const main = async () => {
 
     let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Received", "true")`)
     let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, voteStartTimestamp, avgBlockTime)
+
     let recordsPayload = []
 
     await Promise.all(proposals.map(async (proposal) => {

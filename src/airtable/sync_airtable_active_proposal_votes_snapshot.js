@@ -3,29 +3,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
 const {getCurrentRound} = require('./rounds/funding_rounds')
 
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
-const marketStrategy = [
-    {
-        name: 'erc20-balance-of',
-        params: {
-            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-            symbol: "OCEAN",
-            decimals: 18
-        }
-    },
-    {
-        name: 'ocean-marketplace',
-        params: {
-            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-            symbol: "OCEAN",
-            decimals: 18
-        }
-    }
-];
 
 const network = '1';
 const provider = snapshot.utils.getProvider(network);
@@ -36,11 +18,10 @@ var proposalVotes = {}
 var proposalScores = {}
 var proposalVoteSummary = {}
 
-// DRY
-const getVoterScores = async (provider, voters, blockHeight) => {
+const getVoterScores = async (provider, strategy, voters, blockHeight) => {
     return snapshot.utils.getScores(
         space,
-        marketStrategy,
+        strategy,
         network,
         provider,
         voters,
@@ -50,8 +31,8 @@ const getVoterScores = async (provider, voters, blockHeight) => {
     });
 }
 
-// DRY
-const getActiveProposalVotes = async () => {// DRY/PARAMETERIZE
+// DRY/PARAMETERIZE
+const getActiveProposalVotes = async () => {
     const curRound = await getCurrentRound()
     const curRoundNumber = curRound.get('Round')
 
@@ -60,6 +41,7 @@ const getActiveProposalVotes = async () => {// DRY/PARAMETERIZE
     await Promise.all(activeProposals.map(async (proposal) => {
         try {
             const ipfsHash = proposal.get('ipfsHash')
+            let strategy = getVoteCountStrategy(proposal.get('Round'))
 
             await getProposalVotes(ipfsHash)
                 .then((result) => {
@@ -67,13 +49,14 @@ const getActiveProposalVotes = async () => {// DRY/PARAMETERIZE
                 })
 
             const voters = Object.keys(proposalVotes[ipfsHash])
-            const voterScores = await getVoterScores(provider, voters, proposal.get('Snapshot Block'))
+            const voterScores = await getVoterScores(provider, strategy, voters, proposal.get('Snapshot Block'))
 
             Object.entries(proposalVotes[ipfsHash]).map((voter) => {
-                const strategyScore1 = voterScores[0][voter[0]] || 0
-                const strategyScore2 = voterScores[1][voter[0]] || 0
-
-                voter[1].msg.payload.balance = strategyScore1 + strategyScore2
+                let strategyScore = 0
+                for (i=0; i < strategy.length; i++) {
+                    strategyScore += voterScores[i][voter[0]] || 0
+                }
+                voter[1].msg.payload.balance = strategyScore
             })
 
             let scores = {
