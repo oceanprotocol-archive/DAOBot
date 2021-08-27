@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
+const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
 
@@ -13,12 +14,7 @@ const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI,OCEAN_ERC20_0x);
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
-const roundNumber = 7
-const voteStartTime = 'July 8, 2021 23:59'
-const voteEndTime = 'July 12, 2021 12:00'
-const currentBlockHeight = 12788177
-const targetTimestamp = 1625788799 // Jul 8 2021 23:59:59
-const avgBlockTime = 13
+const avgBlockTime = 13.4
 
 const getWalletBalance = async (wallet0x) => {
     let balance = 0
@@ -33,8 +29,21 @@ const getWalletBalance = async (wallet0x) => {
 }
 
 const main = async () => {
-    let proposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Received", "true")`)
-    let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, targetTimestamp, avgBlockTime)
+    const curRound = await getCurrentRound()
+    const curRoundNumber = curRound.get('Round')
+
+    const voteStartTime = curRound.get('Voting Starts')
+    const voteEndTime = curRound.get('Voting Ends')
+
+    const currentBlock = await web3.eth.getBlock("latest")
+    const currentBlockHeight = currentBlock.number
+
+    const startDate = new Date(voteStartTime)
+    const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
+
+    let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Received", "true")`)
+    let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, voteStartTimestamp, avgBlockTime)
+
     let recordsPayload = []
 
     await Promise.all(proposals.map(async (proposal) => {
@@ -74,5 +83,4 @@ const main = async () => {
     }
 }
 
-// TODO - Update Airtable
-// main()
+main()

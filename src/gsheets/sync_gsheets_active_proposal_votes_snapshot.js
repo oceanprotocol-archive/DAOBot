@@ -6,11 +6,33 @@ const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 
 // DRY/PARAMETERIZE
-const roundNumber = 4
+var curRoundNumber = undefined
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
+
+// TODO - RA: First 4 rounds were done with an ERC20-only strategy
+const marketStrategy = [
+    {
+        name: 'erc20-balance-of',
+        params: {
+            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+            symbol: "OCEAN",
+            decimals: 18
+        }
+    },
+    {
+        name: 'ocean-marketplace',
+        params: {
+            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+            symbol: "OCEAN",
+            decimals: 18
+        }
+    }
+];
 
 const network = '1';
 const provider = snapshot.utils.getProvider(network);
@@ -36,8 +58,8 @@ const dumpFromSnapshotRawToGSheet = async (ipfsHash) => {
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=roundNumber)
-        console.log("Created new sheet [%s] at index [%s].", ipfsHash, roundNumber)
+        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=curRoundNumber)
+        console.log("Created new sheet [%s] at index [%s].", ipfsHash, curRoundNumber)
     }
 
     // Flatten votes from this proposal
@@ -204,7 +226,7 @@ const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
 
     // DRY
     // Get the sheet, otherwise create it
-    const sheetName = `Round ${roundNumber} Results`
+    const sheetName = `Round ${curRoundNumber} Results`
     var sheet = await getValues(oAuth, sheetName, 'A1:B3')
     if (sheet === undefined) {
         var newSheets = await addSheet(oAuth, sheetName)
@@ -239,7 +261,7 @@ const getVoterScores = async (provider, strategy, voters, blockHeight) => {
 
 // DRY
 const getActiveProposalVotes = async () => {
-    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
         try {
@@ -283,6 +305,9 @@ const getActiveProposalVotes = async () => {
 }
 
 const main = async () => {
+    const curRound = await getCurrentRound()
+    curRoundNumber = curRound.get('Round')
+
     // Retrieve all active proposals from Airtable
     await getActiveProposalVotes()
 
