@@ -4,8 +4,6 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
 const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-
-const {getProposalVotes} = require('../snapshot/snapshot_utils');
 const {getCurrentRound} = require('./rounds/funding_rounds')
 
 const snapshot = require('@snapshot-labs/snapshot.js')

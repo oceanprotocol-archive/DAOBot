@@ -6,7 +6,6 @@ const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-const {getProposalVotes} = require('../snapshot/snapshot_utils');
 const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 
 // DRY/PARAMETERIZE
