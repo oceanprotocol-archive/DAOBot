@@ -6,7 +6,6 @@ const should = require('chai').should();
 const expect = require('chai').expect;
 const {getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet} = require('../../airtable/rounds/funding_rounds')
 
-const fundingRound = 8
 var fundingRound = {}
 var allProposals = []
 
@@ -176,6 +175,7 @@ describe('Calculating Winners', function() {
         let downvotedProposals = getDownvotedProposals(allProposals)
         should.equal(downvotedProposals.length, 1)
 
+        fundingRound.fields['Funding Available USD'] = 4500
         allProposals[0].fields['Earmarks'] = 'New Proposal'
         allProposals[1].fields['Earmarks'] = 'New Proposal'
         let winningProposals = getWinningProposals(allProposals, fundingRound)
