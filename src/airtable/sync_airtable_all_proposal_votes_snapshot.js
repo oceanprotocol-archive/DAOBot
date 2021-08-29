@@ -3,33 +3,16 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getVoteCountStrategy, getVoterScores, getProposalVotes} = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
 const roundNumber = 8
-const snapshot = require('@snapshot-labs/snapshot.js')
-const space = 'officialoceandao.eth';
-const provider = snapshot.utils.getProvider(1);
 
 // Let's track the state of various proposals
 var allProposals = []
 var proposalVotes = {}
 var proposalScores = {}
 var proposalVoteSummary = {}
-
-// DRY
-const getVoterScores = async (provider, strategy, voters, blockHeight) => {
-    return snapshot.utils.getScores(
-        space,
-        strategy,
-        1,
-        provider,
-        voters,
-        blockHeight
-    ).then(scores => {
-        return scores
-    });
-}
 
 const getAllProposalVotes = async () => {
     for (i=1; i<roundNumber; i++) {
@@ -47,7 +30,7 @@ const getAllProposalVotes = async () => {
                     })
 
                 const voters = Object.keys(proposalVotes[ipfsHash])
-                const voterScores = await getVoterScores(provider, strategy, voters, proposal.get('Snapshot Block'))
+                const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
 
                 Object.entries(proposalVotes[ipfsHash]).map((voter) => {
                     let strategyScore = 0

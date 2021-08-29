@@ -244,21 +244,6 @@ const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
 }
 
 // DRY
-const getVoterScores = async (provider, strategy, voters, blockHeight) => {
-
-    return snapshot.utils.getScores(
-        space,
-        strategy,
-        network,
-        provider,
-        voters,
-        blockHeight
-    ).then(scores => {
-        return scores
-    });
-}
-
-// DRY
 const getActiveProposalVotes = async () => {
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
@@ -306,7 +291,7 @@ const getActiveProposalVotes = async () => {
 const main = async () => {
     const curRound = await getCurrentRound()
     curRoundNumber = curRound.get('Round')
-    
+
     // Retrieve all active proposals from Airtable
     await getActiveProposalVotes()
 
