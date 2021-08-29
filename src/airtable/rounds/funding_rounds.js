@@ -1,5 +1,13 @@
 const {getRoundsSelectQuery} = require('../airtable_utils')
 
+// Let's track the state of various proposals
+const RoundState = {
+    Started: 'Started',
+    DueDiligence: 'Due Diligence',
+    Voting: 'Voting',
+    Ended: 'Ended',
+};
+
 const filterCurrentRound = (roundsArr) => {
     try {
         let timeNow = new Date(Date.now()).getTime()
@@ -130,4 +138,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};
+module.exports = {RoundState, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};

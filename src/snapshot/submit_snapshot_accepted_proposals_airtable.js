@@ -29,41 +29,54 @@ const validateAccceptedProposal = (proposal) => {
 const main = async () => {
     try {
         const curRound = await getCurrentRound()
+        const curRoundState = curRound.get('Round State')
+        const curRoundVotingStarts = curRound.get('Voting Starts')
         const curRoundNumber = curRound.get('Round')
+        const now = new Date().toISOString().split('T')[0]
 
-        // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
-        acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
+        if( curRoundState === RoundState.DueDiligence && curRoundVotingStarts >= now ) {
+            // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
+            acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
 
-        // Assert quality
-        await Promise.all(acceptedProposals.map(async (proposal) => {
-            try {
-                validateAccceptedProposal(proposal)
+            // Assert quality
+            await Promise.all(acceptedProposals.map(async (proposal) => {
+                try {
+                    validateAccceptedProposal(proposal)
 
-                const payload = buildProposalPayload(proposal)
-                const result = await local_broadcast_proposal(web3, account, payload)
+                    const payload = buildProposalPayload(proposal)
+                    const result = await local_broadcast_proposal(web3, account, payload)
 
-                if (result !== undefined) {
-                    console.log(result)
-                    submittedProposals.push({
-                        id: proposal.id,
-                        fields: {
-                            'ipfsHash': result.ipfsHash,
-                            'Vote URL': `https://vote.oceanprotocol.com/#/officialoceandao.eth/proposal/${result.ipfsHash}`,
-                            'Proposal State': 'Running'
-                        }
-                    })
+                    if (result !== undefined) {
+                        console.log(result)
+                        submittedProposals.push({
+                            id: proposal.id,
+                            fields: {
+                                'ipfsHash': result.ipfsHash,
+                                'Vote URL': `https://vote.oceanprotocol.com/#/officialoceandao.eth/proposal/${result.ipfsHash}`,
+                                'Proposal State': 'Running'
+                            }
+                        })
+                    }
+                } catch (err) {
+                    console.log(err)
                 }
-            } catch (err) {
-                console.log(err)
-            }
-        }))
+            }))
 
-        if( submittedProposals.length > 0 ) {
-            await updateProposalRecords(submittedProposals)
-            console.log('[SUCCESS] Submitted [%s] proposals to Snapshot.', submittedProposals.length)
+            if (submittedProposals.length > 0) {
+                await updateProposalRecords(submittedProposals)
+                console.log('[SUCCESS] Submitted [%s] proposals to Snapshot.', submittedProposals.length)
+            }
+            if (acceptedProposals.length !== submittedProposals.length)
+                console.log('[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.', acceptedProposals.length, submittedProposals.length)
+
+            const roundUpdate = [{
+                id: curRound['id'],
+                fields: {
+                    'Round State': RoundState.Voting,
+                }
+            }]
+            updateRoundRecord(roundUpdate)
         }
-        if( acceptedProposals.length !== submittedProposals.length )
-            console.log('[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.', acceptedProposals.length, submittedProposals.length)
     } catch(err) {
         console.log(err)
     }
