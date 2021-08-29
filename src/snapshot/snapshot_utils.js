@@ -2,8 +2,11 @@ const axios = require('axios');
 const {bufferToHex} = require("ethereumjs-util")
 const {version} = require("@snapshot-labs/snapshot.js/src/constants.json")
 const fetch = require('cross-fetch')
+const snapshot = require('@snapshot-labs/snapshot.js')
 
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org';
+const network = '1';
+const provider = snapshot.utils.getProvider(network);
 
 const strategy = {
     'test_strategy_spring': [{
@@ -125,14 +128,49 @@ const getVoteCountStrategy = (roundNumber) => {
     return strategy['strategy_v0_3']
 }
 
+const getVotesQuery = (ifpshash) => `query Votes {
+  votes (
+    first: 10000,
+    where: {
+      proposal: "${ifpshash}"
+    }
+  ) {
+    voter
+    choice
+  }
+}`
+
 const getProposalVotes = async (ipfsHash) => {
-    const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
+    const proposalUrl = `${hubUrl}/api/${process.env.SNAPSHOT_SPACE}/proposal/` + ipfsHash
     return await axios.get(proposalUrl)
 }
 
 const getProposalVotesGQL = async (ipfsHash) => {
-    const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
-    return await axios.get(proposalUrl)
+    const options = {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            query: getVotesQuery(ipfsHash)
+        })
+    };
+
+    return await fetch("https://hub.snapshot.org/graphql", options)
+}
+
+const getVoterScores = async (strategy, voters, blockHeight) => {
+    return snapshot.utils.getScores(
+        process.env.SNAPSHOT_SPACE,
+        strategy,
+        network,
+        provider,
+        voters,
+        blockHeight
+    ).then(scores => {
+        return scores
+    });
 }
 
 // Configure the proposal template that will be submitted to Snapshot
@@ -224,4 +262,4 @@ const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlock
     return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
 }
 
-module.exports = {getVoteCountStrategy, getProposalVotes, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}
+module.exports = {getVoteCountStrategy, getVotesQuery, getProposalVotes, getProposalVotesGQL, getVoterScores, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}

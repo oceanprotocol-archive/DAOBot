@@ -3,32 +3,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-
-const snapshot = require('@snapshot-labs/snapshot.js')
-const space = 'officialoceandao.eth';
-
-const network = '1';
-const provider = snapshot.utils.getProvider(network);
+const {getVoteCountStrategy, getVoterScores, getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getCurrentRound} = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
 var activeProposals = {}
 var proposalVotes = {}
 var proposalScores = {}
 var proposalVoteSummary = {}
-
-const getVoterScores = async (provider, strategy, voters, blockHeight) => {
-    return snapshot.utils.getScores(
-        space,
-        strategy,
-        network,
-        provider,
-        voters,
-        blockHeight
-    ).then(scores => {
-        return scores
-    });
-}
 
 // DRY/PARAMETERIZE
 const getActiveProposalVotes = async (curRoundNumber) => {
