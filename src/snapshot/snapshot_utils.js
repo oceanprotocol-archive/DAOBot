@@ -66,8 +66,8 @@ const getProposalVotesGQL = async (ipfsHash) => {
             query: getVotesQuery(ipfsHash)
         })
     };
-
-    return await fetch("https://hub.snapshot.org/graphql", options)
+    const response = await fetch("https://hub.snapshot.org/graphql", options)
+    return await response.json()
 }
 
 const getVoterScores = async (strategy, voters, blockHeight) => {

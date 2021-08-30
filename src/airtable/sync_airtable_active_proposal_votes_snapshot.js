@@ -15,7 +15,8 @@ var proposalVoteSummary = {}
 // DRY/PARAMETERIZE
 const getActiveProposalVotes = async () => {
     const curRound = await getCurrentRound()
-    const curRoundNumber = curRound.get('Round')
+    //const curRoundNumber = curRound.get('Round')
+    const curRoundNumber = 8
 
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
@@ -25,13 +26,21 @@ const getActiveProposalVotes = async () => {
             let strategy = getVoteCountStrategy(proposal.get('Round'))
 
             await getProposalVotesGQL(ipfsHash)
-                .then((resp) => resp.json())
                 .then((result) => {
                     proposalVotes[ipfsHash] = result.data.votes
                 })
-
-            const voters = Object.keys(proposalVotes[ipfsHash])
+            const voters = []
+            for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
+                voters.push(proposalVotes[ipfsHash][i].voter)
+            }
             const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
+            const proposalScores = []
+            for (var item = 0; item < voterScores.length; ++item) {
+                for (var voter of Object.keys(item)) {
+                    proposalScores.push(item[voter])
+                }
+            }
+            console.log("scores: " + proposalScores)
 
             Object.entries(proposalVotes[ipfsHash]).map((voter) => {
                 let strategyScore = 0
