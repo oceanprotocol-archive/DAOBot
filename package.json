@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ethersproject/wallet": "^5.4.0",
     "@iarna/rtf-to-html": "^1.1.0",
     "@snapshot-labs/lock": "github:snapshot-labs/lock#master",
     "@snapshot-labs/snapshot-spaces": "github:snapshot-labs/snapshot-spaces#master",
@@ -20,6 +21,7 @@
     "coingecko-api": "^1.0.10",
     "cross-fetch": "^3.1.4",
     "dotenv": "^8.2.0",
+    "ethereumjs-util": "^7.1.0",
     "googleapis": "^71.0.0",
 <<<<<<< HEAD
     "moment": "^2.29.1",
