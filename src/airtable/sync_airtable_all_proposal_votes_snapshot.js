@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getVoterScores, getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL} = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
 const roundNumber = 8
@@ -24,9 +24,10 @@ const getAllProposalVotes = async () => {
             try {
                 const ipfsHash = proposal.get('ipfsHash')
 
-                await getProposalVotes(ipfsHash)
+                await getProposalVotesGQL(ipfsHash)
+                    .then((resp) => resp.json())
                     .then((result) => {
-                        proposalVotes[ipfsHash] = result.data
+                        proposalVotes[ipfsHash] = result.data.votes
                     })
 
                 const voters = Object.keys(proposalVotes[ipfsHash])

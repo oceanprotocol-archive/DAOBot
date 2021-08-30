@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getVoterScores, getProposalVotes} = require('../snapshot/snapshot_utils');
+const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL} = require('../snapshot/snapshot_utils');
 const {getCurrentRound} = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
@@ -21,13 +21,14 @@ const getActiveProposalVotes = async (curRoundNumber) => {
             const ipfsHash = proposal.get('ipfsHash')
             let strategy = getVoteCountStrategy(proposal.get('Round'))
 
-            await getProposalVotes(ipfsHash)
+            await getProposalVotesGQL(ipfsHash)
+                .then((resp) => resp.json())
                 .then((result) => {
-                    proposalVotes[ipfsHash] = result.data
+                    proposalVotes[ipfsHash] = result.data.votes
                 })
 
             const voters = Object.keys(proposalVotes[ipfsHash])
-            const voterScores = await getVoterScores(provider, strategy, voters, proposal.get('Snapshot Block'))
+            const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
 
             Object.entries(proposalVotes[ipfsHash]).map((voter) => {
                 let strategyScore = 0
