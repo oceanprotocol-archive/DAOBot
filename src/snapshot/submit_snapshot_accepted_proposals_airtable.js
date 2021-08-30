@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
-const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
 const {assert} = require('../functions/utils')
 const {web3} = require('../functions/web3')
@@ -26,60 +25,44 @@ const validateAccceptedProposal = (proposal) => {
 
 // All required fields should have already been validated by the online Form
 // Build payload for proposal, and submit it
-const main = async () => {
+const submitProposalsToSnapshot = async (roundNumber) => {
     try {
-        const curRound = await getCurrentRound()
-        const curRoundState = curRound.get('Round State')
-        const curRoundVotingStarts = curRound.get('Voting Starts')
-        const curRoundNumber = curRound.get('Round')
-        const now = new Date().toISOString().split('T')[0]
+        // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
+        acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Accepted", "true")`)
 
-        if( curRoundState === RoundState.DueDiligence && curRoundVotingStarts >= now ) {
-            // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
-            acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
+        // Assert quality
+        await Promise.all(acceptedProposals.map(async (proposal) => {
+            try {
+                validateAccceptedProposal(proposal)
 
-            // Assert quality
-            await Promise.all(acceptedProposals.map(async (proposal) => {
-                try {
-                    validateAccceptedProposal(proposal)
+                const payload = buildProposalPayload(proposal)
+                const result = await local_broadcast_proposal(web3, account, payload)
 
-                    const payload = buildProposalPayload(proposal)
-                    const result = await local_broadcast_proposal(web3, account, payload)
-
-                    if (result !== undefined) {
-                        console.log(result)
-                        submittedProposals.push({
-                            id: proposal.id,
-                            fields: {
-                                'ipfsHash': result.ipfsHash,
-                                'Vote URL': `https://vote.oceanprotocol.com/#/officialoceandao.eth/proposal/${result.ipfsHash}`,
-                                'Proposal State': 'Running'
-                            }
-                        })
-                    }
-                } catch (err) {
-                    console.log(err)
+                if (result !== undefined) {
+                    console.log(result)
+                    submittedProposals.push({
+                        id: proposal.id,
+                        fields: {
+                            'ipfsHash': result.ipfsHash,
+                            'Vote URL': `https://vote.oceanprotocol.com/#/officialoceandao.eth/proposal/${result.ipfsHash}`,
+                            'Proposal State': 'Running'
+                        }
+                    })
                 }
-            }))
-
-            if (submittedProposals.length > 0) {
-                await updateProposalRecords(submittedProposals)
-                console.log('[SUCCESS] Submitted [%s] proposals to Snapshot.', submittedProposals.length)
+            } catch (err) {
+                console.log(err)
             }
-            if (acceptedProposals.length !== submittedProposals.length)
-                console.log('[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.', acceptedProposals.length, submittedProposals.length)
+        }))
 
-            const roundUpdate = [{
-                id: curRound['id'],
-                fields: {
-                    'Round State': RoundState.Voting,
-                }
-            }]
-            updateRoundRecord(roundUpdate)
+        if (submittedProposals.length > 0) {
+            await updateProposalRecords(submittedProposals)
+            console.log('[SUCCESS] Submitted [%s] proposals to Snapshot.', submittedProposals.length)
         }
+        if (acceptedProposals.length !== submittedProposals.length)
+            console.log('[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.', acceptedProposals.length, submittedProposals.length)
     } catch(err) {
         console.log(err)
     }
 }
 
-main()
+module.exports = {submitProposalsToSnapshot};

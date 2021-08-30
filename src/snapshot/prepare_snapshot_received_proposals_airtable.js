@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
-const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
 
@@ -28,8 +27,7 @@ const getWalletBalance = async (wallet0x) => {
     return balance
 }
 
-const main = async () => {
-    const curRound = await getCurrentRound()
+const prepareProposalsForSnapshot = async (curRound) => {
     const curRoundNumber = curRound.get('Round')
 
     const voteStartTime = curRound.get('Voting Starts')
@@ -83,4 +81,4 @@ const main = async () => {
     }
 }
 
-main()
+module.exports = {prepareProposalsForSnapshot};
