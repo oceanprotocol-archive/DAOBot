@@ -1,3 +1,4 @@
+const moment = require('moment')
 const {getRoundsSelectQuery} = require('../airtable_utils')
 
 // Let's track the state of various proposals
@@ -23,9 +24,9 @@ const filterCurrentRound = (roundsArr) => {
 }
 
 const getCurrentRound = async () => {
-    const nowDateString = new Date(Date.now()).toISOString().split('T')[0]
+    let nowDateString = moment().utc().toISOString()
     const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`)
-    return filterCurrentRound(roundParameters)
+    return roundParameters[0]
 }
 
 const getWinningProposals = (proposals, curFundingRound) => {

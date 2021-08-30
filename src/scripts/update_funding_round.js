@@ -2,8 +2,9 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getRoundsSelectQuery, updateRoundRecord} = require('./airtable_utils')
-const {RoundState, getCurrentRound} = require('./rounds/funding_rounds')
+const moment = require('moment')
+const {getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
+const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
 const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
@@ -12,23 +13,37 @@ const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active
 
 const main = async () => {
     const curRound = await getCurrentRound()
-    const curRoundNumber = curRound.get('Round')
-    const curRoundState = curRound.get('Round State')
-    const curRoundStartDate = curRound.get('Start Date')
-    const curRoundProposalsDueBy = curRound.get('Proposals Due By')
-    const curRoundVoteStart = curRound.get('Voting Starts')
-    const curRoundVoteEnd = curRound.get('Voting End')
+    let curRoundNumber = undefined
+    let curRoundState = undefined
+    let curRoundStartDate = undefined
+    let curRoundProposalsDueBy = undefined
+    let curRoundVoteStart = undefined
+    let curRoundVoteEnd = undefined
+
+    if( curRound !== undefined ) {
+        curRoundNumber = curRound.get('Round')
+        curRoundState = curRound.get('Round State')
+        curRoundStartDate = curRound.get('Start Date')
+        curRoundProposalsDueBy = curRound.get('Proposals Due By')
+        curRoundVoteStart = curRound.get('Voting Starts')
+        curRoundVoteEnd = curRound.get('Voting Ends')
+    }
 
     const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
     let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
-    lastRound = lastRound[0]
-    const lastRoundState = lastRound.get('Round State')
-    const lastRoundVoteEnd = lastRound.get('Voting End')
+    let lastRoundState = undefined
+    let lastRoundVoteEnd = undefined
 
-    const now = new Date().toISOString().split('T')[0]
+    if( lastRound !== undefined && lastRound.length > 0 ) {
+        lastRound = lastRound[0]
+        lastRoundState = lastRound.get('Round State')
+        lastRoundVoteEnd = lastRound.get('Voting Ends')
+    }
+
+    const now = moment().utc().toISOString()
 
     if (curRoundState === undefined) {
-        if( lastRoundState === RoundState.Voting && lastRoundVoteEnd <= now) {
+        if( lastRoundState === RoundState.Voting && lastRoundVoteEnd <= now ) {
             console.log("Start next round.")
 
             // Update votes
