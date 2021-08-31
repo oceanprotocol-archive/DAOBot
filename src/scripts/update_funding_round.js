@@ -5,6 +5,7 @@ dotenv.config();
 const moment = require('moment')
 const {getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
 const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
+const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
 const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
@@ -83,11 +84,13 @@ const main = async () => {
             console.log("Update active round.")
 
             // Preapre proposals for Snapshot (Check token balance, calc snapshot height)
+            processAirtableNewProposals(curRoundNumber)
             prepareProposalsForSnapshot(curRound)
         }else if(curRoundState === RoundState.Started && curRoundProposalsDueBy >= now) {
             console.log("Start DD period.")
 
             // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
+            processAirtableNewProposals(curRoundNumber)
             prepareProposalsForSnapshot(curRound)
 
             // Enter Due Diligence period

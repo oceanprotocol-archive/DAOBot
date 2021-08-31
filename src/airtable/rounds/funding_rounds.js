@@ -9,6 +9,15 @@ const RoundState = {
     Ended: 'Ended',
 };
 
+const getFundingRound = async (roundNum) => {
+    try {
+        const roundParameters = await getRoundsSelectQuery(`{Round} = "${roundNum}"`)
+        return roundParameters[0]
+    } catch(err) {
+        console.log(err)
+    }
+}
+
 const filterCurrentRound = (roundsArr) => {
     try {
         let timeNow = new Date(Date.now()).getTime()
@@ -118,7 +127,7 @@ const dumpResultsToGSheet = async (results) => {
         try {
             let proposal = res[1]
             let pctYes = proposal.get('Voted Yes') / (proposal.get('Voted Yes') + proposal.get('Voted No'))
-            let greaterThan50Yes = pctYes >= 0.50 ? true : false
+            let greaterThan50Yes = pctYes >= 0.50
             return [
                 proposal.get('Project Name'),
                 proposal.get('Voted Yes'),
@@ -139,4 +148,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {RoundState, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};
+module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};

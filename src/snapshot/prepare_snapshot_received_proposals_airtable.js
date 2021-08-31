@@ -39,7 +39,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
     const startDate = new Date(voteStartTime)
     const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
 
-    let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Received", "true")`)
+    let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`)
     let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, voteStartTimestamp, avgBlockTime)
 
     let recordsPayload = []
@@ -53,6 +53,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
+                        'Proposal State': 'Accepted',
                         'Voting Starts': voteStartTime,
                         'Voting Ends': voteEndTime,
                         'Snapshot Block': Number(estimatedBlockHeight),
@@ -63,9 +64,10 @@ const prepareProposalsForSnapshot = async (curRound) => {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
-                        'Voting Starts': '',
-                        'Voting Ends': '',
-                        'Snapshot Block': 0,
+                        'Proposal State': 'Rejected',
+                        'Voting Starts': undefined,
+                        'Voting Ends': undefined,
+                        'Snapshot Block': undefined,
                         'Deployment Ready': 'No'
                     }
                 })
