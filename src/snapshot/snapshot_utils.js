@@ -6,6 +6,15 @@ const fetch = require('cross-fetch')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org';
 const space = 'officialoceandao.eth'
 
+const strategy_test = [{
+    name: "erc20-balance-of",
+    params: {
+        symbol: "SPRNG",
+        address: "0x6D40A673446B2D00D1f9E85251209C638049ba22",
+        decimals: 2
+    }
+}]
+
 const strategy_v0_1 = [{
     name: "erc20-balance-of",
     params: {

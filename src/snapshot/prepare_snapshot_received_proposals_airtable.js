@@ -65,9 +65,9 @@ const prepareProposalsForSnapshot = async (curRound) => {
                     id: proposal.id,
                     fields: {
                         'Proposal State': 'Rejected',
-                        'Voting Starts': undefined,
-                        'Voting Ends': undefined,
-                        'Snapshot Block': undefined,
+                        'Voting Starts': null,
+                        'Voting Ends': null,
+                        'Snapshot Block': null,
                         'Deployment Ready': 'No'
                     }
                 })

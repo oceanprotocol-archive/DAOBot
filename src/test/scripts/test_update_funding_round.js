@@ -9,10 +9,18 @@ const {getCurrentRound} = require('../../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../../airtable/process_airtable_new_proposals')
 const {prepareProposalsForSnapshot} = require('../../snapshot/prepare_snapshot_received_proposals_airtable')
 
-describe('Testing Proposals', function() {
+async function sleep(ms) {
+    await _sleep(ms);
+}
+
+function _sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+describe('Testing updateFundingRound', function() {
     it.skip('Validates proposals that are not been initialized.', async function() {
         let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
-        should.equal(inactiveProposals.length, 1);
+        expect(inactiveProposals.length).to.be.greaterThan(0);
     });
 
     it.skip('Initializes proposals for this round.', async function() {
@@ -24,11 +32,12 @@ describe('Testing Proposals', function() {
                 const curRoundNumber = currentRound.get('Round')
                 await processAirtableNewProposals(curRoundNumber)
 
+                await sleep(500)
                 inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
                 should.equal(inactiveProposals.length, 0);
             }
         }
-    });
+    }).timeout(5000);
 
     it('Processes proposals for snapshot.', async function() {
         const currentRound = await getCurrentRound()
