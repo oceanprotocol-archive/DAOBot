@@ -2,9 +2,9 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL} = require('../snapshot/snapshot_utils');
-const {getCurrentRound} = require('./rounds/funding_rounds')
+const { getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable } = require('./airtable_utils')
+const { getVoteCountStrategy, getVoterScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
+const { getCurrentRound } = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
 var activeProposals = {}
@@ -15,8 +15,7 @@ var proposalVoteSummary = {}
 // DRY/PARAMETERIZE
 const getActiveProposalVotes = async () => {
     const curRound = await getCurrentRound()
-    //const curRoundNumber = curRound.get('Round')
-    const curRoundNumber = 8
+    const curRoundNumber = curRound.get('Round')
 
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
@@ -34,33 +33,37 @@ const getActiveProposalVotes = async () => {
                 voters.push(proposalVotes[ipfsHash][i].voter)
             }
             const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
-            const proposalScores = []
-            for (var item = 0; item < voterScores.length; ++item) {
-                for (var voter of Object.keys(item)) {
-                    proposalScores.push(item[voter])
-                }
-            }
-            console.log("scores: " + proposalScores)
 
-            Object.entries(proposalVotes[ipfsHash]).map((voter) => {
+            activeVotes = Object.entries(proposalVotes[ipfsHash]).map((voter) => {
                 let strategyScore = 0
-                for (i=0; i < strategy.length; i++) {
-                    strategyScore += voterScores[i][voter[0]] || 0
+                newVoter = voter[1].voter
+                for (i = 0; i < strategy.length; i++) {
+                    for (var counterVoter of Object.keys(voterScores[i])) {
+                        if (counterVoter === newVoter) {
+                            strategyScore += voterScores[i][newVoter]
+                        } else {
+                            strategyScore += 0
+                        }
+                    }
                 }
-                voter[1].msg.payload.balance = strategyScore
+                let resultVotes = {}
+                resultVotes[newVoter] = {
+                    "choice": voter[1].choice,
+                    "balance": strategyScore
+                }
+                return resultVotes
             })
-
             let scores = {
                 1: 0,
                 2: 0
             }
-            Object.entries(proposalVotes[ipfsHash]).reduce((total, cur) => {
-                const choice = cur[1].msg.payload.choice
-                const balance = cur[1].msg.payload.balance
-                if( scores[choice] === undefined ) scores[choice] = 0
+            Object.entries(activeVotes).reduce((total, cur) => {
+                const voterAddress = Object.keys(cur[1])[0]
+                const choice = cur[1][voterAddress].choice
+                const balance = cur[1][voterAddress].balance
+                if (scores[choice] === undefined) scores[choice] = 0
                 scores[choice] += balance
             }, {})
-
             proposalScores[ipfsHash] = scores
         } catch (err) {
             console.log(err)
