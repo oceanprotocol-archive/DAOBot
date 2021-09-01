@@ -4,45 +4,49 @@ const {version} = require("@snapshot-labs/snapshot.js/src/constants.json")
 const fetch = require('cross-fetch')
 
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org';
-const space = 'officialoceandao.eth'
 
-const strategy_test = [{
-    name: "erc20-balance-of",
-    params: {
-        symbol: "SPRNG",
-        address: "0x6D40A673446B2D00D1f9E85251209C638049ba22",
-        decimals: 2
-    }
-}]
-
-const strategy_v0_1 = [{
-    name: "erc20-balance-of",
-    params: {
-        symbol: "OCEAN",
-        address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-        decimals: 18
-    }
-}]
-
-const strategy_v0_2 = [{
+const strategy = {
+    'test_strategy_spring': [{
+        name: "erc20-balance-of",
+        params: {
+            symbol: "SPRNG",
+            address: "0x6D40A673446B2D00D1f9E85251209C638049ba22",
+            decimals: 2
+        }
+    }],
+    'strategy_v0_1': [{
+        name: "erc20-balance-of",
+        params: {
+            symbol: "OCEAN",
+            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+            decimals: 18
+        }
+    }],
+    'strategy_v0_2': [{
         name: "ocean-marketplace",
         params: {
             symbol: "OCEAN",
             address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
             decimals: 18
         }
-}, {
-    name: "erc20-balance-of",
-    params: {
-        symbol: "OCEAN",
-        address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-        decimals: 18
-    }
-}]
+    }, {
+        name: "erc20-balance-of",
+        params: {
+            symbol: "OCEAN",
+            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+            decimals: 18
+        }
+    }]
+}
 
-const getVoteCountStrategy = (round) => {
-    if(round < 5) return strategy_v0_1
-    return strategy_v0_2
+const getVoteCountStrategy = (roundNumber) => {
+    const defaultStrategy = process.env.SNAPSHOT_STRATEGY
+    if( defaultStrategy !== undefined ) {
+        return strategy[process.env.SNAPSHOT_STRATEGY]
+    }
+
+    if(roundNumber < 5) return strategy['strategy_v0_1']
+    return strategy['strategy_v0_2']
 }
 
 const getProposalVotes = async (ipfsHash) => {
@@ -51,7 +55,8 @@ const getProposalVotes = async (ipfsHash) => {
 }
 
 // Configure the proposal template that will be submitted to Snapshot
-const buildProposalPayload = (proposal) => {
+const buildProposalPayload = (proposal, roundNumber) => {
+    const strategy = getVoteCountStrategy(roundNumber)
     const startTs = Date.parse(proposal.get('Voting Starts'))/1000
     const endTs = Date.parse(proposal.get('Voting Ends'))/1000
     const blockHeight = proposal.get('Snapshot Block')
@@ -64,7 +69,7 @@ ${proposal.get("Proposal URL")}
 ${proposal.get("Grant Deliverables")}
 
 ### Engage in community conversation, questions and feedback
-https://discord.com/channels/612953348487905282/776848812534398986
+https://discord.gg/TnXjkR5
 
 ## Cast your vote below!`
 
@@ -77,9 +82,8 @@ https://discord.com/channels/612953348487905282/776848812534398986
         choices: ["Yes", "No"],
         metadata: {
             network: 1,
-            strategies: strategies
+            strategies: strategy
         },
-
         snapshot: blockHeight
     }
 }
@@ -92,7 +96,7 @@ const send = async (url, init) => {
                 throw res;
             })
             .catch((e) => {
-                console.log(e.json())
+                console.log(e)
             });
     });
 }
@@ -104,7 +108,7 @@ const local_broadcast_proposal = async (web3, account, payload, pSpace=null, pUr
             msg: JSON.stringify({
                 version: version,
                 timestamp: (Date.now() / 1e3).toFixed(),
-                space: pSpace === null ? space : pSpace,
+                space: pSpace === null ? process.env.SNAPSHOT_SPACE : pSpace,
                 type: 'proposal',
                 payload
             })

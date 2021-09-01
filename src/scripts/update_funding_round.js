@@ -12,6 +12,11 @@ const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepte
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 
+// Split up functionality
+// Make it easy to debug/trigger events
+// DONE - End voting periods
+// DONE - Kickoff new round
+// DONE - Update existing round
 const main = async () => {
     const curRound = await getCurrentRound()
     let curRoundNumber = undefined
@@ -48,11 +53,11 @@ const main = async () => {
             console.log("Start next round.")
 
             // Update votes
-            syncAirtableActiveProposalVotes(curRoundNumber)
-            syncGSheetsActiveProposalVotes(curRoundNumber)
+            await syncAirtableActiveProposalVotes(curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber)
 
             // Complete round calculations
-            processFundingRoundComplete(curRoundNumber)
+            await processFundingRoundComplete(curRoundNumber)
 
             // Start the next round
             const roundUpdate = [{
@@ -66,7 +71,7 @@ const main = async () => {
                     'Round State': RoundState.Started,
                 }
             }]
-            updateRoundRecord(roundUpdate)
+            await updateRoundRecord(roundUpdate)
         } else if( curRoundStartDate <= now ) {
             console.log("Start current round.")
 
@@ -77,21 +82,21 @@ const main = async () => {
                     'Round State': RoundState.Started,
                 }
             }]
-            updateRoundRecord(roundUpdate)
+            await updateRoundRecord(roundUpdate)
         }
     } else {
         if(curRoundState === RoundState.Started && curRoundProposalsDueBy < now) {
             console.log("Update active round.")
 
             // Preapre proposals for Snapshot (Check token balance, calc snapshot height)
-            processAirtableNewProposals(curRoundNumber)
-            prepareProposalsForSnapshot(curRound)
+            await processAirtableNewProposals(curRoundNumber)
+            await prepareProposalsForSnapshot(curRound)
         }else if(curRoundState === RoundState.Started && curRoundProposalsDueBy >= now) {
             console.log("Start DD period.")
 
             // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
-            processAirtableNewProposals(curRoundNumber)
-            prepareProposalsForSnapshot(curRound)
+            await processAirtableNewProposals(curRoundNumber)
+            await prepareProposalsForSnapshot(curRound)
 
             // Enter Due Diligence period
             const roundUpdate = [{
@@ -100,12 +105,12 @@ const main = async () => {
                     'Round State': RoundState.DueDiligence,
                 }
             }]
-            updateRoundRecord(roundUpdate)
+            await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && curRoundVoteStart >= now) {
             console.log("Start Voting period.")
 
             // Submit to snapshot + Enter voting state
-            submitProposalsToSnapshot(curRoundNumber)
+            await submitProposalsToSnapshot(curRoundNumber)
 
             const roundUpdate = [{
                 id: curRound['id'],
@@ -113,13 +118,13 @@ const main = async () => {
                     'Round State': RoundState.Voting,
                 }
             }]
-            updateRoundRecord(roundUpdate)
+            await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.Voting && curRoundVoteEnd > now) {
             console.log("Update vote count.")
 
             // Update votes
-            syncAirtableActiveProposalVotes(curRoundNumber)
-            syncGSheetsActiveProposalVotes(curRoundNumber)
+            await syncAirtableActiveProposalVotes(curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber)
         }
     }
 }

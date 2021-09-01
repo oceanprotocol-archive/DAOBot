@@ -3,7 +3,7 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {buildProposalPayload, local_broadcast_proposal} = require('./snapshot_utils')
-const {assert} = require('../functions/utils')
+const {assert, sleep} = require('../functions/utils')
 const {web3} = require('../functions/web3')
 
 const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here';
@@ -31,12 +31,15 @@ const submitProposalsToSnapshot = async (roundNumber) => {
         acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Accepted", "true")`)
 
         // Assert quality
-        await Promise.all(acceptedProposals.map(async (proposal) => {
+        // Foreach may be locking/sync vs. Promise/all which may fire all at once
+        // We probably want to throttle the deployment to snapshot w/ a sleep
+        for(const proposal of acceptedProposals) {
+            // await Promise.all(acceptedProposals.map(async (proposal) => {
             try {
                 validateAccceptedProposal(proposal)
 
-                const payload = buildProposalPayload(proposal)
-                const result = await local_broadcast_proposal(web3, account, payload)
+                const payload = buildProposalPayload(proposal, roundNumber)
+                const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
 
                 if (result !== undefined) {
                     console.log(result)
@@ -44,15 +47,18 @@ const submitProposalsToSnapshot = async (roundNumber) => {
                         id: proposal.id,
                         fields: {
                             'ipfsHash': result.ipfsHash,
-                            'Vote URL': `https://vote.oceanprotocol.com/#/officialoceandao.eth/proposal/${result.ipfsHash}`,
+                            'Vote URL': `https://${process.env.SNAPSHOT_URL}/#/${process.env.SNAPSHOT_SPACE}/proposal/${result.ipfsHash}`,
                             'Proposal State': 'Running'
                         }
                     })
                 }
+
+                await sleep(250)
             } catch (err) {
                 console.log(err)
             }
-        }))
+        // }))
+        }
 
         if (submittedProposals.length > 0) {
             await updateProposalRecords(submittedProposals)
