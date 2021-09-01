@@ -11,6 +11,7 @@ const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_rece
 const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const {getTokenPrice} = require('../functions/coingecko')
 
 // Split up functionality
 // Make it easy to debug/trigger events
@@ -57,7 +58,7 @@ const main = async () => {
             await syncGSheetsActiveProposalVotes(curRoundNumber)
 
             // Complete round calculations
-            await processFundingRoundComplete(curRoundNumber)
+            const proposalsFunded = await processFundingRoundComplete(curRoundNumber)
 
             // Start the next round
             const roundUpdate = [{
@@ -69,6 +70,7 @@ const main = async () => {
                 id: curRound['id'],
                 fields: {
                     'Round State': RoundState.Started,
+                    'Proposals Granted': proposalsFunded
                 }
             }]
             await updateRoundRecord(roundUpdate)
@@ -95,14 +97,28 @@ const main = async () => {
             console.log("Start DD period.")
 
             // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
-            await processAirtableNewProposals(curRoundNumber)
+            const numProposalsProcessed = await processAirtableNewProposals(curRoundNumber)
             await prepareProposalsForSnapshot(curRound)
+
+            const tokenPrice = await getTokenPrice()
+            const maxGrantUSD = curRound.get('Max Grant USD')
+            const earmarkedUSD = curRound.get('Earmarked USD')
+            const fundingAvailableUSD = curRound.get('Funding Available USD')
+
+            const maxGrantOCEAN = maxGrantUSD / tokenPrice
+            const earmarkedOCEAN = earmarkedUSD / tokenPrice
+            const fundingAvailableOCEAN = fundingAvailableUSD / tokenPrice
 
             // Enter Due Diligence period
             const roundUpdate = [{
                 id: curRound['id'],
                 fields: {
                     'Round State': RoundState.DueDiligence,
+                    'Proposals': numProposalsProcessed,
+                    'OCEAN Price': tokenPrice,
+                    'Max Grant': maxGrantOCEAN,
+                    'Earmarked': earmarkedOCEAN,
+                    'Funding Available': fundingAvailableOCEAN,
                 }
             }]
             await updateRoundRecord(roundUpdate)

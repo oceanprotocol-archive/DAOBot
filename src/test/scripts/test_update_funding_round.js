@@ -12,7 +12,9 @@ const {submitProposalsToSnapshot} = require('../../snapshot/submit_snapshot_acce
 const {sleep} = require('../../functions/utils')
 
 // To run these tests, you should setup the DB beforehand
-// Requirement: 1 proposal in DB w/o "Round" or "Proposal State" params
+// Requirement:
+// - 1 funding round where the "Start Date" < now < "Voting Ends"
+// - 1 proposal in DB w/o "Round" or "Proposal State" params
 // 1. In DB - Delete a proposal "Round" + "Propoal State" params.
 describe('Functionally test updateFundingRound', function() {
     it.skip('Validates proposals that are not been initialized.', async function() {
@@ -20,7 +22,7 @@ describe('Functionally test updateFundingRound', function() {
         expect(inactiveProposals.length).to.be.greaterThan(0);
     });
 
-    it('Initializes proposals for this round.', async function() {
+    it.skip('Initializes proposals for this round.', async function() {
         let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
 
         if( inactiveProposals.length > 0 ) {
@@ -36,7 +38,7 @@ describe('Functionally test updateFundingRound', function() {
         }
     }).timeout(5000);
 
-    it('Processes proposals for snapshot.', async function() {
+    it.skip('Processes proposals for snapshot.', async function() {
         const currentRound = await getCurrentRound()
         if( currentRound !== undefined ) {
             await prepareProposalsForSnapshot(currentRound)
@@ -48,7 +50,7 @@ describe('Functionally test updateFundingRound', function() {
         }
     }).timeout(5000);
 
-    it('Deploys proposals to snapshot.', async function() {
+    it.skip('Deploys proposals to snapshot.', async function() {
         const currentRound = await getCurrentRound()
         if( currentRound !== undefined ) {
             // Submit to snapshot + Enter voting state

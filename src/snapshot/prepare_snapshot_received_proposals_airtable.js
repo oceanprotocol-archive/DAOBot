@@ -81,6 +81,8 @@ const prepareProposalsForSnapshot = async (curRound) => {
         await updateProposalRecords(recordsPayload)
         console.log('Updated [%s] records', recordsPayload.length)
     }
+
+    return recordsPayload.length
 }
 
 module.exports = {prepareProposalsForSnapshot};
