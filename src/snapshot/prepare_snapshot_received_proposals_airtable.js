@@ -47,9 +47,11 @@ const prepareProposalsForSnapshot = async (curRound) => {
     await Promise.all(proposals.map(async (proposal) => {
         try {
             let wallet_0x = proposal.get('Wallet Address')
+            let proposalStanding = proposal.get('Proposal Standing')
+            let goodStanding = proposalStanding === 'Completed' || proposalStanding ==='Refunded'
             let balance = await getWalletBalance(wallet_0x)
 
-            if( balance >= MIN_OCEAN_REQUIRED ) {
+            if( balance >= MIN_OCEAN_REQUIRED && goodStanding === true ) {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
