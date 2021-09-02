@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const should = require('chai').should();
-const {getVoteCountStrategy, getVotesQuery, getProposalVotesGQL, getVoterScores} = require('../../snapshot/snapshot_utils');
+const {getVoteCountStrategy, getVotesQuery, reduceVoterScores, getProposalVotesGQL, getVoterScores} = require('../../snapshot/snapshot_utils');
 
 const blockNumber = 12968040;
 
@@ -88,47 +88,55 @@ describe('Snapshot GraphQL test', () => {
             });
     });
 
-    it('Validates scores from proposal & voters 1', async () => {
-        var votes = []
-        let response = await getProposalVotesGQL(proposalIPFSHash_1)
-        response = await response.json()
-        votes = response.data.votes
-        should.equal(votes.length, 24)
-
-        const voters = votes.map((x) => {
-            return x['voter']
-        })
+    it('Validates scores from proposal #1', async () => {
         const strategy = getVoteCountStrategy(8)
 
-        const voterScores = await getVoterScores(strategy, voters, blockNumber)
-        let flatVoterScores = Object.assign({}, voterScores[0], voterScores[1])
+        let votes = []
+        await getProposalVotesGQL(proposalIPFSHash_1)
+            .then((result) => {
+                votes = result.data.votes
+            })
+        should.equal(votes.length, 24)
 
-        for (const [key, value] of Object.entries(flatVoterScores)) {
-            let validationValue = voterValidation_1[key]
-            should.equal(value, validationValue)
+        const voters = []
+        for (var i = 0; i < votes.length; ++i) {
+            voters.push(votes[i].voter)
         }
+
+        const voterScores = await getVoterScores(strategy, voters, blockNumber)
+        const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
+
+        reducedVoterScores.map((x) => {
+            const voterAddress = Object.keys(x)[0]
+            const validationValue = voterValidation_1[voterAddress]
+            should.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))
+        })
         console.log(voterScores)
     });
 
-    it('Validates scores from proposal & voters 2', async () => {
-        var votes = []
-        let response = await getProposalVotesGQL(proposalIPFSHash_2)
-        response = await response.json()
-        votes = response.data.votes
-        should.equal(votes.length, 23)
-
-        const voters = votes.map((x) => {
-            return x['voter']
-        })
+    it('Validates scores from proposal #2', async () => {
         const strategy = getVoteCountStrategy(8)
 
-        const voterScores = await getVoterScores(strategy, voters, blockNumber)
-        let flatVoterScores = Object.assign({}, voterScores[0], voterScores[1])
+        let votes = []
+        await getProposalVotesGQL(proposalIPFSHash_2)
+            .then((result) => {
+                votes = result.data.votes
+            })
+        should.equal(votes.length, 23)
 
-        for (const [key, value] of Object.entries(flatVoterScores)) {
-            let validationValue = voterValidation_2[key]
-            should.equal(value, validationValue)
+        const voters = []
+        for (var i = 0; i < votes.length; ++i) {
+            voters.push(votes[i].voter)
         }
+
+        const voterScores = await getVoterScores(strategy, voters, blockNumber)
+        const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
+
+        reducedVoterScores.map((x) => {
+            const voterAddress = Object.keys(x)[0]
+            const validationValue = voterValidation_2[voterAddress]
+            should.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))
+        })
         console.log(voterScores)
     });
 });

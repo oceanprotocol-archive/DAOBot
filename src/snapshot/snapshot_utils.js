@@ -83,6 +83,47 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
     });
 }
 
+// Returns reduced voter score based on multiple strategies => {voter:{choice:int,balance:int}}
+const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
+    return Object.entries(proposalVotes).map((voter) => {
+        let strategyScore = 0
+        newVoter = voter[1].voter
+        for (i = 0; i < strategy.length; i++) {
+            for (var counterVoter of Object.keys(voterScores[i])) {
+                if (counterVoter === newVoter) {
+                    strategyScore += voterScores[i][newVoter]
+                } else {
+                    strategyScore += 0
+                }
+            }
+        }
+        let resultVotes = {}
+        resultVotes[newVoter] = {
+            "choice": voter[1].choice,
+            "balance": strategyScore
+        }
+        return resultVotes
+    })
+}
+
+// Returns reduced proposal summary based on many voters => {1:int,2:int}
+const reduceProposalScores = (voterScores) => {
+    let scores = {
+        1: 0,
+        2: 0
+    }
+
+    Object.entries(voterScores).reduce((total, cur) => {
+        const voterAddress = Object.keys(cur[1])[0]
+        const choice = cur[1][voterAddress].choice
+        const balance = cur[1][voterAddress].balance
+        if (scores[choice] === undefined) scores[choice] = 0
+        scores[choice] += balance
+    }, {})
+
+    return scores
+}
+
 // Configure the proposal template that will be submitted to Snapshot
 const buildProposalPayload = (proposal) => {
     const startTs = Date.parse(proposal.get('Voting Starts'))/1000
@@ -172,4 +213,15 @@ const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlock
     return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
 }
 
-module.exports = {getVoteCountStrategy, getVotesQuery, getProposalVotes, getProposalVotesGQL, getVoterScores, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}
+module.exports = {
+    getVoteCountStrategy,
+    getVotesQuery,
+    getProposalVotes,
+    getProposalVotesGQL,
+    getVoterScores,
+    reduceVoterScores,
+    reduceProposalScores,
+    buildProposalPayload,
+    local_broadcast_proposal,
+    calcTargetBlockHeight
+}
