@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const { getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable } = require('./airtable_utils')
-const { getVoteCountStrategy, getVoterScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
+const { getVoteCountStrategy, getVoterScores, reduceVoterScores, reduceProposalScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
 const { getCurrentRound } = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
@@ -29,39 +29,11 @@ const getActiveProposalVotes = async (curRoundNumber) => {
             for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
                 voters.push(proposalVotes[ipfsHash][i].voter)
             }
+
             const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
 
-            activeVotes = Object.entries(proposalVotes[ipfsHash]).map((voter) => {
-                let strategyScore = 0
-                newVoter = voter[1].voter
-                for (i = 0; i < strategy.length; i++) {
-                    for (var counterVoter of Object.keys(voterScores[i])) {
-                        if (counterVoter === newVoter) {
-                            strategyScore += voterScores[i][newVoter]
-                        } else {
-                            strategyScore += 0
-                        }
-                    }
-                }
-                let resultVotes = {}
-                resultVotes[newVoter] = {
-                    "choice": voter[1].choice,
-                    "balance": strategyScore
-                }
-                return resultVotes
-            })
-            let scores = {
-                1: 0,
-                2: 0
-            }
-            Object.entries(activeVotes).reduce((total, cur) => {
-                const voterAddress = Object.keys(cur[1])[0]
-                const choice = cur[1][voterAddress].choice
-                const balance = cur[1][voterAddress].balance
-                if (scores[choice] === undefined) scores[choice] = 0
-                scores[choice] += balance
-            }, {})
-            proposalScores[ipfsHash] = scores
+            const reducedVoterScores = reduceVoterScores(strategy, proposalVotes[ipfsHash], voterScores)
+            proposalScores[ipfsHash] = reduceProposalScores(reducedVoterScores)
         } catch (err) {
             console.log(err)
         }
