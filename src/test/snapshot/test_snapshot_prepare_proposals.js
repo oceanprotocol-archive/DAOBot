@@ -30,7 +30,7 @@ describe('Airtable test', () => {
         const startTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
 
         should.equal(voteStartTime, '2021-08-05T23:59:00.000Z');
-        should.equal(voteEndTime, '2021-08-09T23:59:00.000Z');
+        should.equal(voteEndTime, '2021-08-09T12:00:00.000Z');
         expect(currentBlockHeight).to.be.a('number');
         expect(startTimestamp).to.be.a('number');
 

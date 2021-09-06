@@ -4,7 +4,7 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
+const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
 
 var currentProposals = undefined
 var allProposals = []
@@ -15,10 +15,42 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'May 01, 2021',
+            'Refund Transaction': undefined,
+            'Disputed Status': undefined,
+        },
+        get: function (key) {
+            return this.fields[key];
+        }
+    },
+    {
+        id: 'proposal_1_new_existing_entrant',
+        fields: {
+            'Project Name': 'New Existing Entrant',
+            'Proposal URL': 'www.new-existing-entrant.com',
+            'Proposal State': undefined,
+            'Proposal Standing': undefined,
+            'Deliverable Checklist': undefined,
+            'Last Deliverable Update': undefined,
+            'Refund Transaction': undefined,
+            'Disputed Status': undefined,
+        },
+        get: function (key) {
+            return this.fields[key];
+        }
+    },
+    {
+        id: 'proposal_1_new_entrant',
+        fields: {
+            'Project Name': 'New Entrant',
+            'Proposal URL': 'www.new-entrant.com',
+            'Proposal State': undefined,
+            'Proposal Standing': undefined,
+            'Deliverable Checklist': undefined,
+            'Last Deliverable Update': undefined,
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
         },
@@ -31,7 +63,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Jan 01, 2021',
@@ -46,7 +78,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Feb 01, 2021',
@@ -61,7 +93,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Mar 01, 2021',
@@ -76,7 +108,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Apr 01, 2021',
@@ -224,6 +256,34 @@ describe('Process Project Standings', function() {
         should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
     });
 
+    it('Validate [currentProposalStanding] New Entrants, and Unmatched have no standing', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        // Step 3 - Report the latest (top of stack) proposal standing from each project
+        // latestProposal should equal head of each project
+        let latestProposals = getProjectsLatestProposal(proposalStandings)
+        should.equal(latestProposals['test']['id'], allProposals[allProposals.length-1]['id']);
+
+        let currentProposalStandings = processProposalStandings(currentProposals)
+        updateCurrentRoundStandings(currentProposalStandings, latestProposals)
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], latestProposals['test'].fields['Proposal Standing'])
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
+
+        should.equal(currentProposalStandings['New Existing Entrant'][0].fields['Proposal Standing'], null);
+        should.equal(currentProposalStandings['New Existing Entrant'][0].fields['Proposal State'], undefined);
+        should.equal(currentProposalStandings['New Entrant'][0].fields['Proposal Standing'], null);
+        should.equal(currentProposalStandings['New Entrant'][0].fields['Proposal State'], undefined);
+    });
+
     it('Validates [Bad Project State] is cleaned up', function() {
         // Initialize Proposal[1] to not be refunded
         // Process all proposals
@@ -276,7 +336,7 @@ describe('Process Project Standings', function() {
         processHistoricalStandings(proposalStandings);
 
         for (let i = 1; i < proposalStandings.length; i++) {
-            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Dispute)
+            should.equal(proposalStandings['test'][i].fields['Proposal Standing'], Standings.Dispute)
         }
     });
 
@@ -293,8 +353,30 @@ describe('Process Project Standings', function() {
         processHistoricalStandings(proposalStandings);
 
         for (let i = 1; i < proposalStandings.length; i++) {
-            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Completed)
+            should.equal(proposalStandings['test'][i].fields['Proposal Standing'], Standings.Completed)
         }
+    });
+
+    it('Validates projects not funded, do not receive a standing.', function() {
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Proposal State'] = State.Rejected
+        allProposals[1].fields['Proposal State'] = State.NotGranted
+        allProposals[2].fields['Proposal State'] = State.DownVoted
+
+        // Zero every completion
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = undefined
+        })
+        // Complete the last one
+        allProposals[3].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], null)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], null)
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], null)
     });
 
 });

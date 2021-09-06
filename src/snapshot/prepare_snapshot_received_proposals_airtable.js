@@ -2,7 +2,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
-const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
 
@@ -28,8 +27,7 @@ const getWalletBalance = async (wallet0x) => {
     return balance
 }
 
-const main = async () => {
-    const curRound = await getCurrentRound()
+const prepareProposalsForSnapshot = async (curRound) => {
     const curRoundNumber = curRound.get('Round')
 
     const voteStartTime = curRound.get('Voting Starts')
@@ -41,7 +39,7 @@ const main = async () => {
     const startDate = new Date(voteStartTime)
     const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
 
-    let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Received", "true")`)
+    let proposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`)
     let estimatedBlockHeight = calcTargetBlockHeight(currentBlockHeight, voteStartTimestamp, avgBlockTime)
 
     let recordsPayload = []
@@ -49,12 +47,15 @@ const main = async () => {
     await Promise.all(proposals.map(async (proposal) => {
         try {
             let wallet_0x = proposal.get('Wallet Address')
+            let proposalStanding = proposal.get('Proposal Standing')
+            let goodStanding = proposalStanding === 'Completed' || proposalStanding ==='Refunded'
             let balance = await getWalletBalance(wallet_0x)
 
-            if( balance >= MIN_OCEAN_REQUIRED ) {
+            if( balance >= MIN_OCEAN_REQUIRED && goodStanding === true ) {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
+                        'Proposal State': 'Accepted',
                         'Voting Starts': voteStartTime,
                         'Voting Ends': voteEndTime,
                         'Snapshot Block': Number(estimatedBlockHeight),
@@ -65,9 +66,10 @@ const main = async () => {
                 recordsPayload.push({
                     id: proposal.id,
                     fields: {
-                        'Voting Starts': '',
-                        'Voting Ends': '',
-                        'Snapshot Block': 0,
+                        'Proposal State': 'Rejected',
+                        'Voting Starts': null,
+                        'Voting Ends': null,
+                        'Snapshot Block': null,
                         'Deployment Ready': 'No'
                     }
                 })
@@ -81,6 +83,8 @@ const main = async () => {
         await updateProposalRecords(recordsPayload)
         console.log('Updated [%s] records', recordsPayload.length)
     }
+
+    return recordsPayload.length
 }
 
-main()
+module.exports = {prepareProposalsForSnapshot};

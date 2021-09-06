@@ -1,4 +1,22 @@
+const moment = require('moment')
 const {getRoundsSelectQuery} = require('../airtable_utils')
+
+// Let's track the state of various proposals
+const RoundState = {
+    Started: 'Started',
+    DueDiligence: 'Due Diligence',
+    Voting: 'Voting',
+    Ended: 'Ended',
+};
+
+const getFundingRound = async (roundNum) => {
+    try {
+        const roundParameters = await getRoundsSelectQuery(`{Round} = "${roundNum}"`)
+        return roundParameters[0]
+    } catch(err) {
+        console.log(err)
+    }
+}
 
 const filterCurrentRound = (roundsArr) => {
     try {
@@ -15,9 +33,9 @@ const filterCurrentRound = (roundsArr) => {
 }
 
 const getCurrentRound = async () => {
-    const nowDateString = new Date(Date.now()).toISOString().split('T')[0]
+    let nowDateString = moment().utc().toISOString()
     const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`)
-    return filterCurrentRound(roundParameters)
+    return roundParameters[0]
 }
 
 const getWinningProposals = (proposals, curFundingRound) => {
@@ -109,7 +127,7 @@ const dumpResultsToGSheet = async (results) => {
         try {
             let proposal = res[1]
             let pctYes = proposal.get('Voted Yes') / (proposal.get('Voted Yes') + proposal.get('Voted No'))
-            let greaterThan50Yes = pctYes >= 0.50 ? true : false
+            let greaterThan50Yes = pctYes >= 0.50
             return [
                 proposal.get('Project Name'),
                 proposal.get('Voted Yes'),
@@ -130,4 +148,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};
+module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet};
