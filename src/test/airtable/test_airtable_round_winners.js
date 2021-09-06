@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const should = require('chai').should();
-const expect = require('chai').expect;
 const {getWinningProposals, getDownvotedProposals, calculateWinningProposals, calculateFinalResults, dumpResultsToGSheet} = require('../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}

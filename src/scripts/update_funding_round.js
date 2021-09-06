@@ -1,0 +1,148 @@
+global['fetch'] = require('cross-fetch');
+const dotenv = require('dotenv');
+dotenv.config();
+
+const moment = require('moment')
+const {getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
+const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
+const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
+const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
+const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
+const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
+const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
+const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const {getTokenPrice} = require('../functions/coingecko')
+
+// Split up functionality
+// Make it easy to debug/trigger events
+// DONE - End voting periods
+// DONE - Kickoff new round
+// DONE - Update existing round
+const main = async () => {
+    const curRound = await getCurrentRound()
+    let curRoundNumber = undefined
+    let curRoundState = undefined
+    let curRoundStartDate = undefined
+    let curRoundProposalsDueBy = undefined
+    let curRoundVoteStart = undefined
+    let curRoundVoteEnd = undefined
+
+    if( curRound !== undefined ) {
+        curRoundNumber = curRound.get('Round')
+        curRoundState = curRound.get('Round State')
+        curRoundStartDate = curRound.get('Start Date')
+        curRoundProposalsDueBy = curRound.get('Proposals Due By')
+        curRoundVoteStart = curRound.get('Voting Starts')
+        curRoundVoteEnd = curRound.get('Voting Ends')
+    }
+
+    const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
+    let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
+    let lastRoundState = undefined
+    let lastRoundVoteEnd = undefined
+
+    if( lastRound !== undefined && lastRound.length > 0 ) {
+        lastRound = lastRound[0]
+        lastRoundState = lastRound.get('Round State')
+        lastRoundVoteEnd = lastRound.get('Voting Ends')
+    }
+
+    const now = moment().utc().toISOString()
+
+    if (curRoundState === undefined) {
+        if( lastRoundState === RoundState.Voting && lastRoundVoteEnd <= now ) {
+            console.log("Start next round.")
+
+            // Update votes
+            await syncAirtableActiveProposalVotes(curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber)
+
+            // Complete round calculations
+            const proposalsFunded = await processFundingRoundComplete(curRoundNumber)
+
+            // Start the next round
+            const roundUpdate = [{
+                id: lastRound['id'],
+                fields: {
+                    'Round State': RoundState.Ended,
+                }
+            }, {
+                id: curRound['id'],
+                fields: {
+                    'Round State': RoundState.Started,
+                    'Proposals Granted': proposalsFunded
+                }
+            }]
+            await updateRoundRecord(roundUpdate)
+        } else if( curRoundStartDate <= now ) {
+            console.log("Start current round.")
+
+            // Start the current round
+            const roundUpdate = [{
+                id: curRound['id'],
+                fields: {
+                    'Round State': RoundState.Started,
+                }
+            }]
+            await updateRoundRecord(roundUpdate)
+        }
+    } else {
+        if(curRoundState === RoundState.Started && curRoundProposalsDueBy < now) {
+            console.log("Update active round.")
+
+            // Preapre proposals for Snapshot (Check token balance, calc snapshot height)
+            await processAirtableNewProposals(curRoundNumber)
+            await prepareProposalsForSnapshot(curRound)
+        }else if(curRoundState === RoundState.Started && curRoundProposalsDueBy >= now) {
+            console.log("Start DD period.")
+
+            // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
+            const numProposalsProcessed = await processAirtableNewProposals(curRoundNumber)
+            await prepareProposalsForSnapshot(curRound)
+
+            const tokenPrice = await getTokenPrice()
+            const maxGrantUSD = curRound.get('Max Grant USD')
+            const earmarkedUSD = curRound.get('Earmarked USD')
+            const fundingAvailableUSD = curRound.get('Funding Available USD')
+
+            const maxGrantOCEAN = maxGrantUSD / tokenPrice
+            const earmarkedOCEAN = earmarkedUSD / tokenPrice
+            const fundingAvailableOCEAN = fundingAvailableUSD / tokenPrice
+
+            // Enter Due Diligence period
+            const roundUpdate = [{
+                id: curRound['id'],
+                fields: {
+                    'Round State': RoundState.DueDiligence,
+                    'Proposals': numProposalsProcessed,
+                    'OCEAN Price': tokenPrice,
+                    'Max Grant': maxGrantOCEAN,
+                    'Earmarked': earmarkedOCEAN,
+                    'Funding Available': fundingAvailableOCEAN,
+                }
+            }]
+            await updateRoundRecord(roundUpdate)
+        }else if(curRoundState === RoundState.DueDiligence && curRoundVoteStart >= now) {
+            console.log("Start Voting period.")
+
+            // Submit to snapshot + Enter voting state
+            await submitProposalsToSnapshot(curRoundNumber)
+
+            const roundUpdate = [{
+                id: curRound['id'],
+                fields: {
+                    'Round State': RoundState.Voting,
+                }
+            }]
+            await updateRoundRecord(roundUpdate)
+        }else if(curRoundState === RoundState.Voting && curRoundVoteEnd > now) {
+            console.log("Update vote count.")
+
+            // Update votes
+            await syncAirtableActiveProposalVotes(curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber)
+        }
+    }
+}
+
+main()

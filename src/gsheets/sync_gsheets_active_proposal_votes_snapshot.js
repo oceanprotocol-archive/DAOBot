@@ -6,7 +6,6 @@ const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-const {getCurrentRound} = require('../airtable/rounds/funding_rounds')
 
 // DRY/PARAMETERIZE
 var curRoundNumber = undefined
@@ -239,7 +238,7 @@ const getVoterScores = async (provider, strategy, voters, blockHeight) => {
 }
 
 // DRY
-const getActiveProposalVotes = async () => {
+const getActiveProposalVotes = async (curRoundNumber) => {
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
@@ -283,12 +282,12 @@ const getActiveProposalVotes = async () => {
     }))
 }
 
-const main = async () => {
+const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
     const curRound = await getCurrentRound()
     curRoundNumber = curRound.get('Round')
 
     // Retrieve all active proposals from Airtable
-    await getActiveProposalVotes()
+    await getActiveProposalVotes(curRoundNumber)
 
     // Output the raw snapshot raw data into gsheets
     Object.entries(proposalVotes).map(async (p) => {
@@ -303,4 +302,4 @@ const main = async () => {
     console.log('Updated GSheets')
 }
 
-main()
+module.exports = {syncGSheetsActiveProposalVotes};

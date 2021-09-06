@@ -2,16 +2,12 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery, getRoundsSelectQuery, updateProposalRecords} = require('./airtable_utils')
-const {getCurrentRound} = require('./rounds/funding_rounds')
+const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
 const {initOAuthToken} = require('../gsheets/gsheets')
 const {getValues, addSheet, updateValues} = require('../gsheets/gsheets_utils')
 const {getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet} = require('./rounds/funding_rounds')
 
-const main = async () => {
-    const curRound = await getCurrentRound()
-    const curRoundNumber = curRound.get('Round')
-
+const processFundingRoundComplete = async (curRoundNumber) => {
     // Step 1 - Identify all winning and downvoted proposals
     // const activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
     const activeProposals = await getProposalsSelectQuery(`{Round} = "${curRoundNumber}"`)
@@ -64,7 +60,7 @@ const main = async () => {
     let gsheetRows = []
 
     // Flatten results onto gsheetRows
-    earmarkedResults.splice(0,0, ['Earmarked Winners'])
+    earmarkedResults.splice(0, 0, ['Earmarked Winners'])
     earmarkedResults.push([''])
     generalResults.splice(0, 0, ['General Winners'])
     generalResults.push([''])
@@ -84,30 +80,32 @@ const main = async () => {
     // 2x Rows => Header & Summed results
     let burnedFunds = [
         [
-            'Earmarked USD Burned', '','General USD Burned', '', 'Total USD Burned'
+            'Earmarked USD Burned', '', 'General USD Burned', '', 'Total USD Burned'
         ],
         [
             finalResults.earmarkedResults.fundsLeft,
             '',
             finalResults.generalResults.fundsLeft,
             '',
-            finalResults.earmarkedResults.fundsLeft+finalResults.generalResults.fundsLeft
+            finalResults.earmarkedResults.fundsLeft + finalResults.generalResults.fundsLeft
         ],
         [
-        'Earmarked OCEAN Burned', '','General OCEAN Burned', '', 'Total OCEAN Burned'
+            'Earmarked OCEAN Burned', '', 'General OCEAN Burned', '', 'Total OCEAN Burned'
         ],
         [
             finalResults.earmarkedResults.fundsLeft / oceanUSD,
             '',
             finalResults.generalResults.fundsLeft / oceanUSD,
             '',
-            (finalResults.earmarkedResults.fundsLeft+finalResults.generalResults.fundsLeft) / oceanUSD
+            (finalResults.earmarkedResults.fundsLeft + finalResults.generalResults.fundsLeft) / oceanUSD
         ]
     ]
     gsheetRows = gsheetRows.concat(burnedFunds)
 
-    await updateValues(oAuth, sheetName, 'A1:H' + (gsheetRows.length+1), gsheetRows)
+    await updateValues(oAuth, sheetName, 'A1:H' + (gsheetRows.length + 1), gsheetRows)
     console.log('\n[%s]\nDumped [%s] rows to Gsheets', (new Date()).toString(), Object.entries(gsheetRows).length)
+
+    return earmarkedResults.length + generalResults.length + partiallyFundedResults.length
 }
 
-main()
+module.exports = {processFundingRoundComplete};

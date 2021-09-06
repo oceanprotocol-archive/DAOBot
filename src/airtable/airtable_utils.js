@@ -78,4 +78,21 @@ const updateProposalRecords = async (records) => {
     ))
 }
 
-module.exports = {getRoundsSelectQuery, getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable}
+const updateRoundRecord = async (record) => {
+    await fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/Funding Rounds`, {
+        method: "patch", // make sure it is a "PATCH request"
+        headers: {
+            Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({records: record}),
+    })
+    .then((res) => {
+        console.log('Response from Airtable: ', res.status)
+    })
+    .catch((err) => {
+        console.log(err);
+    })
+}
+
+module.exports = {getRoundsSelectQuery, getProposalsSelectQuery, updateProposalRecords, updateRoundRecord, sumSnapshotVotesToAirtable}

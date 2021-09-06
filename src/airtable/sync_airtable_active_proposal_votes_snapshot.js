@@ -4,7 +4,6 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
 const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-const {getCurrentRound} = require('./rounds/funding_rounds')
 
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
@@ -32,10 +31,7 @@ const getVoterScores = async (provider, strategy, voters, blockHeight) => {
 }
 
 // DRY/PARAMETERIZE
-const getActiveProposalVotes = async () => {
-    const curRound = await getCurrentRound()
-    const curRoundNumber = curRound.get('Round')
-
+const getActiveProposalVotes = async (curRoundNumber) => {
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
@@ -77,12 +73,12 @@ const getActiveProposalVotes = async () => {
     }))
 }
 
-const main = async () => {
-    await getActiveProposalVotes()
+const syncAirtableActiveProposalVotes = async (curRoundNumber) => {
+    await getActiveProposalVotes(curRoundNumber)
     proposalVoteSummary = await sumSnapshotVotesToAirtable(activeProposals, proposalScores)
     console.log('============')
     await updateProposalRecords(proposalVoteSummary)
     console.log('[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), proposalVoteSummary.length)
 }
 
-main()
+module.exports = {syncAirtableActiveProposalVotes};
