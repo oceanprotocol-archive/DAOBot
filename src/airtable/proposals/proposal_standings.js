@@ -1,7 +1,21 @@
 const {getProposalsSelectQuery} = require('../airtable_utils')
 
-// Let's track the state of various proposals
+// Proposal States
+const State = {
+    Received: 'Received',
+    Rejected: 'Rejected',
+    Accepted: 'Accepted',
+    Running: 'Running',
+    Ended: 'Ended',
+    NotGranted: 'Not Granted',
+    DownVoted: 'Down Voted',
+    Granted: 'Granted',
+    Funded: 'Funded'
+}
+
+// Project Standings
 const Standings = {
+    Undefined: undefined,
     Unreported: 'Unreported',
     Completed: 'Completed',
     Progress: 'In Progress',
@@ -22,10 +36,11 @@ const Earmarks = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (deliverableChecklist, completed, timedOut, refunded) => {
+const getProjectStanding = (deliverableChecklist, completed, timedOut, refunded, funded) => {
     let newStanding = undefined
 
-    if( refunded === true ) newStanding = Standings.Refunded
+    if( funded === false ) newStanding = Standings.Undefined
+    else if( refunded === true ) newStanding = Standings.Refunded
     else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
     else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
     else newStanding = Standings.Unreported
@@ -59,6 +74,10 @@ const areDeliverablesComplete = (deliverables) => {
     return completed
 }
 
+const isFunded = (proposalState) => {
+    return proposalState === State.Granted || proposalState === State.Funded
+}
+
 const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
     let deliverableUpdate = new Date(lastDeliverableUpdate)
     let timeOutDate = new Date(deliverableUpdate.setMonth(deliverableUpdate.getMonth() + 3))
@@ -84,10 +103,11 @@ const getProposalRecord = (proposal) => {
     let deliverableUpdate = proposal.get('Last Deliverable Update')
     let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
     let disputed = proposal.get('Disputed Status')
+    let funded = isFunded(proposalState)
     let timedOut = hasTimedOut(currentStanding, deliverableUpdate) && currentStanding !== Standings.Unreported
     let deliverables = splitDeliverableChecklist(deliverableChecklist)
     let completed = areDeliverablesComplete(deliverables)
-    let newStanding = getProjectStanding(deliverables, completed, timedOut, refunded)
+    let newStanding = getProjectStanding(deliverables, completed, timedOut, refunded, funded)
 
     return {
         id: proposal.id,
@@ -173,4 +193,4 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
     }
 }
 
-module.exports = {Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings};
+module.exports = {State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings};

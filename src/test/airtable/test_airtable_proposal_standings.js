@@ -4,7 +4,7 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
+const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
 
 var currentProposals = undefined
 var allProposals = []
@@ -15,7 +15,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'May 01, 2021',
@@ -31,7 +31,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Jan 01, 2021',
@@ -46,7 +46,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Feb 01, 2021',
@@ -61,7 +61,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Mar 01, 2021',
@@ -76,7 +76,7 @@ beforeEach(async function() {
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
-            'Proposal State': 'myState',
+            'Proposal State': State.Funded,
             'Proposal Standing': undefined,
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Apr 01, 2021',
@@ -276,7 +276,7 @@ describe('Process Project Standings', function() {
         processHistoricalStandings(proposalStandings);
 
         for (let i = 1; i < proposalStandings.length; i++) {
-            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Dispute)
+            should.equal(proposalStandings['test'][i].fields['Proposal Standing'], Standings.Dispute)
         }
     });
 
@@ -293,8 +293,28 @@ describe('Process Project Standings', function() {
         processHistoricalStandings(proposalStandings);
 
         for (let i = 1; i < proposalStandings.length; i++) {
-            should.equal(proposalStandings[projectName][i].fields['Proposal Standing'], Standings.Completed)
+            should.equal(proposalStandings['test'][i].fields['Proposal Standing'], Standings.Completed)
         }
+    });
+
+    it('Validates projects not funded, do not receive a standing.', function() {
+        // Complete every proposal
+        allProposals.forEach((x) => {
+            x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        })
+
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Proposal State'] = State.Rejected
+        allProposals[1].fields['Proposal State'] = State.NotGranted
+        allProposals[2].fields['Proposal State'] = State.DownVoted
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Undefined)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Undefined)
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.Undefined)
     });
 
 });
