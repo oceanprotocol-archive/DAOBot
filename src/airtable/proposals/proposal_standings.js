@@ -2,6 +2,7 @@ const {getProposalsSelectQuery} = require('../airtable_utils')
 
 // Proposal States
 const State = {
+    Undefined: null,
     Received: 'Received',
     Rejected: 'Rejected',
     Accepted: 'Accepted',
@@ -15,7 +16,7 @@ const State = {
 
 // Project Standings
 const Standings = {
-    Undefined: undefined,
+    Undefined: null,
     Unreported: 'Unreported',
     Completed: 'Completed',
     Progress: 'In Progress',
@@ -25,11 +26,13 @@ const Standings = {
 };
 
 const Disputed = {
+    Undefined: null,
     Ongoing: 'Ongoing',
     Resolved: 'Resolved'
 }
 
 const Earmarks = {
+    Undefined: null,
     NewEntrants: 'New Entrants',
     Outreach: 'Outreach'
 }
@@ -39,7 +42,7 @@ const Earmarks = {
 const getProjectStanding = (deliverableChecklist, completed, timedOut, refunded, funded) => {
     let newStanding = undefined
 
-    if( funded === false ) newStanding = Standings.Undefined
+    if( funded === false && deliverableChecklist.length === 0 ) newStanding = Standings.Undefined
     else if( refunded === true ) newStanding = Standings.Refunded
     else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
     else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
@@ -187,8 +190,9 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
             value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
             value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
         } else {
-            value[0].fields['Proposal Standing'] = undefined
-            value[0].fields['Outstanding Proposals'] = undefined
+            value[0].fields['Proposal State'] = value[0].fields['Proposal State']
+            value[0].fields['Proposal Standing'] = value[0].fields['Proposal Standing']
+            value[0].fields['Outstanding Proposals'] = value[0].fields['Outstanding Proposals']
         }
     }
 }
