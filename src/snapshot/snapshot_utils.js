@@ -36,8 +36,83 @@ const strategy = {
             address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
             decimals: 18
         }
+    }],
+    'strategy_v0_3' = [{
+        name: 'erc20-balance-of',
+        params: {
+            symbol: 'OCEAN',
+            address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+            decimals: 18
+        }
+    },
+    {
+        name: 'ocean-marketplace',
+        params: {
+            symbol: 'OCEAN',
+            address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+            decimals: 18
+        }
+    },
+    {
+        name: 'sushiswap',
+        params: {
+            symbol: 'OCEAN',
+            address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+            decimals: 18
+        }
+    },
+    {
+        name: 'uniswap',
+        params: {
+            symbol: 'OCEAN',
+            address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+            decimals: 18
+        }
+    },
+    {
+        name: 'contract-call',
+        params: {
+            address: '0x9712Bb50DC6Efb8a3d7D12cEA500a50967d2d471',
+            args: [
+                '%{address}',
+                '0xCDfF066eDf8a770E9b6A7aE12F7CFD3DbA0011B5',
+                '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
+            ],
+            decimals: 18,
+            symbol: 'OCEAN',
+            methodABI: {
+                inputs: [
+                    {
+                        internalType: 'address',
+                        name: 'provider',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'poolToken',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'reserveToken',
+                        type: 'address'
+                    }
+                ],
+                name: 'totalProviderAmount',
+                outputs: [
+                    {
+                        internalType: 'uint256',
+                        name: '',
+                        type: 'uint256'
+                    }
+                ],
+                stateMutability: 'view',
+                type: 'function'
+            }
+        }
     }]
-}
+};
+
 
 const getVoteCountStrategy = (roundNumber) => {
     const defaultStrategy = process.env.SNAPSHOT_STRATEGY
@@ -46,10 +121,16 @@ const getVoteCountStrategy = (roundNumber) => {
     }
 
     if(roundNumber < 5) return strategy['strategy_v0_1']
-    return strategy['strategy_v0_2']
+    if(round < 9) return strategy['strategy_v0_2']
+    return strategy['strategy_v0_3']
 }
 
 const getProposalVotes = async (ipfsHash) => {
+    const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
+    return await axios.get(proposalUrl)
+}
+
+const getProposalVotesGQL = async (ipfsHash) => {
     const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
     return await axios.get(proposalUrl)
 }

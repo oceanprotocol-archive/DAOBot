@@ -12,26 +12,6 @@ var curRoundNumber = undefined
 const snapshot = require('@snapshot-labs/snapshot.js')
 const space = 'officialoceandao.eth';
 
-// TODO - RA: First 4 rounds were done with an ERC20-only strategy
-const marketStrategy = [
-    {
-        name: 'erc20-balance-of',
-        params: {
-            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-            symbol: "OCEAN",
-            decimals: 18
-        }
-    },
-    {
-        name: 'ocean-marketplace',
-        params: {
-            address: "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
-            symbol: "OCEAN",
-            decimals: 18
-        }
-    }
-];
-
 const network = '1';
 const provider = snapshot.utils.getProvider(network);
 
@@ -303,6 +283,9 @@ const getActiveProposalVotes = async (curRoundNumber) => {
 }
 
 const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
+    const curRound = await getCurrentRound()
+    curRoundNumber = curRound.get('Round')
+
     // Retrieve all active proposals from Airtable
     await getActiveProposalVotes(curRoundNumber)
 
