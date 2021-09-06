@@ -37,7 +37,7 @@ const strategy = {
             decimals: 18
         }
     }],
-    'strategy_v0_3' = [{
+    'strategy_v0_3': [{
         name: 'erc20-balance-of',
         params: {
             symbol: 'OCEAN',
