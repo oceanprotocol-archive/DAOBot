@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+const {Standings} = require('../airtable/proposals/proposal_standings')
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
@@ -48,7 +49,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
         try {
             let wallet_0x = proposal.get('Wallet Address')
             let proposalStanding = proposal.get('Proposal Standing')
-            let goodStanding = proposalStanding === 'Completed' || proposalStanding ==='Refunded'
+            let goodStanding = proposalStanding === Standings.Completed || proposalStanding === Standings.Refunded || proposalStanding === Standings.Undefined
             let balance = await getWalletBalance(wallet_0x)
 
             if( balance >= MIN_OCEAN_REQUIRED && goodStanding === true ) {

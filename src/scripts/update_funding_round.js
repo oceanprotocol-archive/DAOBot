@@ -11,6 +11,7 @@ const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_rece
 const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const {sleep} = require('../functions/utils')
 const {getTokenPrice} = require('../functions/coingecko')
 
 // Split up functionality
@@ -31,7 +32,7 @@ const main = async () => {
         curRoundNumber = curRound.get('Round')
         curRoundState = curRound.get('Round State')
         curRoundStartDate = curRound.get('Start Date')
-        curRoundProposalsDueBy_plus15 = moment(round[0].fields['Proposals Due By']).add(15, 'minutes')
+        curRoundProposalsDueBy_plus15 = moment(curRound.get('Proposals Due By')).add(15, 'minutes').utc().toISOString()
         curRoundVoteStart = curRound.get('Voting Starts')
         curRoundVoteEnd = curRound.get('Voting Ends')
     }
@@ -92,6 +93,9 @@ const main = async () => {
 
             // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
             await processAirtableNewProposals(curRoundNumber)
+
+            // Review all standings for Snapshot
+            sleep(1000)
             await prepareProposalsForSnapshot(curRound)
         }else if(curRoundState === RoundState.Started && now >= curRoundProposalsDueBy_plus15) {
             console.log("Start DD period.")
