@@ -2,7 +2,8 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const should = require('chai').should();
+const should = require('chai').should()
+const {assert} = require('chai')
 const {getVoteCountStrategy, getVotesQuery, reduceVoterScores, getProposalVotesGQL, getVoterScores} = require('../../snapshot/snapshot_utils');
 
 const singleBatchVoting_blockHeight = 11457494;
@@ -138,7 +139,7 @@ describe('Snapshot GraphQL test', () => {
             },
 
             body: JSON.stringify({
-                query: getVotesQuery(proposalIPFSHash_1)
+                query: getVotesQuery(singleBatchVoting_proposalIPFSHash)
             })
         };
 
@@ -237,7 +238,13 @@ describe('Snapshot GraphQL test', () => {
             const voterAddress = Object.keys(x)[0]
             const validationValue = uni_sushi_bancor_voterValidation[voterAddress]
             if( validationValue !== undefined ) {
-                should.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))
+                if (voterAddress === '0x61B15998893cC746B46C08FEdEE13a0d1b33bBa9') {
+                    console.log(`Calculated score ${x[voterAddress].balance.toFixed(2)}`)
+                    console.log(`Expected score ${validationValue.toFixed(2)}`)
+                    assert.fail('Snapshot score is not the same as expected => https://snapshot.org/#/officialoceandao.eth/proposal/QmQgfxvLqz88pL3ByK6U82bxezCU8MAiCSgxtTTCoR3fWm')
+                } else {
+                    should.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))
+                }
             } else {
                 console.log(`Voter [${voterAddress}] score is not found in snapshot`)
             }

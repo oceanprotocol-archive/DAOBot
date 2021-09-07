@@ -182,13 +182,6 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
             const curStratScore = voterScores[i][newVoter]
             if( curStratScore !== undefined )
                 strategyScore += curStratScore
-            // for (var counterVoter of Object.keys(voterScores[i])) {
-            //     if (counterVoter === newVoter) {
-            //         strategyScore += voterScores[i][newVoter]
-            //     } else {
-            //         strategyScore += 0
-            //     }
-            // }
         }
         let resultVotes = {}
         resultVotes[newVoter] = {
