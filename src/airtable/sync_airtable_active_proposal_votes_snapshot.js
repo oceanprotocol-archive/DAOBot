@@ -4,13 +4,6 @@ dotenv.config();
 
 const { getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable } = require('./airtable_utils')
 const { getVoteCountStrategy, getVoterScores, reduceVoterScores, reduceProposalScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
-const { getCurrentRound } = require('./rounds/funding_rounds')
-
-const snapshot = require('@snapshot-labs/snapshot.js')
-const space = 'officialoceandao.eth';
-
-const network = '1';
-const provider = snapshot.utils.getProvider(network);
 
 // Let's track the state of various proposals
 var activeProposals = {}
