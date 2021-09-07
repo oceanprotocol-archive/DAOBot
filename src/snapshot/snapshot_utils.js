@@ -124,7 +124,7 @@ const getVoteCountStrategy = (roundNumber) => {
     }
 
     if(roundNumber < 5) return strategy['strategy_v0_1']
-    if(round < 9) return strategy['strategy_v0_2']
+    if(roundNumber < 9) return strategy['strategy_v0_2']
     return strategy['strategy_v0_3']
 }
 
@@ -177,15 +177,18 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
 const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
     return Object.entries(proposalVotes).map((voter) => {
         let strategyScore = 0
-        newVoter = voter[1].voter
+        const newVoter = voter[1].voter
         for (i = 0; i < strategy.length; i++) {
-            for (var counterVoter of Object.keys(voterScores[i])) {
-                if (counterVoter === newVoter) {
-                    strategyScore += voterScores[i][newVoter]
-                } else {
-                    strategyScore += 0
-                }
-            }
+            const curStratScore = voterScores[i][newVoter]
+            if( curStratScore !== undefined )
+                strategyScore += curStratScore
+            // for (var counterVoter of Object.keys(voterScores[i])) {
+            //     if (counterVoter === newVoter) {
+            //         strategyScore += voterScores[i][newVoter]
+            //     } else {
+            //         strategyScore += 0
+            //     }
+            // }
         }
         let resultVotes = {}
         resultVotes[newVoter] = {

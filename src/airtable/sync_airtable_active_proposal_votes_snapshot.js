@@ -4,7 +4,6 @@ dotenv.config();
 
 const { getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable } = require('./airtable_utils')
 const { getVoteCountStrategy, getVoterScores, reduceVoterScores, reduceProposalScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
-const { getCurrentRound } = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
 var activeProposals = {}
