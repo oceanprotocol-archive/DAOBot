@@ -155,6 +155,7 @@ const processHistoricalStandings = (proposalStandings) => {
             if( lastStanding !== Standings.Incomplete && lastStanding !== Standings.Dispute ) {
                 if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
                 else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
+                else if ( proposal.fields['Proposal Standing'] !== Standings.Undefined ) lastStanding = proposal.fields['Proposal Standing']
             }
 
             // OUTSTANDING PROPOSAL URLS:
@@ -166,6 +167,8 @@ const processHistoricalStandings = (proposalStandings) => {
                 proposal.fields['Proposal Standing'] = lastStanding
             } else if( proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0 ) {
                 proposal.fields['Outstanding Proposals'] = outstandingURL
+                proposal.fields['Proposal Standing'] = lastStanding
+            } else if( proposal.fields['Proposal Standing'] === Standings.Undefined ) {
                 proposal.fields['Proposal Standing'] = lastStanding
             }
         })

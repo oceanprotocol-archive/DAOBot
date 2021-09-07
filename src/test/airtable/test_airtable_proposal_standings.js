@@ -374,9 +374,34 @@ describe('Process Project Standings', function() {
         let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
-        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], null)
-        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], null)
-        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], null)
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], undefined)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], undefined)
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], undefined)
+    });
+
+    it('Validates downvoted/declined projects without standing receive previous standings.', function() {
+        // Set the very first proposal to not be completed
+        allProposals[0].fields['Proposal State'] = State.Funded
+        allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        allProposals[1].fields['Proposal State'] = State.Funded
+        allProposals[1].fields['Refund Transaction'] = undefined
+        allProposals[1].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        allProposals[2].fields['Proposal State'] = State.Funded
+        allProposals[2].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+
+        allProposals[3].fields['Proposal State'] = State.DownVoted
+        allProposals[3].fields['Deliverable Checklist'] = undefined
+
+        // Process all proposals
+        let proposalStandings = processProposalStandings(allProposals);
+        processHistoricalStandings(proposalStandings);
+
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][3].fields['Proposal Standing'], Standings.Completed)
     });
 
 });
