@@ -6,7 +6,7 @@ const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_uti
 
 // DRY/PARAMETERIZE
 const processAirtableNewProposals = async (curRoundNumber) => {
-    let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = ${curRoundNumber}, {Proposal State} = "", "true")`)
+    let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
     let proposalRecords = []
 
     await Promise.all(inactiveProposals.map(async (p) => {
