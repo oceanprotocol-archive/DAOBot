@@ -17,6 +17,7 @@ const State = {
 // Project Standings
 const Standings = {
     Undefined: undefined,
+    NoOcean: 'No Ocean',
     Unreported: 'Unreported',
     Completed: 'Completed',
     Progress: 'In Progress',
@@ -39,10 +40,11 @@ const Earmarks = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (deliverableChecklist, completed, timedOut, refunded, funded) => {
+const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, noOcean) => {
     let newStanding = undefined
 
-    if( funded === false && deliverableChecklist.length === 0 ) newStanding = null
+    if( (proposalState === State.Received || proposalState === State.Rejected) && noOcean === true ) newStanding = Standings.NoOcean
+    else if( funded === false && deliverableChecklist.length === 0 ) newStanding = null
     else if( refunded === true ) newStanding = Standings.Refunded
     else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
     else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
@@ -107,10 +109,11 @@ const getProposalRecord = (proposal) => {
     let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
     let disputed = proposal.get('Disputed Status')
     let funded = isFunded(proposalState)
+    let noOcean = proposal.get('Deployment Ready') === 'No'
     let timedOut = hasTimedOut(currentStanding, deliverableUpdate) && currentStanding !== Standings.Unreported
     let deliverables = splitDeliverableChecklist(deliverableChecklist)
     let completed = areDeliverablesComplete(deliverables)
-    let newStanding = getProjectStanding(deliverables, completed, timedOut, refunded, funded)
+    let newStanding = getProjectStanding(proposalState, deliverables, completed, timedOut, refunded, funded, noOcean)
 
     return {
         id: proposal.id,
@@ -190,12 +193,10 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
     for (const [key, value] of Object.entries(currentRoundProposals)) {
         let latestProposal = latestProposals[key]
         if (latestProposal !== undefined) {
-            value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
-            value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
-        } else {
-            value[0].fields['Proposal State'] = value[0].fields['Proposal State']
-            value[0].fields['Proposal Standing'] = value[0].fields['Proposal Standing']
-            value[0].fields['Outstanding Proposals'] = value[0].fields['Outstanding Proposals']
+            if( value[0].fields['Proposal Standing'] !== Standings.NoOcean ) {
+                value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
+                value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
+            }
         }
     }
 }
