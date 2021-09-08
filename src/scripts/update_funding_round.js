@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const moment = require('moment')
-const {getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
+const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
 const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
