@@ -159,7 +159,7 @@ const main = async () => {
             }]
             await updateRoundRecord(roundUpdate)
 
-        }else if(curRoundState === RoundState.Voting && now >= curRoundVoteEnd) {
+        }else if(curRoundState === RoundState.Voting && now < curRoundVoteEnd) {
             console.log("Update vote count.")
 
             // Update votes
