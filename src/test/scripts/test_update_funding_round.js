@@ -4,7 +4,9 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {getProposalsSelectQuery} = require('../../airtable/airtable_utils')
+
+const moment = require('moment')
+const {getRoundsSelectQuery, getProposalsSelectQuery} = require('../../airtable/airtable_utils')
 const {getCurrentRound} = require('../../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../../airtable/process_airtable_new_proposals')
 const {prepareProposalsForSnapshot} = require('../../snapshot/prepare_snapshot_received_proposals_airtable')
@@ -17,6 +19,15 @@ const {sleep} = require('../../functions/utils')
 // - 1 proposal in DB w/o "Round" or "Proposal State" params
 // 1. In DB - Delete a proposal "Round" + "Propoal State" params.
 describe('Functionally test updateFundingRound', function() {
+    it('Validates moment + 15m', async function() {
+        let round = await getRoundsSelectQuery(`{Round} = "1"`)
+        let roundDueBy = moment(round[0].fields['Proposals Due By'])
+        let roundDueBy_plus15 = moment(round[0].fields['Proposals Due By']).add(15, 'minutes')
+
+        should.equal(roundDueBy.utc().toISOString(), '2020-12-14T23:59:00.000Z')
+        should.equal(roundDueBy_plus15.utc().toISOString(), '2020-12-15T00:14:00.000Z')
+    })
+
     it.skip('Validates proposals that are not been initialized.', async function() {
         let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
         expect(inactiveProposals.length).to.be.greaterThan(0);

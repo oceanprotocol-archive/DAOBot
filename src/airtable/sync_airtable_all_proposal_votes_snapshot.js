@@ -3,13 +3,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords, sumSnapshotVotesToAirtable} = require('./airtable_utils')
-const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
+const { getVoteCountStrategy, getVoterScores, reduceVoterScores, reduceProposalScores, getProposalVotesGQL } = require('../snapshot/snapshot_utils');
 
 // DRY/PARAMETERIZE
-const roundNumber = 8
-const snapshot = require('@snapshot-labs/snapshot.js')
-const space = 'officialoceandao.eth';
-const provider = snapshot.utils.getProvider(1);
+const {getCurrentRound} = require('./rounds/funding_rounds')
 
 // Let's track the state of various proposals
 var allProposals = []
@@ -17,58 +14,32 @@ var proposalVotes = {}
 var proposalScores = {}
 var proposalVoteSummary = {}
 
-// DRY
-const getVoterScores = async (provider, strategy, voters, blockHeight) => {
-    return snapshot.utils.getScores(
-        space,
-        strategy,
-        1,
-        provider,
-        voters,
-        blockHeight
-    ).then(scores => {
-        return scores
-    });
-}
-
 const getAllProposalVotes = async () => {
-    for (i=1; i<roundNumber; i++) {
-        let strategy = getVoteCountStrategy(i)
-        let roundProposals = await getProposalsSelectQuery(`AND({Round} = "${i}", NOT({Proposal State} = "Rejected"), "true")`)
+    const curRound = await getCurrentRound()
+    const curRoundNumber = curRound.get('Round')
+
+    for (var roundNum=1; roundNum<curRoundNumber; roundNum++) {
+        let strategy = getVoteCountStrategy(roundNum)
+        let roundProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNum}", NOT({Proposal State} = "Rejected"), "true")`)
         allProposals = allProposals.concat(roundProposals)
 
         await Promise.all(roundProposals.map(async (proposal) => {
             try {
                 const ipfsHash = proposal.get('ipfsHash')
 
-                await getProposalVotes(ipfsHash)
+                await getProposalVotesGQL(ipfsHash)
                     .then((result) => {
-                        proposalVotes[ipfsHash] = result.data
+                        proposalVotes[ipfsHash] = result.data.votes
                     })
-
-                const voters = Object.keys(proposalVotes[ipfsHash])
-                const voterScores = await getVoterScores(provider, strategy, voters, proposal.get('Snapshot Block'))
-
-                Object.entries(proposalVotes[ipfsHash]).map((voter) => {
-                    let strategyScore = 0
-                    for (i=0; i < strategy.length; i++) {
-                        strategyScore += voterScores[i][voter[0]] || 0
-                    }
-                    voter[1].msg.payload.balance = strategyScore
-                })
-
-                let scores = {
-                    1: 0,
-                    2: 0
+                const voters = []
+                for (var index = 0; index < proposalVotes[ipfsHash].length; ++index) {
+                    voters.push(proposalVotes[ipfsHash][index].voter)
                 }
-                Object.entries(proposalVotes[ipfsHash]).reduce((total, cur) => {
-                    const choice = cur[1].msg.payload.choice
-                    const balance = cur[1].msg.payload.balance
-                    if (scores[choice] === undefined) scores[choice] = 0
-                    scores[choice] += balance
-                }, {})
 
-                proposalScores[ipfsHash] = scores
+                const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
+
+                const reducedVoterScores = reduceVoterScores(strategy, proposalVotes[ipfsHash], voterScores)
+                proposalScores[ipfsHash] = reduceProposalScores(reducedVoterScores)
             } catch (err) {
                 console.log(err)
             }

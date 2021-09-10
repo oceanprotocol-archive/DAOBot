@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const moment = require('moment')
-const {getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
+const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
 const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
@@ -11,7 +11,17 @@ const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_rece
 const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const {sleep} = require('../functions/utils')
 const {getTokenPrice} = require('../functions/coingecko')
+
+const prepareNewProposals = async (curRound, curRoundNumber) => {
+    // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
+    await processAirtableNewProposals(curRoundNumber)
+
+    // Review all standings for Snapshot
+    sleep(1000)
+    await prepareProposalsForSnapshot(curRound)
+}
 
 // Split up functionality
 // Make it easy to debug/trigger events
@@ -24,6 +34,7 @@ const main = async () => {
     let curRoundState = undefined
     let curRoundStartDate = undefined
     let curRoundProposalsDueBy = undefined
+    let curRoundProposalsDueBy_plus15 = undefined
     let curRoundVoteStart = undefined
     let curRoundVoteEnd = undefined
 
@@ -31,7 +42,8 @@ const main = async () => {
         curRoundNumber = curRound.get('Round')
         curRoundState = curRound.get('Round State')
         curRoundStartDate = curRound.get('Start Date')
-        curRoundProposalsDueBy = curRound.get('Proposals Due By')
+        curRoundProposalsDueBy = moment(curRound.get('Proposals Due By')).utc().toISOString()
+        curRoundProposalsDueBy_plus15 = moment(curRound.get('Proposals Due By')).add(15, 'minutes').utc().toISOString()
         curRoundVoteStart = curRound.get('Voting Starts')
         curRoundVoteEnd = curRound.get('Voting Ends')
     }
@@ -50,12 +62,12 @@ const main = async () => {
     const now = moment().utc().toISOString()
 
     if (curRoundState === undefined) {
-        if( lastRoundState === RoundState.Voting && lastRoundVoteEnd <= now ) {
+        if( lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd ) {
             console.log("Start next round.")
 
             // Update votes
             await syncAirtableActiveProposalVotes(curRoundNumber)
-            await syncGSheetsActiveProposalVotes(curRoundNumber)
+            // await syncGSheetsActiveProposalVotes(curRoundNumber)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(curRoundNumber)
@@ -74,7 +86,7 @@ const main = async () => {
                 }
             }]
             await updateRoundRecord(roundUpdate)
-        } else if( curRoundStartDate <= now ) {
+        } else if( now >= curRoundStartDate ) {
             console.log("Start current round.")
 
             // Start the current round
@@ -87,19 +99,15 @@ const main = async () => {
             await updateRoundRecord(roundUpdate)
         }
     } else {
-        if(curRoundState === RoundState.Started && curRoundProposalsDueBy < now) {
+        if(curRoundState === RoundState.Started && now < curRoundProposalsDueBy ) {
             console.log("Update active round.")
-
-            // Preapre proposals for Snapshot (Check token balance, calc snapshot height)
-            await processAirtableNewProposals(curRoundNumber)
-            await prepareProposalsForSnapshot(curRound)
-        }else if(curRoundState === RoundState.Started && curRoundProposalsDueBy >= now) {
+            await prepareNewProposals(curRound, curRoundNumber)
+        }else if(curRoundState === RoundState.Started && now >= curRoundProposalsDueBy) {
             console.log("Start DD period.")
 
-            // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
-            const numProposalsProcessed = await processAirtableNewProposals(curRoundNumber)
-            await prepareProposalsForSnapshot(curRound)
+            await prepareNewProposals(curRound, curRoundNumber)
 
+            let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
             const tokenPrice = await getTokenPrice()
             const maxGrantUSD = curRound.get('Max Grant USD')
             const earmarkedUSD = curRound.get('Earmarked USD')
@@ -114,7 +122,7 @@ const main = async () => {
                 id: curRound['id'],
                 fields: {
                     'Round State': RoundState.DueDiligence,
-                    'Proposals': numProposalsProcessed,
+                    'Proposals': allProposals.length,
                     'OCEAN Price': tokenPrice,
                     'Max Grant': maxGrantOCEAN,
                     'Earmarked': earmarkedOCEAN,
@@ -122,7 +130,7 @@ const main = async () => {
                 }
             }]
             await updateRoundRecord(roundUpdate)
-        }else if(curRoundState === RoundState.DueDiligence && curRoundVoteStart >= now) {
+        }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
             console.log("Start Voting period.")
 
             // Submit to snapshot + Enter voting state
@@ -135,12 +143,28 @@ const main = async () => {
                 }
             }]
             await updateRoundRecord(roundUpdate)
-        }else if(curRoundState === RoundState.Voting && curRoundVoteEnd > now) {
+        }else if(curRoundState === RoundState.DueDiligence && now <= curRoundProposalsDueBy_plus15) {
+            // 15 minute grace period from DD to allow Alex to update proposals
+            console.log("Update Proposals - Grace Period.")
+
+            await prepareNewProposals(curRound, curRoundNumber)
+
+            let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
+            // Update proposal count
+            const roundUpdate = [{
+                id: curRound['id'],
+                fields: {
+                    'Proposals': allProposals.length,
+                }
+            }]
+            await updateRoundRecord(roundUpdate)
+
+        }else if(curRoundState === RoundState.Voting && now < curRoundVoteEnd) {
             console.log("Update vote count.")
 
             // Update votes
             await syncAirtableActiveProposalVotes(curRoundNumber)
-            await syncGSheetsActiveProposalVotes(curRoundNumber)
+            // await syncGSheetsActiveProposalVotes(curRoundNumber)
         }
     }
 }

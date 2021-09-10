@@ -2,8 +2,11 @@ const axios = require('axios');
 const {bufferToHex} = require("ethereumjs-util")
 const {version} = require("@snapshot-labs/snapshot.js/src/constants.json")
 const fetch = require('cross-fetch')
+const snapshot = require('@snapshot-labs/snapshot.js')
 
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org';
+const network = '1';
+const provider = snapshot.utils.getProvider(network);
 
 const strategy = {
     'test_strategy_spring': [{
@@ -121,18 +124,90 @@ const getVoteCountStrategy = (roundNumber) => {
     }
 
     if(roundNumber < 5) return strategy['strategy_v0_1']
-    if(round < 9) return strategy['strategy_v0_2']
+    if(roundNumber < 9) return strategy['strategy_v0_2']
     return strategy['strategy_v0_3']
 }
 
+const getVotesQuery = (ifpshash) => `query Votes {
+  votes (
+    first: 10000,
+    where: {
+      proposal: "${ifpshash}"
+    }
+  ) {
+    voter
+    choice
+  }
+}`
+
 const getProposalVotes = async (ipfsHash) => {
-    const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
+    const proposalUrl = `${hubUrl}/api/${process.env.SNAPSHOT_SPACE}/proposal/` + ipfsHash
     return await axios.get(proposalUrl)
 }
 
 const getProposalVotesGQL = async (ipfsHash) => {
-    const proposalUrl = 'https://hub.snapshot.page/api/officialoceandao.eth/proposal/' + ipfsHash
-    return await axios.get(proposalUrl)
+    const options = {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            query: getVotesQuery(ipfsHash)
+        })
+    };
+    const response = await fetch("https://hub.snapshot.org/graphql", options)
+    return await response.json()
+}
+
+const getVoterScores = async (strategy, voters, blockHeight) => {
+    return snapshot.utils.getScores(
+        process.env.SNAPSHOT_SPACE,
+        strategy,
+        network,
+        provider,
+        voters,
+        blockHeight
+    ).then(scores => {
+        return scores
+    });
+}
+
+// Returns reduced voter score based on multiple strategies => {voter:{choice:int,balance:int}}
+const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
+    return Object.entries(proposalVotes).map((voter) => {
+        let strategyScore = 0
+        const newVoter = voter[1].voter
+        for (i = 0; i < strategy.length; i++) {
+            const curStratScore = voterScores[i][newVoter]
+            if( curStratScore !== undefined )
+                strategyScore += curStratScore
+        }
+        let resultVotes = {}
+        resultVotes[newVoter] = {
+            "choice": voter[1].choice,
+            "balance": strategyScore
+        }
+        return resultVotes
+    })
+}
+
+// Returns reduced proposal summary based on many voters => {1:int,2:int}
+const reduceProposalScores = (voterScores) => {
+    let scores = {
+        1: 0,
+        2: 0
+    }
+
+    Object.entries(voterScores).reduce((total, cur) => {
+        const voterAddress = Object.keys(cur[1])[0]
+        const choice = cur[1][voterAddress].choice
+        const balance = cur[1][voterAddress].balance
+        if (scores[choice] === undefined) scores[choice] = 0
+        scores[choice] += balance
+    }, {})
+
+    return scores
 }
 
 // Configure the proposal template that will be submitted to Snapshot
@@ -224,4 +299,15 @@ const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlock
     return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
 }
 
-module.exports = {getVoteCountStrategy, getProposalVotes, buildProposalPayload, local_broadcast_proposal, calcTargetBlockHeight}
+module.exports = {
+    getVoteCountStrategy,
+    getVotesQuery,
+    getProposalVotes,
+    getProposalVotesGQL,
+    getVoterScores,
+    reduceVoterScores,
+    reduceProposalScores,
+    buildProposalPayload,
+    local_broadcast_proposal,
+    calcTargetBlockHeight
+}
