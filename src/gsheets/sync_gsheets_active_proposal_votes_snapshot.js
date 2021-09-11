@@ -5,19 +5,11 @@ dotenv.config();
 const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
 const {getValues, addSheet, updateValues} = require('./gsheets_utils')
-const {getVoteCountStrategy, getProposalVotes} = require('../snapshot/snapshot_utils');
-
-// DRY/PARAMETERIZE
-var curRoundNumber = undefined
-const snapshot = require('@snapshot-labs/snapshot.js')
-const space = 'officialoceandao.eth';
-
-const network = '1';
-const provider = snapshot.utils.getProvider(network);
+const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores} = require('../snapshot/snapshot_utils');
 
 // Let's track the state of various proposals
 var activeProposals = {}
-var proposalVotes = {}
+var voterScores = {}
 var proposalScores = {}
 
 // gsheet summaries to make downstream happy
@@ -29,7 +21,7 @@ var roundSummary = {}
 // 2. Creates sheet if doesn't exist
 // 3. Flatten proposals into an array of values
 // 4. Dumps flat scores & header from snapshot
-const dumpFromSnapshotRawToGSheet = async (ipfsHash) => {
+const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores) => {
     const oAuth = await initOAuthToken()
 
     // DRY
@@ -41,17 +33,13 @@ const dumpFromSnapshotRawToGSheet = async (ipfsHash) => {
     }
 
     // Flatten votes from this proposal
-    var flatObj = Object.entries(proposalVotes[ipfsHash]).map((v) => {
+    var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
         try {
             const vote = v[1]
             return [
                 vote.address,
-                vote.msg.payload.choice,
-                vote.msg.payload.balance,
-                vote.msg.timestamp,
-                vote.msg.version,
-                vote.authorIpfsHash,
-                vote.relayerIpfsHash
+                vote.choice,
+                vote.balance
             ]
         } catch(err) {
             console.log(err)
@@ -59,12 +47,12 @@ const dumpFromSnapshotRawToGSheet = async (ipfsHash) => {
     })
 
     // Dump flattened data from snapshot to sheet
-    flatObj.splice(0,0, ['address','choice','balace','timestamp','version','authorIpfsHash','relayIpfsHash'])
-    await updateValues(oAuth, ipfsHash, 'A1:G'+flatObj.length, flatObj)
+    flatObj.splice(0,0, ['address','choice','balace'])
+    await updateValues(oAuth, ipfsHash, 'A1:C'+flatObj.length, flatObj)
 }
 
 // For each proposal, calculate their summary
-const calculateProposalSummary = async (proposals, scores) => {
+const calculateProposalSummary = async (proposals, voterScores, proposalScores) => {
     let records = []
     proposals.map((p) => {
         // TODO - Add support for non-granular voting system
@@ -74,15 +62,15 @@ const calculateProposalSummary = async (proposals, scores) => {
         const yesIndex = batchIndex === undefined ? 1 : batchIndex
         const noIndex = batchIndex === undefined ? 2 : undefined
 
-        const yesVotes = scores[ipfsHash][yesIndex] || 0
-        const noVotes = noIndex === 2 ? scores[ipfsHash][noIndex] : 0
+        const yesVotes = proposalScores[ipfsHash][yesIndex] || 0
+        const noVotes = noIndex === 2 ? proposalScores[ipfsHash][noIndex] : 0
 
         let numVoters = 0
         if( batchIndex === undefined ) {
-            numVoters = Object.keys(proposalVotes[ipfsHash]).length
+            numVoters = Object.keys(voterScores[ipfsHash]).length
         } else {
-            numVoters = Object.entries(proposalVotes[ipfsHash])
-                .map((v) => {return v[1].msg.payload.choice === batchIndex ? 1 : 0})
+            numVoters = Object.entries(voterScores[ipfsHash])
+                .map((v) => {return v[1].choice === batchIndex ? 1 : 0})
                 .reduce((total, num) => {return total + num})
         }
         const sumVotes = yesVotes + noVotes
@@ -101,17 +89,17 @@ const calculateProposalSummary = async (proposals, scores) => {
     return records
 }
 
-const calculateRoundSummary = async (proposals, scores) => {
+const calculateRoundSummary = async (proposals, voterScores, proposalScores) => {
     // push all votes, from all proposals into a single object
     let votes = []
     const batchMode = proposals[0].get('Snapshot Batch Index') !== undefined
     // If Granular Voting
     if(batchMode === true) {
-        votes = Object.entries(proposalVotes[proposals[0].get('ipfsHash')])
+        votes = Object.entries(voterScores[proposals[0].get('ipfsHash')])
     } else {
         proposals.map((p) => {
             const ipfsHash = p.get('ipfsHash')
-            votes = votes.concat(Object.entries(proposalVotes[ipfsHash]))
+            votes = votes.concat(Object.entries(voterScores[ipfsHash]))
         })
     }
 
@@ -125,12 +113,8 @@ const calculateRoundSummary = async (proposals, scores) => {
 
         wallets[v[0]].push([
             vote.address,
-            vote.msg.payload.choice,
-            vote.msg.payload.balance,
-            vote.msg.timestamp,
-            vote.msg.version,
-            vote.authorIpfsHash,
-            vote.relayerIpfsHash
+            vote.choice,
+            vote.balance
         ])
     });
 
@@ -199,7 +183,7 @@ const calculateRoundSummary = async (proposals, scores) => {
 }
 
 // ProposalSummary + RoundSummary -> Google Sheet
-const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
+const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundSummary) => {
     const oAuth = await initOAuthToken()
 
     // DRY
@@ -223,22 +207,11 @@ const dumpRoundSummaryToGSheets = async (proposalSummary, roundSummary) => {
 }
 
 // DRY
-const getVoterScores = async (provider, strategy, voters, blockHeight) => {
-
-    return snapshot.utils.getScores(
-        space,
-        strategy,
-        network,
-        provider,
-        voters,
-        blockHeight
-    ).then(scores => {
-        return scores
-    });
-}
-
-// DRY
 const getActiveProposalVotes = async (curRoundNumber) => {
+    let proposalVotes = {}
+    let voterScores = {}
+    let proposalScores = {}
+
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
@@ -246,58 +219,42 @@ const getActiveProposalVotes = async (curRoundNumber) => {
             const ipfsHash = proposal.get('ipfsHash')
             let strategy = getVoteCountStrategy(proposal.get('Round'))
 
-            await getProposalVotes(ipfsHash)
+            await getProposalVotesGQL(ipfsHash)
                 .then((result) => {
-                    proposalVotes[ipfsHash] = result.data
+                    proposalVotes[ipfsHash] = result.data.votes
                 })
-
-            const voters = Object.keys(proposalVotes[ipfsHash])
-            const voterScores = await getVoterScores(provider, strategy, voters, proposal.get('Snapshot Block'))
-
-            // Add up total voter score, from all snapshot strategies.
-            Object.entries(proposalVotes[ipfsHash]).map((voter) => {
-                let strategyScore = 0
-                for (i=0; i < strategy.length; i++) {
-                    strategyScore += voterScores[i][voter[0]] || 0
-                }
-                voter[1].msg.payload.balance = strategyScore
-            })
-
-            // Add up total voter score, from all snapshot strategies.
-            let scores = {
-                1: 0,
-                2: 0
+            const voters = []
+            for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
+                voters.push(proposalVotes[ipfsHash][i].voter)
             }
-            Object.entries(proposalVotes[ipfsHash]).reduce((total, cur) => {
-                const choice = cur[1].msg.payload.choice
-                const balance = cur[1].msg.payload.balance
-                if( scores[choice] === undefined ) scores[choice] = 0
-                scores[choice] += balance
-            }, {})
 
-            proposalScores[ipfsHash] = scores
+            const scores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
+
+            voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
+            proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
         } catch (err) {
             console.log(err)
         }
     }))
+
+    return [voterScores, proposalScores]
 }
 
 const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
-    const curRound = await getCurrentRound()
-    curRoundNumber = curRound.get('Round')
-
     // Retrieve all active proposals from Airtable
-    await getActiveProposalVotes(curRoundNumber)
+    const results = await getActiveProposalVotes(curRoundNumber)
+    let voterScores = results[0]
+    let proposalScores = results[1]
 
     // Output the raw snapshot raw data into gsheets
-    Object.entries(proposalVotes).map(async (p) => {
-        await dumpFromSnapshotRawToGSheet(p[0])
+    Object.entries(voterScores).map(async (p) => {
+        await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
     })
 
     // Output the round summary
-    proposalSummary = await calculateProposalSummary(activeProposals, proposalScores)
-    roundSummary = await calculateRoundSummary(activeProposals, proposalScores)
-    await dumpRoundSummaryToGSheets(proposalSummary, roundSummary)
+    proposalSummary = await calculateProposalSummary(activeProposals, voterScores, proposalScores)
+    roundSummary = await calculateRoundSummary(activeProposals, voterScores, proposalScores)
+    await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
     console.log('Updated GSheets')
 }

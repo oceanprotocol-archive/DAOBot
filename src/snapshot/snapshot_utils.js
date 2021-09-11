@@ -183,12 +183,11 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
             if( curStratScore !== undefined )
                 strategyScore += curStratScore
         }
-        let resultVotes = {}
-        resultVotes[newVoter] = {
+        return {
+            "address": newVoter,
             "choice": voter[1].choice,
             "balance": strategyScore
         }
-        return resultVotes
     })
 }
 
@@ -200,9 +199,8 @@ const reduceProposalScores = (voterScores) => {
     }
 
     Object.entries(voterScores).reduce((total, cur) => {
-        const voterAddress = Object.keys(cur[1])[0]
-        const choice = cur[1][voterAddress].choice
-        const balance = cur[1][voterAddress].balance
+        const choice = cur[1].choice
+        const balance = cur[1].balance
         if (scores[choice] === undefined) scores[choice] = 0
         scores[choice] += balance
     }, {})
