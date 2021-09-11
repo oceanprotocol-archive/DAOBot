@@ -163,7 +163,7 @@ const main = async () => {
             console.log("Update vote count.")
 
             // Update votes
-            // await syncAirtableActiveProposalVotes(curRoundNumber)
+            await syncAirtableActiveProposalVotes(curRoundNumber)
             await syncGSheetsActiveProposalVotes(curRoundNumber)
         }
     }
