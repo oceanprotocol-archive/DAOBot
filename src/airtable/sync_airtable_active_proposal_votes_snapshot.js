@@ -7,12 +7,13 @@ const { getVoteCountStrategy, getVoterScores, reduceVoterScores, reduceProposalS
 
 // Let's track the state of various proposals
 var activeProposals = {}
-var proposalVotes = {}
-var proposalScores = {}
-var proposalVoteSummary = {}
+// var proposalVotes = {}
 
-// DRY/PARAMETERIZE
 const getActiveProposalVotes = async (curRoundNumber) => {
+    let proposalVotes = {}
+    let voterScores = {}
+    let proposalScores = {}
+
     activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
 
     await Promise.all(activeProposals.map(async (proposal) => {
@@ -29,19 +30,23 @@ const getActiveProposalVotes = async (curRoundNumber) => {
                 voters.push(proposalVotes[ipfsHash][i].voter)
             }
 
-            const voterScores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
+            const scores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
 
-            const reducedVoterScores = reduceVoterScores(strategy, proposalVotes[ipfsHash], voterScores)
-            proposalScores[ipfsHash] = reduceProposalScores(reducedVoterScores)
+            voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
+            proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
         } catch (err) {
             console.log(err)
         }
     }))
+
+    return [voterScores, proposalScores]
 }
 
 const syncAirtableActiveProposalVotes = async (curRoundNumber) => {
-    await getActiveProposalVotes(curRoundNumber)
-    proposalVoteSummary = await sumSnapshotVotesToAirtable(activeProposals, proposalScores)
+    const results = await getActiveProposalVotes(curRoundNumber)
+    let proposalScores = results[1]
+
+    const proposalVoteSummary = await sumSnapshotVotesToAirtable(activeProposals, proposalScores)
     console.log('============')
     await updateProposalRecords(proposalVoteSummary)
     console.log('[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), proposalVoteSummary.length)

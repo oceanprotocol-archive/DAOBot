@@ -7,10 +7,19 @@ const {initOAuthToken} = require('../gsheets/gsheets')
 const {getValues, addSheet, updateValues} = require('../gsheets/gsheets_utils')
 const {getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet} = require('./rounds/funding_rounds')
 
-const processFundingRoundComplete = async (curRoundNumber) => {
+const clearFundedRecords = (proposals) => {
+    proposals = proposals.map(p => {
+        p.fields['USD Granted'] = 0
+        p.fields['OCEAN Requested'] = 0
+        p.fields['OCEAN Granted'] = 0
+    })
+}
+
+const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     // Step 1 - Identify all winning and downvoted proposals
-    // const activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
     const activeProposals = await getProposalsSelectQuery(`{Round} = "${curRoundNumber}"`)
+
+    clearFundedRecords(activeProposals)
     const downvotedProposals = getDownvotedProposals(activeProposals)
     const winningProposals = getWinningProposals(activeProposals, curRoundNumber)
     const finalResults = calculateFinalResults(winningProposals, curRound)
