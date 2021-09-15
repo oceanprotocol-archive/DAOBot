@@ -66,11 +66,11 @@ const main = async () => {
             console.log("Start next round.")
 
             // Update votes
-            await syncAirtableActiveProposalVotes(curRoundNumber)
-            await syncGSheetsActiveProposalVotes(curRoundNumber)
+            await syncAirtableActiveProposalVotes(lastRoundNumber)
+            await syncGSheetsActiveProposalVotes(lastRoundNumber)
 
             // Complete round calculations
-            const proposalsFunded = await processFundingRoundComplete(curRound, curRoundNumber)
+            const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
 
             // Start the next round
             const roundUpdate = [{
