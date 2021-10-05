@@ -57,10 +57,11 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
     proposals.map((p) => {
         // TODO - Add support for non-granular voting system
         const batchIndex = p.get('Snapshot Batch Index')
+        const batchIndexNo = p.get('Snapshot Batch Index No')
         const ipfsHash = p.get('ipfsHash')
 
         const yesIndex = batchIndex === undefined ? 1 : batchIndex
-        const noIndex = batchIndex === undefined ? 2 : undefined
+        const noIndex = batchIndexNo === undefined ? 2 : batchIndexNo
 
         const yesVotes = proposalScores[ipfsHash][yesIndex] || 0
         const noVotes = noIndex === 2 ? proposalScores[ipfsHash][noIndex] : 0
@@ -92,6 +93,8 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
 const calculateRoundSummary = async (proposals, voterScores, proposalScores) => {
     // push all votes, from all proposals into a single object
     let votes = []
+
+    // TODO - Update function to support Y/N voting
     const batchMode = proposals[0].get('Snapshot Batch Index') !== undefined
     // If Granular Voting
     if(batchMode === true) {
@@ -138,7 +141,7 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
                 walletSummary[address]['sumNo'] = 0
             })
         } else {
-            Object.values(w).map((v) => {
+            Object.values(w).map((v) => {proposalScores
                 walletSummary[address]['numVotes']++;
                 walletSummary[address]['numYes'] += v[1] === 1 ? 1 : 0
                 walletSummary[address]['numNo'] += v[1] === 2 ? 1 : 0

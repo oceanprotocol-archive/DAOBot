@@ -8,7 +8,7 @@ const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
-const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
+const {submitProposalsToSnaphotBatch} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const {sleep} = require('../functions/utils')
@@ -134,7 +134,7 @@ const main = async () => {
             console.log("Start Voting period.")
 
             // Submit to snapshot + Enter voting state
-            await submitProposalsToSnapshot(curRoundNumber)
+            await submitProposalsToSnaphotBatch(curRoundNumber)
 
             const roundUpdate = [{
                 id: curRound['id'],
