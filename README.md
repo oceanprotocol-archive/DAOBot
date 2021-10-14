@@ -49,8 +49,8 @@ Instructions
 
 Example Crontab - Sync every 2 minutes 
 ```
-*/2 * * * * sh /DAOBot/cron_sync_votes_airtable.sh 2>&1
-*/2 * * * * sh /DAOBot/cron_sync_votes_gsheets.sh 2>&1
+* * * * * sh /DAOBot/cron_update_funding_round.sh 2>&1
+*/5 * * * * sh /DAOBot/cron_update_standings.sh 2>&1
 ```
 
 ## RUN/CRON - DAOBot Main entry points
@@ -78,3 +78,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
