@@ -256,7 +256,7 @@ describe('Process Project Standings', function() {
         should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
     });
 
-    it('Validate [currentProposalStanding] New Entrants, and Unmatched have no standing', function() {
+    it('Validate [currentProposalStanding] New Entrants, and Unmatched have standing=New Project', function() {
         // Complete every proposal
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -278,9 +278,9 @@ describe('Process Project Standings', function() {
         should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], latestProposals['test'].fields['Proposal Standing'])
         should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.Incomplete);
 
-        should.equal(currentProposalStandings['New Existing Entrant'][0].fields['Proposal Standing'], null);
+        should.equal(currentProposalStandings['New Existing Entrant'][0].fields['Proposal Standing'], Standings.NewProject);
         should.equal(currentProposalStandings['New Existing Entrant'][0].fields['Proposal State'], undefined);
-        should.equal(currentProposalStandings['New Entrant'][0].fields['Proposal Standing'], null);
+        should.equal(currentProposalStandings['New Entrant'][0].fields['Proposal Standing'], Standings.NewProject);
         should.equal(currentProposalStandings['New Entrant'][0].fields['Proposal State'], undefined);
     });
 
@@ -374,9 +374,9 @@ describe('Process Project Standings', function() {
         let proposalStandings = processProposalStandings(allProposals);
         processHistoricalStandings(proposalStandings);
 
-        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], undefined)
-        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], undefined)
-        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], undefined)
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.NewProject)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.NewProject)
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.NewProject)
     });
 
     it('Validates downvoted/declined projects without standing receive previous standings.', function() {
@@ -401,7 +401,7 @@ describe('Process Project Standings', function() {
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
         should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Completed)
         should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.Completed)
-        should.equal(proposalStandings['test'][3].fields['Proposal Standing'], Standings.Completed)
+        should.equal(proposalStandings['test'][3].fields['Proposal Standing'], Standings.NewProject)
     });
 
     it('Validates State.Received proposals report Standing.NoOcean.', function() {
