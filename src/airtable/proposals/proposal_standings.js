@@ -17,6 +17,7 @@ const State = {
 // Project Standings
 const Standings = {
     Undefined: undefined,
+    NewProject: 'New Project',
     NoOcean: 'No Ocean',
     Unreported: 'Unreported',
     Completed: 'Completed',
@@ -159,6 +160,11 @@ const processHistoricalStandings = (proposalStandings) => {
                 if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
                 else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
                 else if ( proposal.fields['Proposal Standing'] !== null ) lastStanding = proposal.fields['Proposal Standing']
+            }
+
+            // Add 'New Project' value to 'Proposal Standing' column if there is no proposal standing value.
+            if( proposal.fields['Proposal Standing'] === null ) {
+                proposal.fields['Proposal Standing'] = Standings.NewProject
             }
 
             // OUTSTANDING PROPOSAL URLS:
