@@ -50,7 +50,7 @@ const getProjectStanding = (proposalState, deliverableChecklist, completed, time
     else if( funded === false && deliverableChecklist.length === 0 ) newStanding = Standings.NewProject
     else if( refunded === true ) newStanding = Standings.Refunded
     else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
-    //else if( areOceansEnough === false ) newStanding = Standings.NoOcean
+    else if( areOceansEnough === false ) newStanding = Standings.NoOcean
     else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
     else newStanding = Standings.Unreported
 
@@ -161,7 +161,6 @@ const processHistoricalStandings = async (proposalStandings) => {
         for( const proposal of value) {
             let areOceansEnough = await hasEnoughOceans(proposal.fields['Wallet Address'])
             proposal.fields['Outstanding Proposals'] = ''
-            console.log(areOceansEnough)
             if(proposal.fields['Proposal Standing'] === Standings.NoOcean){
                 if( areOceansEnough){
                     proposal.fields['Proposal Standing'] = Standings.NewProject

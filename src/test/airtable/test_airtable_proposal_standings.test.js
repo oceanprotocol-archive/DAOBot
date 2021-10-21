@@ -5,9 +5,12 @@ dotenv.config();
 const should = require('chai').should();
 const expect = require('chai').expect;
 const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
+const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS} = require('../config')
 
 var currentProposals = undefined
 var allProposals = []
+
+//WALLET_ADDRESS_WITH_ENOUGH_OCEANS =''
 
 beforeEach(async function() {
     currentProposals = [{
@@ -21,6 +24,7 @@ beforeEach(async function() {
             'Last Deliverable Update': 'May 01, 2021',
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -37,6 +41,7 @@ beforeEach(async function() {
             'Last Deliverable Update': undefined,
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -53,6 +58,7 @@ beforeEach(async function() {
             'Last Deliverable Update': undefined,
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -69,6 +75,7 @@ beforeEach(async function() {
             'Last Deliverable Update': 'Jan 01, 2021',
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -84,6 +91,7 @@ beforeEach(async function() {
             'Last Deliverable Update': 'Feb 01, 2021',
             'Refund Transaction': '0xRefundTx',
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -99,6 +107,7 @@ beforeEach(async function() {
             'Last Deliverable Update': 'Mar 01, 2021',
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -114,6 +123,7 @@ beforeEach(async function() {
             'Last Deliverable Update': 'Apr 01, 2021',
             'Refund Transaction': undefined,
             'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
         },
         get: function (key) {
             return this.fields[key];
@@ -433,6 +443,7 @@ describe('Process Project Standings', function() {
         allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
         allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
         allProposals[0].fields['Proposal State'] = State.Rejected
+        allProposals[0].fields['Wallet Address'] ='0x9DA423a15a87E145d9dAEF73F30A710cB4106BD2'
 
         //console.log(allProposals[0].fields)
 
