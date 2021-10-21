@@ -35,11 +35,24 @@ const populate = async projects => {
 	});
 };
 
+const levels = {
+	// NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r11-update-funding-levels
+	"Round 11": project => {
+		const completed = project["Project Standing"].Completed;
+		if (completed === 0) return "New Project";
+		if (completed === 1) return "Existing Project";
+		if (completed >= 2 && completed < 5) return "Experienced Project";
+		if (completed >= 5) return "Veteran Project";
+	}
+};
+
 const toAirtableList = projects => {
 	const l = [];
 	for (const [key, value] of Object.entries(projects)) {
 		value["Project Name"] = key;
+		value["Project Level"] = levels["Round 11"](value);
 		delete value["Project Standing"];
+
 		l.push({
 			fields: {
 				...value
@@ -117,5 +130,6 @@ module.exports = {
 	summarize,
 	populate,
 	chunk,
-	toAirtableList
+	toAirtableList,
+	levels
 };

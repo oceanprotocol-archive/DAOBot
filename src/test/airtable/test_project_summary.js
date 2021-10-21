@@ -7,15 +7,69 @@ const {
   summarize,
   retrieve,
   chunk,
-  toAirtableList
+  toAirtableList,
+  levels
 } = require("../../airtable/project_summary.js");
 
-describe("getting all proposals", () => {
+describe("Creating project summaries", () => {
+  it("should summarize levels given the project standings", done => {
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 0
+        }
+      }),
+      "New Project"
+    );
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 1
+        }
+      }),
+      "Existing Project"
+    );
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 2
+        }
+      }),
+      "Experienced Project"
+    );
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 4
+        }
+      }),
+      "Experienced Project"
+    );
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 5
+        }
+      }),
+      "Veteran Project"
+    );
+    assert.deepEqual(
+      levels["Round 11"]({
+        "Project Standing": {
+          Completed: 1337
+        }
+      }),
+      "Veteran Project"
+    );
+    done();
+  });
+
   it("should chunk any array to a max size of 10", done => {
     const chunks = chunk([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert.deepEqual(chunks, [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]);
     done();
   });
+
   it("is should return the base with all data included", async () => {
     const proposals = await retrieve();
     expect(proposals).to.be.an("array");
@@ -65,6 +119,7 @@ describe("getting all proposals", () => {
       {
         fields: {
           "Project Name": "FantasyFinance",
+          "Project Level": "Experienced Project",
           "Voted Yes": 3,
           "Voted No": 0,
           "OCEAN Granted": 3,
@@ -75,6 +130,7 @@ describe("getting all proposals", () => {
       {
         fields: {
           "Project Name": "LoserFinance",
+          "Project Level": "New Project",
           "Voted Yes": 0,
           "Voted No": 1,
           "OCEAN Granted": 0,
