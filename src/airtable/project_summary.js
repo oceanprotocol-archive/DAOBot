@@ -15,6 +15,44 @@ const fields = [
   "Proposal Standing"
 ];
 
+const summarize = proposals => {
+  const projects = {};
+  for (let proposal of proposals) {
+    const name = proposal["Project Name"];
+    let project = projects[name];
+
+    if (!project) {
+      project = {
+        "Voted Yes": proposal["Voted Yes"],
+        "Voted No": proposal["Voted No"],
+        "OCEAN Granted": proposal["OCEAN Granted"],
+        "Times Proposed": 1,
+        "Times Granted": proposal["OCEAN Granted"] > 0 ? 1 : 0,
+        "Project Standing": {
+          Completed: 0,
+          "Funds Returned": 0,
+          "In Progress": 0,
+          "incomplete & inactive": 0,
+          Unreported: 0,
+          "In Dispute": 0
+        }
+      };
+      project["Project Standing"][proposal["Proposal Standing"]] += 1;
+    } else {
+      project["Voted Yes"] += proposal["Voted Yes"];
+      project["Voted No"] += proposal["Voted No"];
+      project["OCEAN Granted"] += proposal["OCEAN Granted"];
+      project["Times Granted"] += proposal["OCEAN Granted"] > 0 ? 1 : 0;
+
+      project["Times Proposed"] += 1;
+      project["Project Standing"][proposal["Proposal Standing"]] += 1;
+    }
+    projects[name] = project;
+  }
+
+  return projects;
+};
+
 const retrieve = async () => {
   const proposals = [];
 
@@ -41,5 +79,6 @@ const retrieve = async () => {
 };
 
 module.exports = {
-  retrieve
+  retrieve,
+  summarize
 };
