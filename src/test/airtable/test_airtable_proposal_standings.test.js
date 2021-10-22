@@ -5,7 +5,7 @@ dotenv.config();
 const should = require('chai').should();
 const expect = require('chai').expect;
 const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
-const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS} = require('../config')
+const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS, WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS} = require('../config')
 
 var currentProposals = undefined
 var allProposals = []
@@ -428,9 +428,8 @@ describe('Process Project Standings', function() {
         // latestProposal should equal head of each project
         let latestProposals = getProjectsLatestProposal(proposalStandings)
 
-        currentProposals[0].fields['Deployment Ready'] = 'No'
-        currentProposals[0].fields['Deliverable Checklist'] = undefined
-        currentProposals[0].fields['Proposal State'] = State.Received
+        currentProposals[0].fields['Proposal State'] = State.Rejected
+        currentProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
 
         let currentProposalStandings = await processProposalStandings(currentProposals)
         updateCurrentRoundStandings(currentProposalStandings, latestProposals)
@@ -443,7 +442,6 @@ describe('Process Project Standings', function() {
         allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
         allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
         allProposals[0].fields['Proposal State'] = State.Rejected
-        allProposals[0].fields['Wallet Address'] ='0x9DA423a15a87E145d9dAEF73F30A710cB4106BD2'
 
         //console.log(allProposals[0].fields)
 
@@ -451,14 +449,6 @@ describe('Process Project Standings', function() {
         let proposalStandings = await processProposalStandings(allProposals);
         //console.log(proposalStandings['test'][0])
         await processHistoricalStandings(proposalStandings);
-
-        // Step 3 - Report the latest (top of stack) proposal standing from each project
-        // latestProposal should equal head of each project
-        /*let latestProposals = getProjectsLatestProposal(proposalStandings)
-        allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
-
-        let currentProposalStandings = processProposalStandings(currentProposals)
-        updateCurrentRoundStandings(currentProposalStandings, latestProposals)*/
 
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed);
     });
