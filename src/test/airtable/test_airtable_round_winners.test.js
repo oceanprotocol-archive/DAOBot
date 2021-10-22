@@ -13,7 +13,7 @@ beforeEach(async function() {
         id: 'round_8',
         fields: {
             'OCEAN Price': 0.5,
-            'Earmarked USD': 1500,
+            'Earmarks': '{"New Outreach":{"OCEAN":30000, "USD":28000}, "New Project":{"OCEAN":40000, "USD":38000}, "Core Tech":{"OCEAN":50000, "USD":48000}, "General":{"OCEAN":60000, "USD":58000}}',
             'Funding Available USD': 5000,
         },
         get: function (key) {
@@ -113,7 +113,7 @@ beforeEach(async function() {
 });
 
 describe('Calculating Winners', function() {
-    it('Sample data includes 3 proposals', function() {
+    /*it('Sample data includes 3 proposals', function() {
         should.equal(allProposals.length, 8);
     });
 
@@ -239,5 +239,22 @@ describe('Calculating Winners', function() {
         should.equal(generalResults.length, 5)
         should.equal(partiallyFundedResults.length, 1)
         should.equal(notFundedResults.length, 3)
+    });*/
+
+    it('Test new earmarks structure', function() {
+        let oceanPrice = fundingRound.get('OCEAN Price')
+        allProposals[0].fields['Earmarks'] = 'New Project'
+        allProposals[1].fields['Earmarks'] = 'New Project'
+        allProposals[2].fields['Earmarks'] = 'New Project'
+
+        allProposals[3].fields['Earmarks'] = 'Core Tech'
+        allProposals[4].fields['Earmarks'] = 'Core Tech'
+
+        let proposalsWithEarmark = allProposals.filter(p => p.get('Earmarks') !== undefined)
+        //console.log(fundingRound.get('Earmarks'))
+        let finalResults = calculateFinalResults(proposalsWithEarmark, fundingRound)
+        console.log(finalResults)
+        /*let earmarkedResults = calculateWinningProposals(proposalsWithEarmark, usdEarmarked, oceanPrice)
+        should.equal(earmarkedResults.winningProposals.length, 1)*/
     });
 });

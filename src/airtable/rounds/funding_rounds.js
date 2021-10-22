@@ -91,9 +91,47 @@ const calculateWinningProposals = (proposals, fundsAvailableUSD, oceanPrice) => 
 }
 
 const calculateFinalResults = (proposals, fundingRound) => {
+    let earmarkedResults = {}
     let oceanPrice = fundingRound.get('OCEAN Price')
+    let earmarkedWinnerIds = []
 
-    let earmarks = proposals.filter(p => p.get('Earmarks') !== undefined)
+    const earmarksJson = JSON.parse(fundingRound.get('Earmarks'))
+
+    for(const earmark in earmarksJson){
+        let earmarkProposals = proposals.filter(proposal => proposal.get('Earmarks') === earmark)
+        if(earmarkProposals.length === 0) {
+            earmarkedResults[earmark] = []
+            continue
+        }
+        //console.log(earmarkProposals)
+        let usdEarmarked = earmarksJson[earmark]['USD']
+        //console.log(usdEarmarked)
+        let winningProposals = calculateWinningProposals(earmarkProposals, usdEarmarked, oceanPrice)
+        console.log(winningProposals)
+        earmarkedResults[earmark] = winningProposals
+        earmarkedWinnerIds=winningProposals.winningProposals.map(x => x['id'])
+    }
+    
+    console.log(earmarkedResults)
+
+    let remainder = proposals.filter(p => earmarkedWinnerIds.lastIndexOf(p['id']) === -1 )
+    let partiallyFunded = remainder.filter(p => p.get('USD Granted') > 0)
+    let notFunded = remainder.filter(p => p.get('USD Granted') === undefined || p.get('USD Granted') === 0)
+    notFunded.map(p => {
+        p.fields['OCEAN Requested'] = 0
+        p.fields['USD Granted'] = 0
+        p.fields['OCEAN Granted'] = 0
+        p.fields['Proposal State'] = 'Not Granted'
+    })
+
+    return {
+        earmarkedResults: earmarkedResults,
+        partiallyFunded: partiallyFunded,
+        notFunded: notFunded,
+    }
+
+
+    /*let earmarks = proposals.filter(p => p.get('Earmarks') !== undefined)
     let usdEarmarked = fundingRound.get('Earmarked USD')
     let earmarkedResults = calculateWinningProposals(earmarks, usdEarmarked, oceanPrice)
     let earmarkedWinnerIds = earmarkedResults.winningProposals.map(x => x['id'])
@@ -118,7 +156,8 @@ const calculateFinalResults = (proposals, fundingRound) => {
         generalResults: generalResults,
         partiallyFunded: partiallyFunded,
         notFunded: notFunded,
-    }
+    }*/
+    return undefined
 }
 
 const dumpResultsToGSheet = async (results) => {
