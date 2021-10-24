@@ -32,28 +32,24 @@ const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
         // We probably want to throttle the deployment to snapshot w/ a sleep
         let submittedProposals = []
         for(const proposal of acceptedProposals) {
-            try {
-                validateAccceptedProposal(proposal)
+            validateAccceptedProposal(proposal)
 
-                const payload = buildGranularProposalPayload(proposal, roundNumber, voteType)
-                const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
+            const payload = buildGranularProposalPayload(proposal, roundNumber, voteType)
+            const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
 
-                if (result !== undefined) {
-                    console.log(result)
-                    submittedProposals.push({
-                        id: proposal.id,
-                        fields: {
-                            'ipfsHash': result.ipfsHash,
-                            'Vote URL': `https://${process.env.SNAPSHOT_URL}/#/${process.env.SNAPSHOT_SPACE}/proposal/${result.ipfsHash}`,
-                            'Proposal State': 'Running'
-                        }
-                    })
-                }
-
-                await sleep(250)
-            } catch (err) {
-                console.log(err)
+            if (result !== undefined) {
+                console.log(result)
+                submittedProposals.push({
+                    id: proposal.id,
+                    fields: {
+                        'ipfsHash': result.ipfsHash,
+                        'Vote URL': `https://${process.env.SNAPSHOT_URL}/#/${process.env.SNAPSHOT_SPACE}/proposal/${result.ipfsHash}`,
+                        'Proposal State': 'Running'
+                    }
+                })
             }
+
+            await sleep(250)
         }
 
         if (submittedProposals.length > 0) {
@@ -75,18 +71,15 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
         let proposalIndex = {} // let's keep a dict of proposalName + y/n indexes
         let proposalArr = [] // let's keep all proposals Y/N in an ordered array
         let index = 1
-        try {
-            for(const proposal of acceptedProposals) {
-                validateAccceptedProposal(proposal)
-                proposalIndex[proposal.get('Project Name')] = [index, index + 1]
-                proposalArr.push(proposal.get('Project Name') + '_Yes' )
-                proposalArr.push(proposal.get('Project Name') + '_No' )
-                index += 2
-            }
-        } catch (err) {
-            console.log(err)
-        }
 
+        for(const proposal of acceptedProposals) {
+            validateAccceptedProposal(proposal)
+            proposalIndex[proposal.get('Project Name')] = [index, index + 1]
+            proposalArr.push(proposal.get('Project Name') + '_Yes' )
+            proposalArr.push(proposal.get('Project Name') + '_No' )
+            index += 2
+        }
+        
         const payload = buildBatchProposalPayload(acceptedProposals, proposalArr, roundNumber, voteType)
         const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
         console.log(result)
