@@ -8,9 +8,10 @@ const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
-const {submitProposalsToSnaphotBatch} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
+const {submitProposalsToSnaphotGranular, submitProposalsToSnaphotBatch} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const {VoteType, BallotType} = require('../snapshot/snapshot_utils')
 const {sleep} = require('../functions/utils')
 const {getTokenPrice} = require('../functions/coingecko')
 
@@ -37,6 +38,8 @@ const main = async () => {
     let curRoundProposalsDueBy_plus15 = undefined
     let curRoundVoteStart = undefined
     let curRoundVoteEnd = undefined
+    let curRoundVoteType = undefined
+    let curRoundBallotType = undefined
 
     if( curRound !== undefined ) {
         curRoundNumber = curRound.get('Round')
@@ -46,6 +49,8 @@ const main = async () => {
         curRoundProposalsDueBy_plus15 = moment(curRound.get('Proposals Due By')).add(15, 'minutes').utc().toISOString()
         curRoundVoteStart = curRound.get('Voting Starts')
         curRoundVoteEnd = curRound.get('Voting Ends')
+        curRoundVoteType = curRound.get('Vote Type')
+        curRoundBallotType = curRound.get('Ballot Type')
     }
 
     const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
@@ -134,7 +139,11 @@ const main = async () => {
             console.log("Start Voting period.")
 
             // Submit to snapshot + Enter voting state
-            await submitProposalsToSnaphotBatch(curRoundNumber)
+            if( curRoundBallotType === BallotType.Granular ) {
+                await submitProposalsToSnaphotGranular(curRoundNumber, curRoundVoteType)
+            } else if( curRoundBallotType === BallotType.Batch ) {
+                await submitProposalsToSnaphotBatch(curRoundNumber, curRoundVoteType)
+            }
 
             const roundUpdate = [{
                 id: curRound['id'],

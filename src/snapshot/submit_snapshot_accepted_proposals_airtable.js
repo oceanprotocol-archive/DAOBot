@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
-const {buildGranularProposalPayload, buildBatchProposalPayload, local_broadcast_proposal, VoteType} = require('./snapshot_utils')
+const {buildGranularProposalPayload, buildBatchProposalPayload, local_broadcast_proposal, VoteType, BallotType} = require('./snapshot_utils')
 const {assert, sleep} = require('../functions/utils')
 const {web3} = require('../functions/web3')
 
@@ -22,7 +22,7 @@ const validateAccceptedProposal = (proposal) => {
 
 // All required fields should have already been validated by the online Form
 // Build payload for proposal, and submit it
-const submitProposalsToSnaphotGranular = async (roundNumber) => {
+const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
     try {
         // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
         const acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Accepted", "true")`)
@@ -35,7 +35,7 @@ const submitProposalsToSnaphotGranular = async (roundNumber) => {
             try {
                 validateAccceptedProposal(proposal)
 
-                const payload = buildGranularProposalPayload(proposal, roundNumber, VoteType.SingleChoice)
+                const payload = buildGranularProposalPayload(proposal, roundNumber, voteType)
                 const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
 
                 if (result !== undefined) {
@@ -67,7 +67,7 @@ const submitProposalsToSnaphotGranular = async (roundNumber) => {
     }
 }
 
-const submitProposalsToSnaphotBatch = async (roundNumber) => {
+const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
     try {
         // TODO - Parameterize (Docker) + CI/CD Deploy Button + PEBKAC
         const acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${roundNumber}", {Proposal State} = "Accepted", "true")`)
@@ -87,7 +87,7 @@ const submitProposalsToSnaphotBatch = async (roundNumber) => {
             console.log(err)
         }
 
-        const payload = buildBatchProposalPayload(acceptedProposals, proposalArr, roundNumber, VoteType.Quadratic)
+        const payload = buildBatchProposalPayload(acceptedProposals, proposalArr, roundNumber, voteType)
         const result = await local_broadcast_proposal(web3, account, payload, process.env.SNAPSHOT_SPACE)
         console.log(result)
 

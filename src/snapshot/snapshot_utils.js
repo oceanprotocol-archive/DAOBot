@@ -118,7 +118,13 @@ const strategy = {
 
 const VoteType = {
     SingleChoice: "single-choice",
-    Quadratic: "quadratic"
+    Quadratic: "quadratic",
+    Weighted: "weighted",
+}
+
+const BallotType = {
+    Batch: "Batch",
+    Granular: "Granular"
 }
 
 const getVoteCountStrategy = (roundNumber) => {
@@ -271,7 +277,7 @@ ${x.get('Project Name')} - [Click Here](${x.get('Proposal URL')})
     return payload = {
         end: endTs,
         body: body,
-        name: `OceanDAO Round ${roundNumber}`,
+        name: `Test Proposal ${roundNumber}`,
         type: voteType,
         start: startTs,
         choices: choices,
@@ -351,5 +357,6 @@ module.exports = {
     buildBatchProposalPayload,
     local_broadcast_proposal,
     calcTargetBlockHeight,
-    VoteType
+    VoteType,
+    BallotType
 }
