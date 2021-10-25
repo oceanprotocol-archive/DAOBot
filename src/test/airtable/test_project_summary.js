@@ -5,13 +5,88 @@ const expect = require("chai").expect;
 
 const {
   summarize,
+  populate,
   retrieve,
   chunk,
   toAirtableList,
-  levels
+  levels,
+  remove,
+  deleteAll
 } = require("../../airtable/project_summary.js");
 
 describe("Creating project summaries", () => {
+  it("should populate a table", async done => {
+    const record = {
+      fields: {
+        "Project Name": "FantasyFinance",
+        "Project Level": "Experienced Project",
+        "Voted Yes": 3,
+        "Voted No": 0,
+        "OCEAN Granted": 3,
+        "Times Proposed": 2,
+        "Times Granted": 2
+      }
+    };
+    const [id] = await populate([record]);
+    assert(id.startsWith("rec"));
+    done();
+  });
+
+  it("should delete records from a table", async done => {
+    const record = {
+      fields: {
+        "Project Name": "FantasyFinance",
+        "Project Level": "Experienced Project",
+        "Voted Yes": 3,
+        "Voted No": 0,
+        "OCEAN Granted": 3,
+        "Times Proposed": 2,
+        "Times Granted": 2
+      }
+    };
+    const [id] = await populate([record]);
+    assert(id.startsWith("rec"));
+
+    const [removedId] = await remove([id]);
+    assert(id.startsWith("rec"));
+    done();
+  });
+
+  it("should delete ALL records from a table", async done => {
+    const records = [
+      {
+        fields: {
+          "Project Name": "FantasyFinance",
+          "Project Level": "Experienced Project",
+          "Voted Yes": 3,
+          "Voted No": 0,
+          "OCEAN Granted": 3,
+          "Times Proposed": 2,
+          "Times Granted": 2
+        }
+      },
+      {
+        fields: {
+          "Project Name": "LoserFinance",
+          "Project Level": "New Project",
+          "Voted Yes": 0,
+          "Voted No": 1,
+          "OCEAN Granted": 0,
+          "Times Proposed": 1,
+          "Times Granted": 0
+        }
+      }
+    ];
+    const [id] = await populate(records);
+    assert(id.startsWith("rec"));
+
+    const [id1, id2] = await deleteAll();
+    assert(id1.startsWith("rec"));
+    assert(id2.startsWith("rec"));
+
+    done();
+  });
+
   it("should summarize levels given the project standings", done => {
     assert.deepEqual(
       levels["Round 11"]({
@@ -70,8 +145,30 @@ describe("Creating project summaries", () => {
     done();
   });
 
-  it("is should return the base with all data included", async () => {
-    const proposals = await retrieve();
+  it("should return all projects in the 'Project Summary' table", async done => {
+    const record = {
+      fields: {
+        "Project Name": "FantasyFinance",
+        "Project Level": "Experienced Project",
+        "Voted Yes": 3,
+        "Voted No": 0,
+        "OCEAN Granted": 3,
+        "Times Proposed": 2,
+        "Times Granted": 2
+      }
+    };
+    const [id] = await populate([record]);
+    assert(id.startsWith("rec"));
+
+    const projects = await retrieve.projects();
+    expect(projects).to.be.an("array");
+    // NOTE: All Airtable record ids start with the substring "rec"...
+    assert(projects[0].startsWith("rec"));
+    done();
+  });
+
+  it("should return the base with all data included", async done => {
+    const proposals = await retrieve.proposals();
     expect(proposals).to.be.an("array");
     expect(proposals[0]).to.have.all.keys(
       "Project Name",
@@ -80,6 +177,7 @@ describe("Creating project summaries", () => {
       "Voted Yes",
       "Voted No"
     );
+    done();
   });
 
   it("should convert a project object it an airtable list", done => {
