@@ -4,7 +4,7 @@ dotenv.config();
 
 const moment = require('moment')
 const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
-const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
+const {RoundState, getCurrentRound, addOCEANValueToEarmarks} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
@@ -112,11 +112,12 @@ const main = async () => {
             let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
             const tokenPrice = await getTokenPrice()
             const maxGrantUSD = curRound.get('Max Grant USD')
-            const earmarkedUSD = curRound.get('Earmarked USD')
+
+            let earmarkedStructureWithOCEAN = addOCEANValueToEarmarks(curRound, tokenPrice)
+
             const fundingAvailableUSD = curRound.get('Funding Available USD')
 
             const maxGrantOCEAN = maxGrantUSD / tokenPrice
-            const earmarkedOCEAN = earmarkedUSD / tokenPrice
             const fundingAvailableOCEAN = fundingAvailableUSD / tokenPrice
 
             // Enter Due Diligence period
@@ -127,7 +128,7 @@ const main = async () => {
                     'Proposals': allProposals.length,
                     'OCEAN Price': tokenPrice,
                     'Max Grant': maxGrantOCEAN,
-                    'Earmarked': earmarkedOCEAN,
+                    'Earmarks': earmarkedStructureWithOCEAN,
                     'Funding Available': fundingAvailableOCEAN,
                 }
             }]
@@ -170,5 +171,7 @@ const main = async () => {
         }
     }
 }
+
+module.exports = {addOCEANValueToEarmarks};
 
 main()

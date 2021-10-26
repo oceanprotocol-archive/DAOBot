@@ -18,6 +18,14 @@ const getFundingRound = async (roundNum) => {
     }
 }
 
+const addOCEANValueToEarmarks = (curRound, tokenPrice) => {
+    let earmarks = JSON.parse(curRound.get('Earmarks'))
+    for(let earmark in earmarks){
+        earmarks[earmark]['OCEAN'] = earmarks[earmark]['USD'] / tokenPrice
+    }
+    return earmarks
+}
+
 const filterCurrentRound = (roundsArr) => {
     try {
         let timeNow = new Date(Date.now()).getTime()
@@ -155,35 +163,6 @@ const calculateFinalResults = (proposals, fundingRound) => {
         generalResults: generalResults,
         notFunded: notFunded,
     }
-
-
-    /*let earmarks = proposals.filter(p => p.get('Earmarks') !== undefined)
-    let usdEarmarked = fundingRound.get('Earmarked USD')
-    let earmarkedResults = calculateWinningProposals(earmarks, usdEarmarked, oceanPrice)
-    let earmarkedWinnerIds = earmarkedResults.winningProposals.map(x => x['id'])
-
-    let general = proposals.filter(p => earmarkedWinnerIds.lastIndexOf(p['id']) === -1 )
-    let usdGeneral = fundingRound.get('Funding Available USD') - usdEarmarked
-    let generalResults = calculateWinningProposals(general, usdGeneral, oceanPrice)
-    let generalWinnerIds = generalResults.winningProposals.map(x => x['id'])
-
-    let remainder = general.filter(p => generalWinnerIds.lastIndexOf(p['id']) === -1 )
-    let partiallyFunded = remainder.filter(p => p.get('USD Granted') > 0)
-    let notFunded = remainder.filter(p => p.get('USD Granted') === undefined || p.get('USD Granted') === 0)
-    notFunded.map(p => {
-        p.fields['OCEAN Requested'] = 0
-        p.fields['USD Granted'] = 0
-        p.fields['OCEAN Granted'] = 0
-        p.fields['Proposal State'] = 'Not Granted'
-    })
-
-    return {
-        earmarkedResults: earmarkedResults,
-        generalResults: generalResults,
-        partiallyFunded: partiallyFunded,
-        notFunded: notFunded,
-    }*/
-    return undefined
 }
 
 const dumpResultsToGSheet = async (results) => {
@@ -213,4 +192,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet};
+module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks};

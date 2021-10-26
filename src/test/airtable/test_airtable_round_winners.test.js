@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const should = require('chai').should();
-const {getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet} = require('../../airtable/rounds/funding_rounds')
+const {getWinningProposals, getDownvotedProposals, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks} = require('../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []
@@ -113,6 +113,17 @@ beforeEach(async function() {
 });
 
 describe('Calculating Winners', function() {
+
+    it('Check if earmarks structure OCEAN values are populated ', async function() {
+        fundingRound.fields['Earmarks'] = '{"New Outreach":{"OCEAN":0, "USD":28000}, "New Project":{"OCEAN":0, "USD":38000}, "Core Tech":{"OCEAN":0, "USD":48000}}'
+        const tokenPrice = 0.5
+        let newEarmarks = await addOCEANValueToEarmarks(fundingRound,tokenPrice)
+
+        for(earmark in newEarmarks){
+            should.equal(newEarmarks[earmark]['OCEAN'], newEarmarks[earmark]['USD'] / tokenPrice)
+        }
+    });
+
     it('Sample data includes 3 proposals', function() {
         should.equal(allProposals.length, 8);
     });
