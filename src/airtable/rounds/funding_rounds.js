@@ -70,7 +70,7 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
             let usdRequested = p.get('USD Requested')
             let grantCarry = p.get('USD Granted') || 0
             let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
-            //console.log(usdGranted)
+
             p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
             p.fields['USD Granted'] = usdGranted + grantCarry
             p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
@@ -104,12 +104,9 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
         if(earmarkProposals.length === 0) {
             earmarkedResults[earmark] = []
             fundsLeft += earmarksJson[earmark]['USD']
-            //console.log(fundsLeft)
             continue
         }
-        //console.log(earmarkProposals)
         let currentUsdEarmarked = earmarksJson[earmark]['USD']
-        //console.log(usdEarmarked)
         let winningProposals = calculateWinningProposalsForEarmark(earmarkProposals, currentUsdEarmarked, oceanPrice)
         usdEarmarked+=currentUsdEarmarked
         earmarkedResults[earmark] = winningProposals
@@ -138,13 +135,8 @@ const calculateFinalResults = (proposals, fundingRound) => {
 
     let general = proposals.filter(p => earmarkedResults.winnerIds.lastIndexOf(p['id']) === -1 )
 
-    //console.log('general:', general)
-
     let usdGeneral = fundingRound.get('Funding Available USD') - usdEarmarked
-    //console.log('usdEarmarked', usdEarmarked)
-    //console.log('usdGeneral', usdGeneral)
     let generalResults = calculateWinningProposalsForEarmark(general, usdGeneral, oceanPrice)
-    //console.log('general results', generalResults)
     let generalWinnerIds = generalResults.winningProposals.map(x => x['id'])
 
     let remainder = general.filter(p => generalWinnerIds.lastIndexOf(p['id']) === -1 )

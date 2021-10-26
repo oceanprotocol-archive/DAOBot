@@ -226,11 +226,8 @@ describe('Calculating Winners', function() {
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
         let downvotedResults = await dumpResultsToGSheet(downvotedProposals)
-        //console.log(downvotedResults)
         let earmarkedResults = await dumpResultsToGSheet(finalResults.earmarkedResults.winningProposals)
-        console.log(finalResults.generalResults.winningProposals)
         let generalResults = await dumpResultsToGSheet(finalResults.generalResults.winningProposals)
-        console.log(generalResults)
         let partiallyFundedResults = await dumpResultsToGSheet(finalResults.partiallyFunded)
         let notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
 
@@ -266,8 +263,7 @@ describe('Calculating Winners', function() {
 
         //calculate and get the finalt results after granting
         let finalResults = calculateFinalResults(proposalsWithEarmark, fundingRound)
-        //console.log(finalResults)
-        /*let earmarkedResults = calculateWinningProposals(proposalsWithEarmark, usdEarmarked, oceanPrice)
-        should.equal(earmarkedResults.winningProposals.length, 1)*/
+        let earmarkedResults = calculateWinningAllProposals(proposalsWithEarmark, fundingRound, oceanPrice)
+        should.equal(earmarkedResults.winningProposals.length, 5)
     });
 });
