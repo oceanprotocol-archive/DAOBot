@@ -68,7 +68,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(lastRoundNumber)
-            await syncGSheetsActiveProposalVotes(lastRoundNumber)
+            //await syncGSheetsActiveProposalVotes(lastRoundNumber)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
@@ -113,7 +113,7 @@ const main = async () => {
             const tokenPrice = await getTokenPrice()
             const maxGrantUSD = curRound.get('Max Grant USD')
 
-            let earmarkedStructureWithOCEAN = addOCEANValueToEarmarks(curRound, tokenPrice)
+            let earmarkedStructureWithOCEAN = JSON.stringify(addOCEANValueToEarmarks(curRound, tokenPrice))
 
             const fundingAvailableUSD = curRound.get('Funding Available USD')
 

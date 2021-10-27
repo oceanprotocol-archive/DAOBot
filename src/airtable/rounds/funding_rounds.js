@@ -21,7 +21,7 @@ const getFundingRound = async (roundNum) => {
 const addOCEANValueToEarmarks = (curRound, tokenPrice) => {
     let earmarks = JSON.parse(curRound.get('Earmarks'))
     for(let earmark in earmarks){
-        earmarks[earmark]['OCEAN'] = earmarks[earmark]['USD'] / tokenPrice
+        earmarks[earmark]['OCEAN'] = parseFloat(Number.parseFloat(earmarks[earmark]['USD'] / tokenPrice).toFixed(3))
     }
     return earmarks
 }

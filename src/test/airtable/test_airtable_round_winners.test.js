@@ -272,8 +272,7 @@ describe('Calculating Winners', function() {
         //filter all proposals that have Earmarks
         let proposalsWithEarmark = allProposals.filter(p => p.get('Earmarks') !== undefined)
 
-        //calculate and get the finalt results after granting
-        let finalResults = calculateFinalResults(proposalsWithEarmark, fundingRound)
+        //calculate and get all winning proposals
         let earmarkedResults = calculateWinningAllProposals(proposalsWithEarmark, fundingRound, oceanPrice)
         should.equal(earmarkedResults.winningProposals.length, 5)
     });
