@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha './src/test/**/*.js' --recursive -r dotenv/config  --timeout 60000 --exit"
   },
   "author": "",
   "license": "ISC",
