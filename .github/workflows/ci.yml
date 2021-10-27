@@ -29,6 +29,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Install 
+        run: |
+          npm install
+
       - name: Cache node_modules
         uses: actions/cache@v2
         env:
