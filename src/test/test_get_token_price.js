@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-const {getTokenPrice} = require('../../src/functions/coingecko')
+const {getTokenPrice} = require('../functions/coingecko')
 const dotenv = require('dotenv');
 dotenv.config();
 

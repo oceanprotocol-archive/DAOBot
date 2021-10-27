@@ -186,7 +186,7 @@ describe('Snapshot GraphQL test', () => {
             }
         })
         console.log(voterScores)
-    }).timeout(5000);
+    })//.timeout(5000);
 
     it('Validates scores from Y/N granular voting', async () => {
         const strategy = getVoteCountStrategy(8)
@@ -216,7 +216,7 @@ describe('Snapshot GraphQL test', () => {
             }
         })
         console.log(voterScores)
-    }).timeout(5000);
+    })//.timeout(5000);
 
     it('Validates scores from UniV2/Sushi/Bancor', async () => {
         const strategy = getVoteCountStrategy(9)
@@ -252,5 +252,5 @@ describe('Snapshot GraphQL test', () => {
                 console.log(`Voter [${voterAddress}] score is not found in snapshot`)
             }
         })
-    }).timeout(5000);
+    })//.timeout(5000);
 });

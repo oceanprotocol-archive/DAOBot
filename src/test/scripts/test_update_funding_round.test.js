@@ -49,7 +49,7 @@ describe('Functionally test updateFundingRound', function() {
                 should.equal(inactiveProposals.length, 0);
             }
         }
-    }).timeout(5000);
+    })//.timeout(5000);
 
     it.skip('Processes proposals for snapshot.', async function() {
         const currentRound = await getCurrentRound()
@@ -61,7 +61,7 @@ describe('Functionally test updateFundingRound', function() {
             let acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
             expect(acceptedProposals.length).to.be.greaterThan(0);
         }
-    }).timeout(5000);
+    })//.timeout(5000);
 
     it.skip('Deploys proposals to snapshot.', async function() {
         const currentRound = await getCurrentRound()
@@ -74,5 +74,5 @@ describe('Functionally test updateFundingRound', function() {
             let acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
             expect(acceptedProposals.length).to.be.greaterThan(0);
         }
-    }).timeout(90000);
+    })//.timeout(90000);
 });
