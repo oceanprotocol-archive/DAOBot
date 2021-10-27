@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 
 global['fetch'] = require('cross-fetch');
+const fetch = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 

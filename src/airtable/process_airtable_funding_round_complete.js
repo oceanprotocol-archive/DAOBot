@@ -2,13 +2,13 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
-const {initOAuthToken} = require('../gsheets/gsheets')
-const {getValues, addSheet, updateValues} = require('../gsheets/gsheets_utils')
-const {getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet} = require('./rounds/funding_rounds')
+const { getProposalsSelectQuery, updateProposalRecords } = require('./airtable_utils')
+const { initOAuthToken } = require('../gsheets/gsheets')
+const { getValues, addSheet, updateValues } = require('../gsheets/gsheets_utils')
+const { getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet } = require('./rounds/funding_rounds')
 
 const clearFundedRecords = (proposals) => {
-    proposals = proposals.map(p => {
+    proposals.map(p => {
         p.fields['USD Granted'] = 0
         p.fields['OCEAN Requested'] = 0
         p.fields['OCEAN Granted'] = 0
@@ -117,4 +117,4 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     return earmarkedResults.length + generalResults.length + partiallyFundedResults.length
 }
 
-module.exports = {processFundingRoundComplete};
+module.exports = { processFundingRoundComplete };

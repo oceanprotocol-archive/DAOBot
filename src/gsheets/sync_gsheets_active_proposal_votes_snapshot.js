@@ -8,13 +8,13 @@ const { getValues, addSheet, updateValues } = require('./gsheets_utils')
 const { getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores } = require('../snapshot/snapshot_utils');
 
 // Let's track the state of various proposals
-var activeProposals = {}
-var voterScores = {}
-var proposalScores = {}
+let activeProposals = {}
+// var voterScores = {}
+// var proposalScores = {}
 
 // gsheet summaries to make downstream happy
-var proposalSummary = {}
-var roundSummary = {}
+let proposalSummary = {}
+let roundSummary = {}
 
 // Per Snapshot Proposal -> Google Sheet
 // 1. Get proposal data
@@ -28,7 +28,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash, {indexOffset: curRoundNumber})
+        await addSheet(oAuth, ipfsHash, {indexOffset: curRoundNumber})
         console.log("Created new sheet [%s] at index [%s].", ipfsHash, curRoundNumber)
     }
 
@@ -47,7 +47,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     })
 
     // Dump flattened data from snapshot to sheet
-    flatObj.splice(0, 0, ['address', 'choice', 'balace'])
+    flatObj.splice(0, 0, ['address', 'choice', 'balance'])
     await updateValues(oAuth, ipfsHash, 'A1:C' + flatObj.length, flatObj)
 }
 
@@ -89,7 +89,7 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
     return records
 }
 
-const calculateRoundSummary = async (proposals, voterScores, proposalScores) => {
+const calculateRoundSummary = async (proposals, voterScores) => {
     // push all votes, from all proposals into a single object
     let votes = []
     const batchMode = proposals[0].get('Snapshot Batch Index') !== undefined
@@ -191,7 +191,7 @@ const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundS
     const sheetName = `Round ${curRoundNumber} Results`
     var sheet = await getValues(oAuth, sheetName, 'A1:B3')
     if (sheet === undefined) {
-        var newSheets = await addSheet(oAuth, sheetName)
+        await addSheet(oAuth, sheetName)
         console.log("Created new sheet [%s] at index 0.", sheetName)
     }
 

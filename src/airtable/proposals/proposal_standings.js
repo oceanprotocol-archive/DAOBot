@@ -32,11 +32,11 @@ const Disputed = {
     Resolved: 'Resolved'
 }
 
-const Earmarks = {
-    Undefined: undefined,
-    NewEntrants: 'New Entrants',
-    Outreach: 'Outreach'
-}
+// const Earmarks = {
+//     Undefined: undefined,
+//     NewEntrants: 'New Entrants',
+//     Outreach: 'Outreach'
+// }
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
@@ -93,7 +93,7 @@ const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
 const getAllRoundProposals = async (maxRound, minRound = 1) => {
     let allProposals = []
     for (let i = minRound; i <= maxRound; i++) {
-        let roundProposals = await getProposalsSelectQuery(selectionQuery = `{Round} = "${i}"`)
+        let roundProposals = await getProposalsSelectQuery({selectionQuery: `{Round} = "${i}"`})
         allProposals = allProposals.concat(roundProposals)
     }
 

@@ -243,7 +243,7 @@ https://discord.gg/TnXjkR5
 }
 
 const send = async (url, init) => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         fetch(url, init)
             .then((res) => {
                 if (res.ok) return resolve(res.json());
