@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
-    "test": "./node_modules/mocha/bin/mocha './src/test/**/*.js' --recursive -r dotenv/config  --timeout 60000 --exit"
+    "test": "./node_modules/mocha/bin/mocha './src/test/**/*.js' --recursive -r dotenv/config  --timeout 60000 --exit",
+    "lint": "eslint '**/*.js' --ignore-pattern node_modules/"
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.4",
+    "eslint": "^8.1.0",
     "ini": ">=1.3.6",
     "mocha": "^9.0.2",
     "nodemon": "^2.0.4"
