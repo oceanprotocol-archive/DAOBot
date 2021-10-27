@@ -21,7 +21,7 @@ const main = async () => {
 
     // Add all historical proposals that we're going to update
     let rows = []
-    for (const [key, value] of Object.entries(proposalStandings)) {
+    for (const [, value] of Object.entries(proposalStandings)) {
         rows = rows.concat(value)
     }
 
@@ -33,7 +33,7 @@ const main = async () => {
     updateCurrentRoundStandings(currentProposalStandings, latestProposalStandings)
 
     // Add all current proposals that we're going to update
-    for (const [key, value] of Object.entries(currentProposalStandings)) {
+    for (const [, value] of Object.entries(currentProposalStandings)) {
         rows = rows.concat(value)
     }
 

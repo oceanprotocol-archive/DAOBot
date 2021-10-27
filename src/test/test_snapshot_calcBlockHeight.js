@@ -1,4 +1,4 @@
-const snapshot = require('@snapshot-labs/snapshot.js')
+// const snapshot = require('@snapshot-labs/snapshot.js')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {assert} = require('../functions/utils')
 

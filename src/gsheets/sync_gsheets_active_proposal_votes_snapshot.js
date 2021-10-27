@@ -2,10 +2,10 @@ global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
-const {initOAuthToken} = require('./gsheets')
-const {getValues, addSheet, updateValues} = require('./gsheets_utils')
-const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores} = require('../snapshot/snapshot_utils');
+const { getProposalsSelectQuery } = require('../airtable/airtable_utils');
+const { initOAuthToken } = require('./gsheets')
+const { getValues, addSheet, updateValues } = require('./gsheets_utils')
+const { getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores } = require('../snapshot/snapshot_utils');
 
 // Let's track the state of various proposals
 var activeProposals = {}
@@ -28,7 +28,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=curRoundNumber)
+        var newSheets = await addSheet(oAuth, ipfsHash, {indexOffset: curRoundNumber})
         console.log("Created new sheet [%s] at index [%s].", ipfsHash, curRoundNumber)
     }
 
@@ -41,14 +41,14 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
                 vote.choice,
                 vote.balance
             ]
-        } catch(err) {
+        } catch (err) {
             console.log(err)
         }
     })
 
     // Dump flattened data from snapshot to sheet
-    flatObj.splice(0,0, ['address','choice','balace'])
-    await updateValues(oAuth, ipfsHash, 'A1:C'+flatObj.length, flatObj)
+    flatObj.splice(0, 0, ['address', 'choice', 'balace'])
+    await updateValues(oAuth, ipfsHash, 'A1:C' + flatObj.length, flatObj)
 }
 
 // For each proposal, calculate their summary
@@ -66,12 +66,12 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
         const noVotes = noIndex === 2 ? proposalScores[ipfsHash][noIndex] : 0
 
         let numVoters = 0
-        if( batchIndex === undefined ) {
+        if (batchIndex === undefined) {
             numVoters = Object.keys(voterScores[ipfsHash]).length
         } else {
             numVoters = Object.entries(voterScores[ipfsHash])
-                .map((v) => {return v[1].choice === batchIndex ? 1 : 0})
-                .reduce((total, num) => {return total + num})
+                .map((v) => { return v[1].choice === batchIndex ? 1 : 0 })
+                .reduce((total, num) => { return total + num })
         }
         const sumVotes = yesVotes + noVotes
 
@@ -94,7 +94,7 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
     let votes = []
     const batchMode = proposals[0].get('Snapshot Batch Index') !== undefined
     // If Granular Voting
-    if(batchMode === true) {
+    if (batchMode === true) {
         votes = Object.entries(voterScores[proposals[0].get('ipfsHash')])
     } else {
         proposals.map((p) => {
@@ -107,7 +107,7 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
     let wallets = {}
     votes.map((v) => {
         const vote = v[1]
-        if(wallets[v[0]] == null ) {
+        if (wallets[v[0]] == null) {
             wallets[v[0]] = []
         }
 
@@ -121,16 +121,16 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
     // reduce wallet summary
     let walletSummary = {}
     Object.values(wallets).map((w) => {
-        address = w[0][0]
+        let address = w[0][0]
         walletSummary[address] = {
-            'numVotes':0,
-            'numYes':0,
-            'numNo':0,
-            'sumYes':0,
-            'sumNo':0
+            'numVotes': 0,
+            'numYes': 0,
+            'numNo': 0,
+            'sumYes': 0,
+            'sumNo': 0
         }
 
-        if(batchMode === true) {
+        if (batchMode === true) {
             Object.values(w).map((v) => {
                 walletSummary[address]['numVotes']++;
                 walletSummary[address]['numYes'] += 1
@@ -154,21 +154,21 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
     record['numProposals'] = Object.values(proposals).length
     record['numWallets'] = Object.values(wallets).length
     record['numVotes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
-        .map((ws) => {return ws[1]['numVotes']})
-        .reduce((total, num) => {return total + num})
+        .map((ws) => { return ws[1]['numVotes'] })
+        .reduce((total, num) => { return total + num })
 
     record['numYes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
-        .map((ws) => {return ws[1]['numYes']})
-        .reduce((total, num) => {return total + num})
+        .map((ws) => { return ws[1]['numYes'] })
+        .reduce((total, num) => { return total + num })
     record['numNo'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
-        .map((ws) => {return ws[1]['numNo']})
-        .reduce((total, num) => {return total + num})
+        .map((ws) => { return ws[1]['numNo'] })
+        .reduce((total, num) => { return total + num })
     record['sumYes'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
-        .map((ws) => {return ws[1]['sumYes']})
-        .reduce((total, num) => {return total + num})
+        .map((ws) => { return ws[1]['sumYes'] })
+        .reduce((total, num) => { return total + num })
     record['sumNo'] = Object.values(wallets).length === 0 ? 0 : Object.entries(walletSummary)
-        .map((ws) => {return ws[1]['sumNo']})
-        .reduce((total, num) => {return total + num})
+        .map((ws) => { return ws[1]['sumNo'] })
+        .reduce((total, num) => { return total + num })
 
     return [[
         record['numProposals'],
@@ -197,13 +197,13 @@ const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundS
 
     // Dump flattened data from proposalSummary to sheet
     let flatObj = proposalSummary
-    flatObj.splice(0,0, ['ipfsHash','Project Name','Yes','No','Num Voters','Sum Votes'])
-    await updateValues(oAuth, sheetName, 'A1:F'+flatObj.length, flatObj)
+    flatObj.splice(0, 0, ['ipfsHash', 'Project Name', 'Yes', 'No', 'Num Voters', 'Sum Votes'])
+    await updateValues(oAuth, sheetName, 'A1:F' + flatObj.length, flatObj)
 
     // Dump flattened data from roundSummary to sheet
     flatObj = roundSummary
-    flatObj.splice(0,0, ['Num Proposals','Unique Wallets','Num Votes','Num yes','Num No','Sum Yes','Sum No','Sum Votes'])
-    await updateValues(oAuth, sheetName, 'J1:Q'+flatObj.length, flatObj)
+    flatObj.splice(0, 0, ['Num Proposals', 'Unique Wallets', 'Num Votes', 'Num yes', 'Num No', 'Sum Yes', 'Sum No', 'Sum Votes'])
+    await updateValues(oAuth, sheetName, 'J1:Q' + flatObj.length, flatObj)
 }
 
 // DRY
@@ -259,4 +259,4 @@ const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
     console.log('Updated GSheets')
 }
 
-module.exports = {syncGSheetsActiveProposalVotes};
+module.exports = { syncGSheetsActiveProposalVotes };

@@ -3,7 +3,7 @@ const base = require('airtable').base(process.env.AIRTABLE_BASEID)
 
 const splitArr = (arr, chunk) => {
     let arrSplit = []
-    for (i=0; i < arr.length; i += chunk) {
+    for (let i=0; i < arr.length; i += chunk) {
         arrSplit.push(arr.slice(i, i + chunk))
     }
     return arrSplit

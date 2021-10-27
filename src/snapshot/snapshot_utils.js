@@ -1,6 +1,6 @@
 const axios = require('axios');
-const {bufferToHex} = require("ethereumjs-util")
-const {version} = require("@snapshot-labs/snapshot.js/src/constants.json")
+const { bufferToHex } = require("ethereumjs-util")
+const { version } = require("@snapshot-labs/snapshot.js/src/constants.json")
 const fetch = require('cross-fetch')
 const snapshot = require('@snapshot-labs/snapshot.js')
 
@@ -119,12 +119,12 @@ const strategy = {
 
 const getVoteCountStrategy = (roundNumber) => {
     const defaultStrategy = process.env.SNAPSHOT_STRATEGY
-    if( defaultStrategy !== undefined ) {
+    if (defaultStrategy !== undefined) {
         return strategy[process.env.SNAPSHOT_STRATEGY]
     }
 
-    if(roundNumber < 5) return strategy['strategy_v0_1']
-    if(roundNumber < 9) return strategy['strategy_v0_2']
+    if (roundNumber < 5) return strategy['strategy_v0_1']
+    if (roundNumber < 9) return strategy['strategy_v0_2']
     return strategy['strategy_v0_3']
 }
 
@@ -178,9 +178,9 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
     return Object.entries(proposalVotes).map((voter) => {
         let strategyScore = 0
         const newVoter = voter[1].voter
-        for (i = 0; i < strategy.length; i++) {
+        for (let i = 0; i < strategy.length; i++) {
             const curStratScore = voterScores[i][newVoter]
-            if( curStratScore !== undefined )
+            if (curStratScore !== undefined)
                 strategyScore += curStratScore
         }
         return {
@@ -211,8 +211,8 @@ const reduceProposalScores = (voterScores) => {
 // Configure the proposal template that will be submitted to Snapshot
 const buildProposalPayload = (proposal, roundNumber) => {
     const strategy = getVoteCountStrategy(roundNumber)
-    const startTs = Date.parse(proposal.get('Voting Starts'))/1000
-    const endTs = Date.parse(proposal.get('Voting Ends'))/1000
+    const startTs = Date.parse(proposal.get('Voting Starts')) / 1000
+    const endTs = Date.parse(proposal.get('Voting Ends')) / 1000
     const blockHeight = proposal.get('Snapshot Block')
     const body = `${proposal.get("One Liner")}
 
@@ -227,7 +227,7 @@ https://discord.gg/TnXjkR5
 
 ## Cast your vote below!`
 
-    return payload = {
+    return {
         end: endTs,
         body: body,
         name: proposal.get('Project Name'),
@@ -255,7 +255,7 @@ const send = async (url, init) => {
     });
 }
 
-const local_broadcast_proposal = async (web3, account, payload, pSpace=null, pUrl=null ) => {
+const local_broadcast_proposal = async (web3, account, payload, pSpace = null, pUrl = null) => {
     try {
         var msg = {
             address: account.address,
@@ -281,7 +281,7 @@ const local_broadcast_proposal = async (web3, account, payload, pSpace=null, pUr
             body: JSON.stringify(msg)
         };
         return send(url, init)
-    } catch(err) {
+    } catch (err) {
         console.log("ERROR: Broadcast Proposal: ", err)
     }
 }
@@ -292,7 +292,7 @@ const local_broadcast_proposal = async (web3, account, payload, pSpace=null, pUr
 const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlockTime) => {
     const blockNumber = currentBlockHeight
     const targetTimestamp = targetUnixTimestamp
-    const curTimestamp = Date.now()/1000
+    const curTimestamp = Date.now() / 1000
 
     return Math.floor(blockNumber + ((targetTimestamp - curTimestamp) / avgBlockTime))
 }

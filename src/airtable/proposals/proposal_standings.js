@@ -1,4 +1,4 @@
-const {getProposalsSelectQuery} = require('../airtable_utils')
+const { getProposalsSelectQuery } = require('../airtable_utils')
 
 // Proposal States
 const State = {
@@ -43,11 +43,11 @@ const Earmarks = {
 const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, noOcean) => {
     let newStanding = undefined
 
-    if( (proposalState === State.Received || proposalState === State.Rejected) && noOcean === true ) newStanding = Standings.NoOcean
-    else if( funded === false && deliverableChecklist.length === 0 ) newStanding = null
-    else if( refunded === true ) newStanding = Standings.Refunded
-    else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
-    else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
+    if ((proposalState === State.Received || proposalState === State.Rejected) && noOcean === true) newStanding = Standings.NoOcean
+    else if (funded === false && deliverableChecklist.length === 0) newStanding = null
+    else if (refunded === true) newStanding = Standings.Refunded
+    else if (completed === false && timedOut === true) newStanding = Standings.Incomplete
+    else if (deliverableChecklist.length > 0) newStanding = completed === true ? Standings.Completed : Standings.Progress
     else newStanding = Standings.Unreported
 
     return newStanding
@@ -58,7 +58,7 @@ const getProjectStanding = (proposalState, deliverableChecklist, completed, time
 const splitDeliverableChecklist = (deliverableChecklist) => {
     let deliverables = []
 
-    if( deliverableChecklist.length === 0 ) return deliverables
+    if (deliverableChecklist.length === 0) return deliverables
 
     deliverables = deliverableChecklist.split('\n')
     return deliverables.filter(function (deliverable) {
@@ -69,7 +69,7 @@ const splitDeliverableChecklist = (deliverableChecklist) => {
 const areDeliverablesComplete = (deliverables) => {
     let completed = true
 
-    if(deliverables.length === 0)  completed = false
+    if (deliverables.length === 0) completed = false
     else {
         deliverables.map((deliverable) => {
             if (deliverable.indexOf('[x]') !== 0) completed = false
@@ -90,9 +90,9 @@ const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
 }
 
 // Step 1 - Get all proposal standings
-const getAllRoundProposals = async (maxRound, minRound=1) => {
+const getAllRoundProposals = async (maxRound, minRound = 1) => {
     let allProposals = []
-    for (i=minRound; i<=maxRound; i++) {
+    for (let i = minRound; i <= maxRound; i++) {
         let roundProposals = await getProposalsSelectQuery(selectionQuery = `{Round} = "${i}"`)
         allProposals = allProposals.concat(roundProposals)
     }
@@ -130,7 +130,7 @@ const getProposalRecord = (proposal) => {
 // Returns all Proposal Standings, indexed by Project Name
 const processProposalStandings = (allProposals) => {
     let proposalStandings = {}
-    Promise.all(allProposals.map( (proposal) => {
+    Promise.all(allProposals.map((proposal) => {
         try {
             let projectName = proposal.get('Project Name')
             let record = getProposalRecord(proposal)
@@ -148,30 +148,30 @@ const processProposalStandings = (allProposals) => {
 
 // Step 2 - Resolve historical standings
 const processHistoricalStandings = (proposalStandings) => {
-    for (const [key, value] of Object.entries(proposalStandings)) {
+    for (const [, value] of Object.entries(proposalStandings)) {
         let outstandingURL = ""
         let lastStanding = undefined
-        value.map( (proposal) => {
+        value.map((proposal) => {
             proposal.fields['Outstanding Proposals'] = ''
             // DISPUTES: If a proposal is under dispute, the project standing becomes poor
             // INCOMPLETION: If a proposal is incomplete/timedout, the project standing becomes poor
-            if( lastStanding !== Standings.Incomplete && lastStanding !== Standings.Dispute ) {
-                if (proposal.fields['Proposal Standing'] === Standings.Incomplete ) lastStanding = Standings.Incomplete
-                else if ( proposal.fields['Disputed Status'] === Disputed.Ongoing ) lastStanding = Standings.Dispute
-                else if ( proposal.fields['Proposal Standing'] !== null ) lastStanding = proposal.fields['Proposal Standing']
+            if (lastStanding !== Standings.Incomplete && lastStanding !== Standings.Dispute) {
+                if (proposal.fields['Proposal Standing'] === Standings.Incomplete) lastStanding = Standings.Incomplete
+                else if (proposal.fields['Disputed Status'] === Disputed.Ongoing) lastStanding = Standings.Dispute
+                else if (proposal.fields['Proposal Standing'] !== null) lastStanding = proposal.fields['Proposal Standing']
             }
 
             // OUTSTANDING PROPOSAL URLS:
             // Collect the URL of proposals that are in poor condition.
             // Report the URL of all proposals that are in poor condition.
-            if( proposal.fields['Proposal Standing'] === Standings.Incomplete || proposal.fields['Disputed Status'] === Disputed.Ongoing ) {
+            if (proposal.fields['Proposal Standing'] === Standings.Incomplete || proposal.fields['Disputed Status'] === Disputed.Ongoing) {
                 outstandingURL += "- " + proposal.fields['Proposal URL'] + "\n"
                 proposal.fields['Outstanding Proposals'] = outstandingURL
                 proposal.fields['Proposal Standing'] = lastStanding
-            } else if( proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0 ) {
+            } else if (proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0) {
                 proposal.fields['Outstanding Proposals'] = outstandingURL
                 proposal.fields['Proposal Standing'] = lastStanding
-            } else if( proposal.fields['Proposal Standing'] === null ) {
+            } else if (proposal.fields['Proposal Standing'] === null) {
                 proposal.fields['Proposal Standing'] = lastStanding
             }
         })
@@ -182,7 +182,7 @@ const processHistoricalStandings = (proposalStandings) => {
 const getProjectsLatestProposal = (proposalStandings) => {
     let latestProposals = {}
     for (const [key, value] of Object.entries(proposalStandings)) {
-        latestProposals[key] = value[value.length-1]
+        latestProposals[key] = value[value.length - 1]
     }
 
     return latestProposals
@@ -193,7 +193,7 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
     for (const [key, value] of Object.entries(currentRoundProposals)) {
         let latestProposal = latestProposals[key]
         if (latestProposal !== undefined) {
-            if( value[0].fields['Proposal Standing'] !== Standings.NoOcean ) {
+            if (value[0].fields['Proposal Standing'] !== Standings.NoOcean) {
                 value[0].fields['Proposal Standing'] = latestProposal.fields['Proposal Standing']
                 value[0].fields['Outstanding Proposals'] = latestProposal.fields['Outstanding Proposals']
             }
@@ -201,4 +201,4 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
     }
 }
 
-module.exports = {State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings};
+module.exports = { State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings };

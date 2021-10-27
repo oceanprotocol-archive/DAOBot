@@ -39,7 +39,7 @@ const payload = {
 // TODO - Build payload programmatically
 const testPayload = async () => {
     try {
-        const result = await local_broadcast_proposal(web3, account, payload, pSpace='spring-dao', pUrl=snapshot_url)
+        const result = await local_broadcast_proposal(web3, account, payload, {pSpace: 'spring-dao', pUrl: snapshot_url})
         console.log("Results are: ", result)
     } catch(err) {
         console.log(err)
