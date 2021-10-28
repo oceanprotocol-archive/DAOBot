@@ -129,13 +129,14 @@ const main = async () => {
                 break
 
                 case 'OCEAN': 
-                const maxGrantOCEAN = curRound.get('Max Grant OCEAN')
-                const earmarkedOCEAN = curRound.get('Earmarked OCEAN')
-                const fundingAvailableOCEAN = curRound.get('Funding Available OCEAN')
+                // no need to divide by tokenPrice
+                const maxGrantOCEAN = curRound.get('Max Grant')
+                const earmarkedOCEAN = curRound.get('Earmarked')
+                const fundingAvailableOCEAN = curRound.get('Funding Available')
 
-                maxGrant = maxGrantOCEAN/ tokenPrice
-                earmarked = earmarkedOCEAN / tokenPrice
-                fundingAvailable = fundingAvailableOCEAN / tokenPrice
+                maxGrant = maxGrantOCEAN
+                earmarked = earmarkedOCEAN
+                fundingAvailable = fundingAvailableOCEAN 
                 break
 
                 default:
@@ -154,6 +155,7 @@ const main = async () => {
                     'Funding Available': fundingAvailable,
                 }
             }]
+            console.log('ROUND UPDATE: ', roundUpdate)
             await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
             console.log("Start Voting period.")
