@@ -9,6 +9,13 @@ const RoundState = {
     Ended: 'Ended',
 };
 
+const Earmarks = {
+    NEW_OUTREACH: 'New Outreach',
+    NEW_GENERAL: 'New General',
+    CORE_TECH: 'Core Tech',
+    GENERAL: 'General'
+} 
+
 const getFundingRound = async (roundNum) => {
     try {
         const roundParameters = await getRoundsSelectQuery(`{Round} = "${roundNum}"`)
@@ -192,4 +199,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks};
+module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks, Earmarks};

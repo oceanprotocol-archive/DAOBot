@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const should = require('chai').should();
-const {getWinningProposals, getDownvotedProposals, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks} = require('../../airtable/rounds/funding_rounds')
+const {getWinningProposals, getDownvotedProposals, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks, Earmarks} = require('../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []
@@ -13,7 +13,7 @@ beforeEach(async function() {
         id: 'round_8',
         fields: {
             'OCEAN Price': 0.5,
-            'Earmarks': '{"New Outreach":{"OCEAN":30000, "USD":28000}, "New Project":{"OCEAN":40000, "USD":38000}, "Core Tech":{"OCEAN":50000, "USD":48000}}',
+            'Earmarks': `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}}`,
             'Funding Available USD': 53000,
         },
         get: function (key) {
@@ -115,7 +115,7 @@ beforeEach(async function() {
 describe('Calculating Winners', function() {
 
     it('Check if earmarks structure OCEAN values are populated ', async function() {
-        fundingRound.fields['Earmarks'] = '{"New Outreach":{"OCEAN":0, "USD":28000}, "New Project":{"OCEAN":0, "USD":38000}, "Core Tech":{"OCEAN":0, "USD":48000}}'
+        fundingRound.fields['Earmarks'] = `{"${Earmarks.NEW_GENERAL}":{"OCEAN":0, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":0, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":0, "USD":48000}}`
         const tokenPrice = 0.5
         let newEarmarks = await addOCEANValueToEarmarks(fundingRound,tokenPrice)
 
@@ -155,7 +155,7 @@ describe('Calculating Winners', function() {
     it('Validates 1 winning earmarked proposals', function() {
         let oceanPrice = fundingRound.get('OCEAN Price')
 
-        allProposals[0].fields['Earmarks'] = 'New Project'
+        allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         let earmarks = allProposals.filter(p => p.get('Earmarks') !== undefined)
         let earmarkedResults = calculateWinningAllProposals(earmarks, fundingRound, oceanPrice)
         should.equal(earmarkedResults.winningProposals.length, 1)
@@ -164,8 +164,8 @@ describe('Calculating Winners', function() {
     it('Validates 1 winning earmark + 1 partial funding', function() {
         let oceanPrice = fundingRound.get('OCEAN Price')
 
-        allProposals[0].fields['Earmarks'] = 'New Project'
-        allProposals[1].fields['Earmarks'] = 'New Project'
+        allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
+        allProposals[1].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         let earmarks = allProposals.filter(p => p.get('Earmarks') !== undefined)
         let earmarkedResults = calculateWinningAllProposals(earmarks, fundingRound, oceanPrice)
 
@@ -183,8 +183,8 @@ describe('Calculating Winners', function() {
         should.equal(downvotedProposals.length, 1)
 
         fundingRound.fields['Funding Available USD'] = 52500
-        allProposals[0].fields['Earmarks'] = 'New Project'
-        allProposals[1].fields['Earmarks'] = 'New Project'
+        allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
+        allProposals[1].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         let winningProposals = getWinningProposals(allProposals, fundingRound)
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
@@ -231,8 +231,8 @@ describe('Calculating Winners', function() {
         let downvotedProposals = getDownvotedProposals(allProposals)
         should.equal(downvotedProposals.length, 1)
 
-        allProposals[0].fields['Earmarks'] = 'New Project'
-        allProposals[1].fields['Earmarks'] = 'New Project'
+        allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
+        allProposals[1].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         let winningProposals = getWinningProposals(allProposals, fundingRound)
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
@@ -252,19 +252,19 @@ describe('Calculating Winners', function() {
 
     it('Test new earmarks structure', function() {
         //set earmarks for proposals and add USD Granted
-        allProposals[0].fields['Earmarks'] = 'New Project'
+        allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         allProposals[0].fields['USD Requested'] = 2000
 
-        allProposals[1].fields['Earmarks'] = 'New Project'
+        allProposals[1].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         allProposals[1].fields['USD Requested'] = 2000
 
-        allProposals[2].fields['Earmarks'] = 'New Project'
+        allProposals[2].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         allProposals[2].fields['USD Requested'] = 2000
 
-        allProposals[3].fields['Earmarks'] = 'Core Tech'
+        allProposals[3].fields['Earmarks'] = Earmarks.CORE_TECH
         allProposals[3].fields['USD Requested'] = 2000
 
-        allProposals[4].fields['Earmarks'] = 'Core Tech'
+        allProposals[4].fields['Earmarks'] = Earmarks.CORE_TECH
         allProposals[4].fields['USD Requested'] = 2000
 
         allProposals[5].fields['USD Granted'] = 2000

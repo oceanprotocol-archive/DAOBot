@@ -68,7 +68,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(lastRoundNumber)
-            //await syncGSheetsActiveProposalVotes(lastRoundNumber)
+            await syncGSheetsActiveProposalVotes(lastRoundNumber)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
