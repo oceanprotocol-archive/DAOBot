@@ -7,7 +7,7 @@
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
     "test": "jest",
-    "lint": "eslint '**/*.js' --ignore-pattern node_modules/"
+    "lint": "eslint --ignore-pattern node_modules/"
   },
   "author": "",
   "license": "ISC",
