@@ -185,7 +185,6 @@ const main = async () => {
             
             // Enter Due Diligence period
              
-            console.log('ROUND UPDATE: ', roundUpdate)
             await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
             console.log("Start Voting period.")
