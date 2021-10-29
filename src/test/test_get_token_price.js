@@ -4,7 +4,7 @@ dotenv.config();
 
 const expect = require('chai').expect;
 
-describe('Calculating Winners', function() {
+describe('Validate token price', function() {
     it('Should validate token price > 0.0', async function () {
         const tokenPrice = await getTokenPrice()
         console.log('Chainlink: Token Price', tokenPrice)
