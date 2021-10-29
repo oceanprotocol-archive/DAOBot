@@ -106,37 +106,77 @@ const main = async () => {
             await prepareNewProposals(curRound, curRoundNumber)
         }else if(curRoundState === RoundState.Started && now >= curRoundProposalsDueBy) {
             console.log("Start DD period.")
-           
+
             await prepareNewProposals(curRound, curRoundNumber)
 
             let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
             const tokenPrice = await getTokenPrice()
+            const USDPrice = 1/tokenPrice
             const basisCurrency = curRound.get('Basis Currency')
 
             let maxGrant = 0
             let earmarked = 0
             let fundingAvailable = 0
 
+            let maxGrantUSD = 0
+            let earmarkedUSD = 0
+            let fundingAvailableUSD = 0
+
+
+            let roundUpdate = [{
+                id: curRound['id'],
+                fields: {}
+            }]
+
             switch(basisCurrency) {
                 case 'USD' :
-                const maxGrantUSD = curRound.get('Max Grant USD')
-                const earmarkedUSD = curRound.get('Earmarked USD')
-                const fundingAvailableUSD = curRound.get('Funding Available USD')
+                maxGrantUSD = curRound.get('Max Grant USD')
+                earmarkedUSD = curRound.get('Earmarked USD')
+                fundingAvailableUSD = curRound.get('Funding Available USD')
 
                 maxGrant = maxGrantUSD/ tokenPrice
                 earmarked = earmarkedUSD / tokenPrice
                 fundingAvailable = fundingAvailableUSD / tokenPrice
+
+                roundUpdate = [{
+                    id: curRound['id'],
+                    fields: {
+                        'Round State': RoundState.DueDiligence,
+                        'Proposals': allProposals.length,
+                        'OCEAN Price': tokenPrice,
+                        'Max Grant': maxGrant,
+                        'Earmarked': earmarked,
+                        'Funding Available': fundingAvailable,
+                    }
+                }]
                 break
 
                 case 'OCEAN': 
-                // no need to divide by tokenPrice
                 const maxGrantOCEAN = curRound.get('Max Grant')
                 const earmarkedOCEAN = curRound.get('Earmarked')
                 const fundingAvailableOCEAN = curRound.get('Funding Available')
 
+                maxGrantUSD = maxGrantOCEAN / USDPrice
+                earmarkedUSD = earmarkedOCEAN / USDPrice
+                fundingAvailableUSD = fundingAvailableOCEAN / USDPrice
+
                 maxGrant = maxGrantOCEAN
                 earmarked = earmarkedOCEAN
                 fundingAvailable = fundingAvailableOCEAN 
+                roundUpdate = [{
+                    id: curRound['id'],
+                    fields: {
+                        'Round State': RoundState.DueDiligence,
+                        'Proposals': allProposals.length,
+                        'OCEAN Price': tokenPrice,
+                        'Max Grant': maxGrant,
+                        'Earmarked': earmarked,
+                        'Funding Available': fundingAvailable,
+                        'Max Grant USD': maxGrantUSD,
+                        'Earmarked USD': earmarkedUSD,
+                        'Funding Available USD': fundingAvailableUSD
+                    }
+                }]
                 break
 
                 default:
@@ -144,17 +184,7 @@ const main = async () => {
             }
             
             // Enter Due Diligence period
-            const roundUpdate = [{
-                id: curRound['id'],
-                fields: {
-                    'Round State': RoundState.DueDiligence,
-                    'Proposals': allProposals.length,
-                    'OCEAN Price': tokenPrice,
-                    'Max Grant': maxGrant,
-                    'Earmarked': earmarked,
-                    'Funding Available': fundingAvailable,
-                }
-            }]
+             
             console.log('ROUND UPDATE: ', roundUpdate)
             await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
