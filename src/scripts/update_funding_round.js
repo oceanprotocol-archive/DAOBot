@@ -67,6 +67,7 @@ const main = async () => {
     const now = moment().utc().toISOString()
 
     if (curRoundState === undefined) {
+        // this is when the round is ending => switching to the next funding round
         if( lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd ) {
             console.log("Start next round.")
 
@@ -104,6 +105,7 @@ const main = async () => {
             await updateRoundRecord(roundUpdate)
         }
     } else {
+        // this is logic for the current funding round, and the states within it
         if(curRoundState === RoundState.Started && now < curRoundProposalsDueBy ) {
             console.log("Update active round.")
             await prepareNewProposals(curRound, curRoundNumber)
