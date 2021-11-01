@@ -122,12 +122,6 @@ const main = async () => {
             let earmarkedUSD = 0
             let fundingAvailableUSD = 0
 
-
-            let roundUpdate = [{
-                id: curRound['id'],
-                fields: {}
-            }]
-
             switch(basisCurrency) {
                 case 'USD' :
                 maxGrantUSD = curRound.get('Max Grant USD')
@@ -137,18 +131,6 @@ const main = async () => {
                 maxGrant = maxGrantUSD/ tokenPrice
                 earmarked = earmarkedUSD / tokenPrice
                 fundingAvailable = fundingAvailableUSD / tokenPrice
-
-                roundUpdate = [{
-                    id: curRound['id'],
-                    fields: {
-                        'Round State': RoundState.DueDiligence,
-                        'Proposals': allProposals.length,
-                        'OCEAN Price': tokenPrice,
-                        'Max Grant': maxGrant,
-                        'Earmarked': earmarked,
-                        'Funding Available': fundingAvailable,
-                    }
-                }]
                 break
 
                 case 'OCEAN': 
@@ -156,33 +138,34 @@ const main = async () => {
                 const earmarkedOCEAN = curRound.get('Earmarked')
                 const fundingAvailableOCEAN = curRound.get('Funding Available')
 
-                maxGrantUSD = maxGrantOCEAN / USDPrice
-                earmarkedUSD = earmarkedOCEAN / USDPrice
-                fundingAvailableUSD = fundingAvailableOCEAN / USDPrice
-
                 maxGrant = maxGrantOCEAN
                 earmarked = earmarkedOCEAN
                 fundingAvailable = fundingAvailableOCEAN 
-                roundUpdate = [{
-                    id: curRound['id'],
-                    fields: {
-                        'Round State': RoundState.DueDiligence,
-                        'Proposals': allProposals.length,
-                        'OCEAN Price': tokenPrice,
-                        'Max Grant': maxGrant,
-                        'Earmarked': earmarked,
-                        'Funding Available': fundingAvailable,
-                        'Max Grant USD': maxGrantUSD,
-                        'Earmarked USD': earmarkedUSD,
-                        'Funding Available USD': fundingAvailableUSD
-                    }
-                }]
+
+                maxGrantUSD = maxGrantOCEAN / USDPrice
+                earmarkedUSD = earmarkedOCEAN / USDPrice
+                fundingAvailableUSD = fundingAvailableOCEAN / USDPrice               
                 break
 
                 default:
                     console.log('No Basis Currency was selected for this round.')
             }
-            
+
+            let roundUpdate = [{
+                id: curRound['id'],
+                fields: {  
+                    'Round State': RoundState.DueDiligence,
+                    'Proposals': allProposals.length,
+                    'OCEAN Price': tokenPrice,
+                    'Max Grant': maxGrant,
+                    'Earmarked': earmarked,
+                    'Funding Available': fundingAvailable,
+                    'Max Grant USD': maxGrantUSD,
+                    'Earmarked USD': earmarkedUSD,
+                    'Funding Available USD': fundingAvailableUSD
+                }
+            }]
+
             // Enter Due Diligence period
              
             await updateRoundRecord(roundUpdate)
