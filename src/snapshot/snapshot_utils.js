@@ -277,7 +277,7 @@ ${x.get('Project Name')} - [Click Here](${x.get('Proposal URL')})
     return payload = {
         end: endTs,
         body: body,
-        name: `Test Proposal ${roundNumber}`,
+        name: `OceanDAO Round${roundNumber}`,
         type: voteType,
         start: startTs,
         choices: choices,
