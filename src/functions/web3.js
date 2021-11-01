@@ -8,5 +8,5 @@ const url = `https://mainnet.infura.io/v3/${INFURA_API_KEY}`
 const web3 = new Web3(new Web3.providers.HttpProvider(url));
 
 // Load private key & account
-console.log("INFURA_API_URL", `https://mainnet.infura.io/v3/${INFURA_API_KEY}`);
+// console.log("INFURA_API_URL", `https://mainnet.infura.io/v3/${INFURA_API_KEY}`);
 module.exports = {web3};
