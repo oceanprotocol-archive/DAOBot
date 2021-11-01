@@ -13,7 +13,7 @@ const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_act
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const {VoteType, BallotType} = require('../snapshot/snapshot_utils')
 const {sleep} = require('../functions/utils')
-const {getTokenPrice} = require('../functions/coingecko')
+const {getTokenPrice} = require('../functions/chainlink')
 
 const prepareNewProposals = async (curRound, curRoundNumber) => {
     // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
