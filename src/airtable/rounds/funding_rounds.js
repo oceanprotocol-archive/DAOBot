@@ -62,23 +62,54 @@ const getDownvotedProposals = (proposals) => {
     return downvotedProposals
 }
 
-const calculateWinningProposals = (proposals, fundsAvailableUSD, oceanPrice) => {
+const calculateWinningProposals = (proposals, fundsAvailable, oceanPrice) => {
     let winningProposals = []
-    let fundsLeft = fundsAvailableUSD
+    let fundsLeft = fundsAvailable
+    let USDPrice = 1/oceanPrice
+
     for(let p of proposals) {
         if( fundsLeft > 0 ) {
-            let usdRequested = p.get('USD Requested')
-            let grantCarry = p.get('USD Granted') || 0
-            let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
-            p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
-            p.fields['USD Granted'] = usdGranted + grantCarry
-            p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
-            p.fields['Proposal State'] = 'Granted'
-            fundsLeft -= usdGranted
+            let basisCurrency = p.get('Basis Currency')
+            console.log('BASIS CURRENCY: ', basisCurrency)
+            let usdRequested = 0
+            let usdGranted = 0
+            let grantCarry = 0
+            let oceanRequested = 0
+            let oceanGranted = 0
 
+            switch (basisCurrency) {
+                case 'USD':                    
+                    console.log('USD SET')
+                    usdRequested = p.get('USD Requested')
+                    grantCarry = p.get('USD Granted') || 0
+                    usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
+                    p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
+                    p.fields['USD Granted'] = usdGranted + grantCarry
+                    p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
+                    p.fields['Proposal State'] = 'Granted'
+                    fundsLeft -= usdGranted
+                    
+                    if (usdRequested === (usdGranted + grantCarry))
+                        winningProposals.push(p)
+                    break
+
+                case 'OCEAN':
+                    console.log('OCEAN SET')
+                    oceanRequested = p.get('OCEAN Requested')
+                    grantCarry = p.get('OCEAN Granted') || 0
+                    oceanGranted = fundsLeft - (oceanRequested - grantCarry) > 0 ? oceanRequested - grantCarry : fundsLeft
+                    p.fields['USD Requested'] = Math.round(oceanRequested / USDPrice)
+                    p.fields['OCEAN Granted'] = oceanGranted + grantCarry
+                    p.fields['USD Granted'] = Math.round((oceanGranted + grantCarry)/ USDPrice)
+                    p.fields['Proposal State'] = 'Granted'
+                    fundsLeft -= oceanGranted
+
+                    if (oceanRequested === (oceanGranted + grantCarry))
+                        winningProposals.push(p)
+                    break
+            }
             // If we reached the total, then it won via this grant pot
-            if (usdRequested === (usdGranted + grantCarry))
-                winningProposals.push(p)
+            
         } else {
             break
         }
@@ -92,7 +123,7 @@ const calculateWinningProposals = (proposals, fundsAvailableUSD, oceanPrice) => 
 
 const calculateFinalResults = (proposals, fundingRound) => {
     let oceanPrice = fundingRound.get('OCEAN Price')
-
+    
     let earmarks = proposals.filter(p => p.get('Earmarks') !== undefined)
     let usdEarmarked = fundingRound.get('Earmarked USD')
     let earmarkedResults = calculateWinningProposals(earmarks, usdEarmarked, oceanPrice)
