@@ -32,10 +32,12 @@ const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
             for(let earmark in earmarks){
                 earmarks[earmark]['OCEAN'] = parseFloat(Number.parseFloat(earmarks[earmark]['USD'] / tokenPrice).toFixed(3))
             }
+            break
         case 'OCEAN':
             for(let earmark in earmarks){
                 earmarks[earmark]['USD'] = parseFloat(Number.parseFloat(earmarks[earmark]['OCEAN'] * tokenPrice).toFixed(3))
             }
+            break
         default:
             console.log('Basis currency value is wrong')
     }

@@ -122,8 +122,6 @@ describe('Calculating Winners', function() {
         const basisToken = fundingRound.fields['Basis Token']
         let newEarmarks = await completeEarstructuresValues(fundingRound,tokenPrice,basisToken)
 
-        console.log(newEarmarks)
-
         for(earmark in newEarmarks){
             should.equal(newEarmarks[earmark]['OCEAN'], newEarmarks[earmark]['USD'] / tokenPrice)
         }
@@ -135,8 +133,6 @@ describe('Calculating Winners', function() {
         const tokenPrice = 0.5
         const basisToken = fundingRound.fields['Basis Token']
         let newEarmarks = await completeEarstructuresValues(fundingRound,tokenPrice,basisToken)
-
-        console.log(newEarmarks)
 
         for(earmark in newEarmarks){
             should.equal(newEarmarks[earmark]['USD'], newEarmarks[earmark]['OCEAN'] * tokenPrice)

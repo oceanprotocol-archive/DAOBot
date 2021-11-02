@@ -15,7 +15,7 @@
     "@iarna/rtf-to-html": "^1.1.0",
     "@snapshot-labs/lock": "github:snapshot-labs/lock#master",
     "@snapshot-labs/snapshot-spaces": "github:snapshot-labs/snapshot-spaces#master",
-    "@snapshot-labs/snapshot.js": "^0.2.15",
+    "@snapshot-labs/snapshot.js": "github:snapshot-labs/snapshot.js#master",
     "airtable": "^0.11.0",
     "axios": "0.21.4",
     "coingecko-api": "^1.0.10",
