@@ -111,7 +111,6 @@ const main = async () => {
 
             let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
             const tokenPrice = await getTokenPrice()
-            const USDPrice = 1/tokenPrice
             const basisCurrency = curRound.get('Basis Currency')
 
             let maxGrant = 0
@@ -142,9 +141,9 @@ const main = async () => {
                 earmarked = earmarkedOCEAN
                 fundingAvailable = fundingAvailableOCEAN 
 
-                maxGrantUSD = maxGrantOCEAN / USDPrice
-                earmarkedUSD = earmarkedOCEAN / USDPrice
-                fundingAvailableUSD = fundingAvailableOCEAN / USDPrice               
+                maxGrantUSD = maxGrantOCEAN *  tokenPrice
+                earmarkedUSD = earmarkedOCEAN * tokenPrice
+                fundingAvailableUSD = fundingAvailableOCEAN * tokenPrice               
                 break
 
                 default:
