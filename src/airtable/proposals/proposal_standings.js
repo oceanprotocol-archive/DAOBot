@@ -140,6 +140,7 @@ const processProposalStandings = async (allProposals) => {
             //console.log(proposalStandings[projectName])
             if (proposalStandings[projectName] === undefined) proposalStandings[projectName] = []
             proposalStandings[projectName].push(record)
+            console.log(proposalStandings)
         } catch (err) {
             console.log(err)
         }

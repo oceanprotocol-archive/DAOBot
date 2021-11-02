@@ -132,7 +132,7 @@ beforeEach(async function() {
 });
 
 describe('Calculating Proposal Standings', function() {
-    it('Sample data includes 4 proposals from one project', function() {
+   /*it('Sample data includes 4 proposals from one project', function() {
         should.equal(allProposals.length, 4);
     });
 
@@ -451,5 +451,31 @@ describe('Process Project Standings', function() {
         await processHistoricalStandings(proposalStandings);
 
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed);
+    });*/
+
+    it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function() {
+        // Process all proposals
+        allProposals[0].fields['Earmarks'] = 'New Entrants'
+        allProposals[0].fields['Deliverable Checklist'] = undefined
+        let proposalStandings = await processProposalStandings(allProposals);
+        await processHistoricalStandings(proposalStandings);
+
+        console.log(proposalStandings)
+
+        // Step 3 - Report the latest (top of stack) proposal standing from each project
+        // latestProposal should equal head of each project
+        let latestProposals = getProjectsLatestProposal(proposalStandings)
+
+        console.log(latestProposals)
+
+        console.log(latestProposals[0].fields['Proposal Standing'])
+
+        currentProposals[0].fields['Proposal State'] = State.Rejected
+        currentProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
+
+        let currentProposalStandings = await processProposalStandings(currentProposals)
+        updateCurrentRoundStandings(currentProposalStandings, latestProposals)
+
+        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.NoOcean);
     });
 });

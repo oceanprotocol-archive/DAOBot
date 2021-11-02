@@ -28,7 +28,13 @@ const getWalletBalance = async (wallet0x) => {
 }
 
 const hasEnoughOceans = async(wallet_address) => {
-    let balance = await getWalletBalance(wallet_address)
+    if(!wallet_address) return false
+    let balance = 0
+    try{
+        balance = await getWalletBalance(wallet_address)
+    }catch(error){
+        return false
+    }
     return balance >= MIN_OCEAN_REQUIRED
 }
 
