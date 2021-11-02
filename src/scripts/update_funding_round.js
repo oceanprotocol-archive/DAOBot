@@ -4,7 +4,7 @@ dotenv.config();
 
 const moment = require('moment')
 const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
-const {RoundState, getCurrentRound, addOCEANValueToEarmarks} = require('../airtable/rounds/funding_rounds')
+const {RoundState, getCurrentRound, completeEarstructuresValues} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
@@ -12,7 +12,7 @@ const {submitProposalsToSnapshot} = require('../snapshot/submit_snapshot_accepte
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const {sleep} = require('../functions/utils')
-const {getTokenPrice} = require('../functions/coingecko')
+const {getTokenPrice} = require('../functions/chainlink')
 
 const prepareNewProposals = async (curRound, curRoundNumber) => {
     // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
@@ -111,27 +111,55 @@ const main = async () => {
 
             let allProposals = await getProposalsSelectQuery(`{Round} = ${curRoundNumber}`)
             const tokenPrice = await getTokenPrice()
-            const maxGrantUSD = curRound.get('Max Grant USD')
+            const basisCurrency = curRound.get('Basis Currency')
 
-            let earmarkedStructureWithOCEAN = JSON.stringify(addOCEANValueToEarmarks(curRound, tokenPrice))
+            let maxGrant = 0
+            let fundingAvailable = 0
 
-            const fundingAvailableUSD = curRound.get('Funding Available USD')
+            let maxGrantUSD = 0
+            let fundingAvailableUSD = 0
 
-            const maxGrantOCEAN = maxGrantUSD / tokenPrice
-            const fundingAvailableOCEAN = fundingAvailableUSD / tokenPrice
+            switch(basisCurrency) {
+                case 'USD' :
+                maxGrantUSD = curRound.get('Max Grant USD')
+                fundingAvailableUSD = curRound.get('Funding Available USD')
 
-            // Enter Due Diligence period
-            const roundUpdate = [{
+                maxGrant = maxGrantUSD/ tokenPrice
+                fundingAvailable = fundingAvailableUSD / tokenPrice
+                break
+
+                case 'OCEAN': 
+                const maxGrantOCEAN = curRound.get('Max Grant')
+                const fundingAvailableOCEAN = curRound.get('Funding Available')
+
+                maxGrant = maxGrantOCEAN
+                fundingAvailable = fundingAvailableOCEAN 
+
+                maxGrantUSD = maxGrantOCEAN *  tokenPrice
+                fundingAvailableUSD = fundingAvailableOCEAN * tokenPrice               
+                break
+
+                default:
+                    console.log('No Basis Currency was selected for this round.')
+            }
+
+            let roundUpdate = [{
                 id: curRound['id'],
-                fields: {
+                fields: {  
                     'Round State': RoundState.DueDiligence,
                     'Proposals': allProposals.length,
                     'OCEAN Price': tokenPrice,
-                    'Max Grant': maxGrantOCEAN,
-                    'Earmarks': earmarkedStructureWithOCEAN,
-                    'Funding Available': fundingAvailableOCEAN,
+                    'Max Grant': maxGrant,
+                    'Earmarks': JSON.stringify(completeEarstructuresValues(curRound, tokenPrice, basisCurrency)),
+                    'Funding Available': fundingAvailable,
+                    'Max Grant USD': maxGrantUSD,
+                    'Earmarked USD': earmarkedUSD,
+                    'Funding Available USD': fundingAvailableUSD
                 }
             }]
+
+            // Enter Due Diligence period
+             
             await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
             console.log("Start Voting period.")
@@ -172,6 +200,6 @@ const main = async () => {
     }
 }
 
-module.exports = {addOCEANValueToEarmarks};
+module.exports = {completeEarstructuresValues};
 
 main()

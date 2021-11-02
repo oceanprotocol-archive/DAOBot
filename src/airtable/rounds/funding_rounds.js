@@ -25,10 +25,19 @@ const getFundingRound = async (roundNum) => {
     }
 }
 
-const addOCEANValueToEarmarks = (curRound, tokenPrice) => {
+const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
     let earmarks = JSON.parse(curRound.get('Earmarks'))
-    for(let earmark in earmarks){
-        earmarks[earmark]['OCEAN'] = parseFloat(Number.parseFloat(earmarks[earmark]['USD'] / tokenPrice).toFixed(3))
+    switch(basisCurrency){
+        case 'USD':
+            for(let earmark in earmarks){
+                earmarks[earmark]['OCEAN'] = parseFloat(Number.parseFloat(earmarks[earmark]['USD'] / tokenPrice).toFixed(3))
+            }
+        case 'OCEAN':
+            for(let earmark in earmarks){
+                earmarks[earmark]['USD'] = parseFloat(Number.parseFloat(earmarks[earmark]['OCEAN'] * tokenPrice).toFixed(3))
+            }
+        default:
+            console.log('Basis currency value is wrong')
     }
     return earmarks
 }
@@ -199,4 +208,4 @@ const dumpResultsToGSheet = async (results) => {
     return flatObj
 }
 
-module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks, Earmarks};
+module.exports = {RoundState, getFundingRound, getCurrentRound, filterCurrentRound, getWinningProposals, getDownvotedProposals, calculateWinningProposalsForEarmark, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, completeEarstructuresValues, Earmarks};

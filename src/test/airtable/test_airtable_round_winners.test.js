@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const should = require('chai').should();
-const {getWinningProposals, getDownvotedProposals, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, addOCEANValueToEarmarks, Earmarks} = require('../../airtable/rounds/funding_rounds')
+const {getWinningProposals, getDownvotedProposals, calculateWinningAllProposals, calculateFinalResults, dumpResultsToGSheet, completeEarstructuresValues, Earmarks} = require('../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []
@@ -15,6 +15,7 @@ beforeEach(async function() {
             'OCEAN Price': 0.5,
             'Earmarks': `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}}`,
             'Funding Available USD': 53000,
+            'Basis Token': 'USD'
         },
         get: function (key) {
             return this.fields[key];
@@ -116,11 +117,29 @@ describe('Calculating Winners', function() {
 
     it('Check if earmarks structure OCEAN values are populated ', async function() {
         fundingRound.fields['Earmarks'] = `{"${Earmarks.NEW_GENERAL}":{"OCEAN":0, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":0, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":0, "USD":48000}}`
+        fundingRound.fields['Basis Token'] = 'USD'
         const tokenPrice = 0.5
-        let newEarmarks = await addOCEANValueToEarmarks(fundingRound,tokenPrice)
+        const basisToken = fundingRound.fields['Basis Token']
+        let newEarmarks = await completeEarstructuresValues(fundingRound,tokenPrice,basisToken)
+
+        console.log(newEarmarks)
 
         for(earmark in newEarmarks){
             should.equal(newEarmarks[earmark]['OCEAN'], newEarmarks[earmark]['USD'] / tokenPrice)
+        }
+    });
+
+    it('Check if earmarks structure USD values are populated ', async function() {
+        fundingRound.fields['Earmarks'] = `{"${Earmarks.NEW_GENERAL}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":38000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":48000, "USD":0}}`
+        fundingRound.fields['Basis Token'] = 'OCEAN'
+        const tokenPrice = 0.5
+        const basisToken = fundingRound.fields['Basis Token']
+        let newEarmarks = await completeEarstructuresValues(fundingRound,tokenPrice,basisToken)
+
+        console.log(newEarmarks)
+
+        for(earmark in newEarmarks){
+            should.equal(newEarmarks[earmark]['USD'], newEarmarks[earmark]['OCEAN'] * tokenPrice)
         }
     });
 
