@@ -83,6 +83,10 @@ beforeEach(async function() {
             'Max Grant': 32000,
             'Earmarked': 140000,
             'Funding Available': 500000,
+            'OCEAN Price': 1.06,
+            'Funding Available USD': 530000,
+            'Earmarked USD': 148400,
+            'Max Grant USD': 33920,
             'Basis Currency': 'OCEAN',
         },
         get: function (key) {
@@ -146,23 +150,25 @@ describe('Airtable test', () => {
     });
 
     it('Validates current round funding based on selected currency', async () => {
-        const currentRound = await getCurrentRound()
-        should.exist(currentRound.get('Basis Currency'))
-        
-        expect(currentRound.get('Basis Currency')).equals('OCEAN');
+        const currentRound = await getCurrentRound()        
+        const round11 = allRounds[3]
 
-        const oceanPrice = currentRound.get('OCEAN Price')
-        const fundingAvailable = currentRound.get('Funding Available')
-        const earmarked = currentRound.get('Earmarked')
-        const maxGrant = currentRound.get('Max Grant')
+        const basisCurrency = round11.get('Basis Currency')
+        should.exist(basisCurrency)
+        expect(basisCurrency).equals('OCEAN');
+
+        const oceanPrice = round11.get('OCEAN Price')
+        const fundingAvailable = round11.get('Funding Available')
+        const earmarked = round11.get('Earmarked')
+        const maxGrant = round11.get('Max Grant')
 
         const fundingAvailableUSD = fundingAvailable * oceanPrice
         const earmarkedUSD = earmarked * oceanPrice
         const maxGrantUSD = maxGrant * oceanPrice
-
-        expect(currentRound.get('Funding Available USD')).equals(fundingAvailableUSD);
-        expect(currentRound.get('Earmarked USD')).equals(earmarkedUSD);
-        expect(currentRound.get('Max Grant USD')).equals(maxGrantUSD);
+        
+        expect(round11.get('Funding Available USD')).equals(fundingAvailableUSD);
+        expect(round11.get('Earmarked USD')).equals(earmarkedUSD);
+        expect(round11.get('Max Grant USD')).equals(maxGrantUSD);
     });
 
     it('Validates there is only one record from Airtable based on today', async () => {
