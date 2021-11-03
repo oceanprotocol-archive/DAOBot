@@ -203,16 +203,22 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (voterScores) => {
-    let scores = {
-        1: 0,
-        2: 0
-    }
-
+    let scores = {}
+    
     Object.entries(voterScores).reduce((total, cur) => {
-        const choice = cur[1].choice
-        const balance = cur[1].balance
-        if (scores[choice] === undefined) scores[choice] = 0
-        scores[choice] += balance
+        const voterAllChoices = cur[1].choice
+        const voterTotalBalance = cur[1].balance
+
+        let voterVotesCount = 0
+        for (const [_, vote] of Object.entries(voterAllChoices)) {
+            voterVotesCount += vote
+        }
+        
+        for (const [proposalIndex, proposalVotes] of Object.entries(voterAllChoices)) {
+            if (scores[proposalIndex] === undefined) scores[proposalIndex] = 0
+            scores[proposalIndex] += (voterVotesCount > 0 && voterTotalBalance > 0 && proposalVotes > 0) ?
+            ((voterTotalBalance / voterVotesCount) * proposalVotes) : 0
+        }
     }, {})
 
     return scores
