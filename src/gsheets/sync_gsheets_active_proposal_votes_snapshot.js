@@ -1,5 +1,6 @@
 global['fetch'] = require('cross-fetch');
 const dotenv = require('dotenv');
+const {VoteType, BallotType} = require('../snapshot/snapshot_utils')
 dotenv.config();
 
 const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
@@ -38,7 +39,6 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
             const vote = v[1]
             return [
                 vote.address,
-                vote.choice,
                 vote.balance
             ]
         } catch(err) {
@@ -47,7 +47,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     })
 
     // Dump flattened data from snapshot to sheet
-    flatObj.splice(0,0, ['address','choice','balace'])
+    flatObj.splice(0,0, ['address','balace'])
     await updateValues(oAuth, ipfsHash, 'A1:C'+flatObj.length, flatObj)
 }
 
@@ -64,14 +64,14 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
         const noIndex = batchIndexNo === undefined ? 2 : batchIndexNo
 
         const yesVotes = proposalScores[ipfsHash][yesIndex] || 0
-        const noVotes = noIndex === 2 ? proposalScores[ipfsHash][noIndex] : 0
+        const noVotes = proposalScores[ipfsHash][noIndex] || 0
 
         let numVoters = 0
         if( batchIndex === undefined ) {
             numVoters = Object.keys(voterScores[ipfsHash]).length
         } else {
             numVoters = Object.entries(voterScores[ipfsHash])
-                .map((v) => {return v[1].choice === batchIndex ? 1 : 0})
+                .map((v) => {return (v[1].choice[batchIndex] != undefined && v[1].choice[batchIndex] > 0) ? 1 : 0})
                 .reduce((total, num) => {return total + num})
         }
         const sumVotes = yesVotes + noVotes
@@ -90,16 +90,14 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
     return records
 }
 
-const calculateRoundSummary = async (proposals, voterScores, proposalScores) => {
+const calculateRoundSummary = async (curRoundBallotType, proposals, voterScores, proposalScores) => {
     // push all votes, from all proposals into a single object
     let votes = []
 
-    // TODO - Update function to support Y/N voting
-    const batchMode = proposals[0].get('Snapshot Batch Index') !== undefined
     // If Granular Voting
-    if(batchMode === true) {
+    if(curRoundBallotType === BallotType.Granular) {
         votes = Object.entries(voterScores[proposals[0].get('ipfsHash')])
-    } else {
+    } else if (curRoundBallotType === BallotType.Batch){
         proposals.map((p) => {
             const ipfsHash = p.get('ipfsHash')
             votes = votes.concat(Object.entries(voterScores[ipfsHash]))
@@ -133,20 +131,51 @@ const calculateRoundSummary = async (proposals, voterScores, proposalScores) => 
             'sumNo':0
         }
 
-        if(batchMode === true) {
+        if(curRoundBallotType === BallotType.Granular) {
             Object.values(w).map((v) => {
                 walletSummary[address]['numVotes']++;
                 walletSummary[address]['numYes'] += 1
                 walletSummary[address]['sumYes'] += v[2]
                 walletSummary[address]['sumNo'] = 0
             })
-        } else {
+        } else if (curRoundBallotType === BallotType.Batch) {
             Object.values(w).map((v) => {proposalScores
+
+                let proposalsYesIndexes = []
+                let proposalsNoIndexes = []
+                proposals.map((p) => {
+                    proposalsYesIndexes.push(p.get('Snapshot Batch Index'))
+                    proposalsNoIndexes.push(p.get('Snapshot Batch Index No'))
+                })
+                const walletBalance = v[2]  
+                const walletChoices = v[1]
+                let numYesVotes = 0
+                let sumYesVotes = 0
+                let numNoVotes = 0
+                let sumNoVotes = 0
+
+                let allWalletVotesCount = 0
+                for (const [_, voteChoice] of Object.entries(walletChoices)) 
+                    if (voteChoice > 0)
+                        allWalletVotesCount += 1
+
+                for (const [index, voteChoice] of Object.entries(walletChoices)) {
+                    if (voteChoice > 0) {
+                        if (index in proposalsYesIndexes) {
+                            numYesVotes += voteChoice
+                            sumYesVotes += (walletBalance / allWalletVotesCount) * voteChoice
+                        }    
+                        if (index in proposalsNoIndexes) {
+                            numNoVotes += voteChoice    
+                            sumNoVotes += (walletBalance / allWalletVotesCount) * voteChoice
+                        }
+                    }
+                }
                 walletSummary[address]['numVotes']++;
-                walletSummary[address]['numYes'] += v[1] === 1 ? 1 : 0
-                walletSummary[address]['numNo'] += v[1] === 2 ? 1 : 0
-                walletSummary[address]['sumYes'] += v[1] === 1 ? v[2] : 0
-                walletSummary[address]['sumNo'] += v[1] === 2 ? v[2] : 0
+                walletSummary[address]['numYes'] += numYesVotes
+                walletSummary[address]['numNo'] += numNoVotes
+                walletSummary[address]['sumYes'] += sumYesVotes
+                walletSummary[address]['sumNo'] += sumNoVotes
             })
         }
     })
@@ -243,7 +272,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
     return [voterScores, proposalScores]
 }
 
-const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
+const syncGSheetsActiveProposalVotes = async (curRoundBallotType, curRoundNumber) => {
     // Retrieve all active proposals from Airtable
     const results = await getActiveProposalVotes(curRoundNumber)
     let voterScores = results[0]
@@ -256,7 +285,7 @@ const syncGSheetsActiveProposalVotes = async (curRoundNumber) => {
 
     // Output the round summary
     proposalSummary = await calculateProposalSummary(activeProposals, voterScores, proposalScores)
-    roundSummary = await calculateRoundSummary(activeProposals, voterScores, proposalScores)
+    roundSummary = await calculateRoundSummary(curRoundBallotType, activeProposals, voterScores, proposalScores)
     await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
     console.log('Updated GSheets')
