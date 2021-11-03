@@ -30,6 +30,15 @@ describe('Functionally test updateFundingRound', function() {
         should.equal(roundDueBy_plus15.utc().toISOString(), '2020-12-15T00:14:00.000Z')
     })
 
+    it('Validates basis currency chosen', async function() {
+        const currentRound = await getCurrentRound()
+        if (currentRound !== undefined){
+        const basisCurrency = currentRound.get('Basis Currency')
+        should.not.equal(basisCurrency, undefined) 
+        }
+
+    })
+ 
     it.skip('Validates proposals that are not been initialized.', async function() {
         let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
         expect(inactiveProposals.length).to.be.greaterThan(0);
