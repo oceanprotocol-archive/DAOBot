@@ -7,6 +7,7 @@
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
     "test": "jest",
+    "test-github": "jest",
     "lint": "eslint --ignore-pattern node_modules/"
   },
   "author": "",
