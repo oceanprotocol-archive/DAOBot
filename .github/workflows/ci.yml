@@ -44,4 +44,11 @@ jobs:
 
       # - run: npm ci
       - run: npm run lint
-      - run: npm run test-github AIRTABLE_API_KEY=${{ secrets.AIRTABLE_API_KEY }} AIRTABLE_BASEID=${{ secrets.AIRTABLE_BASEID }} INFURA_API_KEY=${{ secrets.INFURA_API_KEY }} ETH_PRIVATE_KEY=${{ secrets.ETH_PRIVATE_KEY }}
+
+      - name: Tests
+        run: npm run test-github 
+        env:
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }} 
+          AIRTABLE_BASEID: ${{ secrets.AIRTABLE_BASEID }} 
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }} 
+          ETH_PRIVATE_KEY: ${{ secrets.ETH_PRIVATE_KEY }}
