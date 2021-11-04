@@ -139,7 +139,11 @@ const calculateRoundSummary = async (curRoundBallotType, proposals, voterScores,
                 walletSummary[address]['sumNo'] = 0
             })
         } else if (curRoundBallotType === BallotType.Batch) {
-            Object.values(w).map((v) => {proposalScores
+            // For the batch case, the choices are the same on all proposals
+            // And is a dictionary of form: {1: 1, 3: 2, 4: 2, 5: 2, 6: 1}
+            // So calculating all the votes distribution once 
+            if (w.length > 0) {
+                const wallet = w[0]
 
                 let proposalsYesIndexes = []
                 let proposalsNoIndexes = []
@@ -147,36 +151,37 @@ const calculateRoundSummary = async (curRoundBallotType, proposals, voterScores,
                     proposalsYesIndexes.push(p.get('Snapshot Batch Index'))
                     proposalsNoIndexes.push(p.get('Snapshot Batch Index No'))
                 })
-                const walletBalance = v[2]  
-                const walletChoices = v[1]
+                const walletBalance = wallet[2]  
+                const walletChoices = wallet[1]
                 let numYesVotes = 0
                 let sumYesVotes = 0
                 let numNoVotes = 0
                 let sumNoVotes = 0
 
                 let allWalletVotesCount = 0
-                for (const [_, voteChoice] of Object.entries(walletChoices)) 
-                    if (voteChoice > 0)
-                        allWalletVotesCount += 1
+                for (const [_, votesCount] of Object.entries(walletChoices))
+                    allWalletVotesCount += votesCount
 
-                for (const [index, voteChoice] of Object.entries(walletChoices)) {
-                    if (voteChoice > 0) {
-                        if (index in proposalsYesIndexes) {
-                            numYesVotes += voteChoice
-                            sumYesVotes += (walletBalance / allWalletVotesCount) * voteChoice
+                for (const [index, votesCount] of Object.entries(walletChoices)) {
+                    const proposalIndex = parseInt(index)
+                    
+                    if (votesCount > 0 && allWalletVotesCount > 0 && walletBalance > 0) {
+                        if (proposalsYesIndexes.includes(proposalIndex)) {
+                            numYesVotes += votesCount
+                            sumYesVotes += (walletBalance / allWalletVotesCount) * votesCount
                         }    
-                        if (index in proposalsNoIndexes) {
-                            numNoVotes += voteChoice    
-                            sumNoVotes += (walletBalance / allWalletVotesCount) * voteChoice
+                        else if (proposalsNoIndexes.includes(proposalIndex)) {
+                            numNoVotes += votesCount    
+                            sumNoVotes += (walletBalance / allWalletVotesCount) * votesCount
                         }
                     }
                 }
-                walletSummary[address]['numVotes']++;
+                walletSummary[address]['numVotes'] += allWalletVotesCount
                 walletSummary[address]['numYes'] += numYesVotes
                 walletSummary[address]['numNo'] += numNoVotes
                 walletSummary[address]['sumYes'] += sumYesVotes
                 walletSummary[address]['sumNo'] += sumNoVotes
-            })
+            }
         }
     })
 
