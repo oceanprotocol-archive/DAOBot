@@ -56,22 +56,22 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
     let records = []
     proposals.map((p) => {
         // TODO - Add support for non-granular voting system
-        const batchIndex = p.get('Snapshot Batch Index')
+        const batchIndexYes = p.get('Snapshot Batch Index')
         const batchIndexNo = p.get('Snapshot Batch Index No')
         const ipfsHash = p.get('ipfsHash')
 
-        const yesIndex = batchIndex === undefined ? 1 : batchIndex
+        const yesIndex = batchIndexYes === undefined ? 1 : batchIndexYes
         const noIndex = batchIndexNo === undefined ? 2 : batchIndexNo
 
         const yesVotes = proposalScores[ipfsHash][yesIndex] || 0
         const noVotes = proposalScores[ipfsHash][noIndex] || 0
 
         let numVoters = 0
-        if( batchIndex === undefined ) {
+        if( batchIndexYes === undefined || batchIndexNo === undefined ) {
             numVoters = Object.keys(voterScores[ipfsHash]).length
         } else {
             numVoters = Object.entries(voterScores[ipfsHash])
-                .map((v) => {return (v[1].choice[batchIndex] != undefined && v[1].choice[batchIndex] > 0) ? 1 : 0})
+                .map((v) => {return (v[1].choice[batchIndexYes] > 0 || [1].choice[batchIndexNo] > 0) ? 1 : 0})
                 .reduce((total, num) => {return total + num})
         }
         const sumVotes = yesVotes + noVotes
@@ -277,7 +277,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
     return [voterScores, proposalScores]
 }
 
-const syncGSheetsActiveProposalVotes = async (curRoundBallotType, curRoundNumber) => {
+const syncGSheetsActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
     // Retrieve all active proposals from Airtable
     const results = await getActiveProposalVotes(curRoundNumber)
     let voterScores = results[0]

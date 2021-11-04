@@ -57,11 +57,13 @@ const main = async () => {
     let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
     let lastRoundState = undefined
     let lastRoundVoteEnd = undefined
+    let lastRoundBallotType = undefined
 
     if( lastRound !== undefined && lastRound.length > 0 ) {
         lastRound = lastRound[0]
         lastRoundState = lastRound.get('Round State')
         lastRoundVoteEnd = lastRound.get('Voting Ends')
+        lastRoundBallotType = lastRound.get('Ballot Type')
     }
 
     const now = moment().utc().toISOString()
@@ -73,7 +75,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(lastRoundNumber)
-            await syncGSheetsActiveProposalVotes(lastRoundNumber)
+            await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
@@ -83,12 +85,12 @@ const main = async () => {
                 id: lastRound['id'],
                 fields: {
                     'Round State': RoundState.Ended,
+                    'Proposals Granted': proposalsFunded
                 }
             }, {
                 id: curRound['id'],
                 fields: {
-                    'Round State': RoundState.Started,
-                    'Proposals Granted': proposalsFunded
+                    'Round State': RoundState.Started
                 }
             }]
             await updateRoundRecord(roundUpdate)
@@ -203,7 +205,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(curRoundNumber)
-            await syncGSheetsActiveProposalVotes(curRoundBallotType, curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
         }
     }
 }
