@@ -32,12 +32,6 @@ const Disputed = {
     Resolved: 'Resolved'
 }
 
-const Earmarks = {
-    Undefined: undefined,
-    NewEntrants: 'New Entrants',
-    Outreach: 'Outreach'
-}
-
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
 const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, noOcean) => {

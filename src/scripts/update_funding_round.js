@@ -153,7 +153,6 @@ const main = async () => {
                     'Earmarks': JSON.stringify(completeEarstructuresValues(curRound, tokenPrice, basisCurrency)),
                     'Funding Available': fundingAvailable,
                     'Max Grant USD': maxGrantUSD,
-                    'Earmarked USD': earmarkedUSD,
                     'Funding Available USD': fundingAvailableUSD
                 }
             }]
@@ -199,7 +198,5 @@ const main = async () => {
         }
     }
 }
-
-module.exports = {completeEarstructuresValues};
 
 main()
