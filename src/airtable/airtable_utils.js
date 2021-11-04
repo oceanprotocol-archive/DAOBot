@@ -37,10 +37,11 @@ const sumSnapshotVotesToAirtable = async (proposals, scores) => {
     let records = []
     proposals.map((p) => {
         const batchIndex = p.get('Snapshot Batch Index')
+        const batchNoIndex = p.get('Snapshot Batch Index No')
         const ipfsHash = p.get('ipfsHash')
 
         const yesIndex = batchIndex === undefined ? 1 : batchIndex
-        const noIndex = batchIndex === undefined ? 2 : undefined
+        const noIndex = batchNoIndex === undefined ? 2 : batchNoIndex
 
         const yesVotes = scores[ipfsHash][yesIndex] === undefined ? 0 : scores[ipfsHash][yesIndex]
         const noVotes = scores[ipfsHash][noIndex] === undefined ? 0 : scores[ipfsHash][noIndex]
