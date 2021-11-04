@@ -10,7 +10,7 @@ const {getRoundsSelectQuery, getProposalsSelectQuery} = require('../../airtable/
 const {getCurrentRound} = require('../../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../../airtable/process_airtable_new_proposals')
 const {prepareProposalsForSnapshot} = require('../../snapshot/prepare_snapshot_received_proposals_airtable')
-const {submitProposalsToSnapshot} = require('../../snapshot/submit_snapshot_accepted_proposals_airtable')
+const {submitProposalsToSnaphotGranular, submitProposalsToSnaphotBatch} = require('../../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {sleep} = require('../../functions/utils')
 
 // To run these tests, you should setup the DB beforehand
@@ -58,7 +58,7 @@ describe('Functionally test updateFundingRound', function() {
         }
     }).timeout(5000);
 
-    it.skip('Processes proposals for snapshot.', async function() {
+    it('Processes proposals for snapshot.', async function() {
         const currentRound = await getCurrentRound()
         if( currentRound !== undefined ) {
             await prepareProposalsForSnapshot(currentRound)
@@ -68,18 +68,31 @@ describe('Functionally test updateFundingRound', function() {
             let acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`)
             expect(acceptedProposals.length).to.be.greaterThan(0);
         }
-    }).timeout(5000);
+    }).timeout(10000);
 
-    it.skip('Deploys proposals to snapshot.', async function() {
+    it.skip('Deploys proposals to snapshot into multiple ballots.', async function() {
         const currentRound = await getCurrentRound()
         if( currentRound !== undefined ) {
             // Submit to snapshot + Enter voting state
             const curRoundNumber = currentRound.get('Round')
-            await submitProposalsToSnapshot(curRoundNumber)
+            await submitProposalsToSnaphotGranular(curRoundNumber)
 
             await sleep(500)
             let acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
             expect(acceptedProposals.length).to.be.greaterThan(0);
         }
     }).timeout(90000);
+
+    it('Deploys proposals to snapshot in a single ballot.', async function() {
+        const currentRound = await getCurrentRound()
+        if( currentRound !== undefined ) {
+            // Submit to snapshot + Enter voting state
+            const curRoundNumber = currentRound.get('Round')
+            await submitProposalsToSnaphotBatch(curRoundNumber)
+
+            await sleep(500)
+            let acceptedProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`)
+            expect(acceptedProposals.length).to.be.greaterThan(0);
+        }
+    }).timeout(10000);
 });

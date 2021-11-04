@@ -4,7 +4,7 @@ dotenv.config();
 
 const should = require('chai').should()
 const {assert} = require('chai')
-const {getVoteCountStrategy, getVotesQuery, reduceVoterScores, getProposalVotesGQL, getVoterScores} = require('../../snapshot/snapshot_utils');
+const {strategy, getVoteCountStrategy, getVotesQuery, reduceVoterScores, getProposalVotesGQL, getVoterScores} = require('../../snapshot/snapshot_utils');
 
 const singleBatchVoting_blockHeight = 11457494;
 const singleBatchVoting_proposalIPFSHash = "QmPLfq9J2Mr4FDAWpYaBq2veYJpiKVgU6JkXYUvV8qa2FC"
@@ -129,6 +129,9 @@ const uni_sushi_bancor_voterValidation = {
     "0x227FD2fD881Cc6c99DFCcc0FB40f2B1dc2f3F36E":3793.33859637885
 }
 
+const spring_dao_quadratic_blockNumber = 13347979
+const spring_dao_quadratic_proposalIPFSHash = "QmX1H9SiZnM7MvaxzSKNwXKtt9p95RfiWDTKAQLNWnFS1q"
+
 // Tests against Snapshot GraphQL endpoint
 describe('Snapshot GraphQL test', () => {
     it('Validates votes from proposal', async () => {
@@ -250,4 +253,32 @@ describe('Snapshot GraphQL test', () => {
             }
         })
     }).timeout(5000);
+
+    it('Validates scores from SPRING quadratic voting', async () => {
+        const strategy = [{
+            name: "erc20-balance-of",
+            params: {
+                symbol: "SPRNG",
+                address: "0x6D40A673446B2D00D1f9E85251209C638049ba22",
+                decimals: 2
+            }
+        }]
+
+        let votes = []
+        await getProposalVotesGQL(spring_dao_quadratic_proposalIPFSHash)
+            .then((result) => {
+                votes = result.data.votes
+            })
+        should.equal(votes.length, 1)
+
+        const voters = []
+        for (var i = 0; i < votes.length; ++i) {
+            voters.push(votes[i].voter)
+        }
+
+        const voterScores = await getVoterScores(strategy, voters, spring_dao_quadratic_blockNumber)
+        const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
+
+        console.log(reducedVoterScores)
+    })
 });
