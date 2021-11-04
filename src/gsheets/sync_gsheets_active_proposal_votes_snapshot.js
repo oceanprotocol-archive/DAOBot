@@ -71,7 +71,7 @@ const calculateProposalSummary = async (proposals, voterScores, proposalScores) 
             numVoters = Object.keys(voterScores[ipfsHash]).length
         } else {
             numVoters = Object.entries(voterScores[ipfsHash])
-                .map((v) => {return (v[1].choice[batchIndexYes] > 0 || [1].choice[batchIndexNo] > 0) ? 1 : 0})
+                .map((v) => {return (v[1].choice[batchIndexYes] > 0 || v[1].choice[batchIndexNo] > 0) ? 1 : 0})
                 .reduce((total, num) => {return total + num})
         }
         const sumVotes = yesVotes + noVotes
