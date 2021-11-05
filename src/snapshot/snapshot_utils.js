@@ -116,6 +116,16 @@ const strategy = {
     }]
 };
 
+const VoteType = {
+    SingleChoice: "single-choice",
+    Quadratic: "quadratic",
+    Weighted: "weighted",
+}
+
+const BallotType = {
+    Batch: "Batch",
+    Granular: "Granular"
+}
 
 const getVoteCountStrategy = (roundNumber) => {
     const defaultStrategy = process.env.SNAPSHOT_STRATEGY
@@ -193,23 +203,29 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (voterScores) => {
-    let scores = {
-        1: 0,
-        2: 0
-    }
-
+    let scores = {}
+    
     Object.entries(voterScores).reduce((total, cur) => {
-        const choice = cur[1].choice
-        const balance = cur[1].balance
-        if (scores[choice] === undefined) scores[choice] = 0
-        scores[choice] += balance
+        const voterAllChoices = cur[1].choice
+        const voterTotalBalance = cur[1].balance
+
+        let voterVotesCount = 0
+        for (const [_, vote] of Object.entries(voterAllChoices)) {
+            voterVotesCount += vote
+        }
+        
+        for (const [proposalIndex, proposalVotes] of Object.entries(voterAllChoices)) {
+            if (scores[proposalIndex] === undefined) scores[proposalIndex] = 0
+            scores[proposalIndex] += (voterVotesCount > 0 && voterTotalBalance > 0 && proposalVotes > 0) ?
+            ((voterTotalBalance / voterVotesCount) * proposalVotes) : 0
+        }
     }, {})
 
     return scores
 }
 
-// Configure the proposal template that will be submitted to Snapshot
-const buildProposalPayload = (proposal, roundNumber) => {
+// Configure the ballot for a single proposal
+const buildGranularProposalPayload = (proposal, roundNumber, voteType) => {
     const strategy = getVoteCountStrategy(roundNumber)
     const startTs = Date.parse(proposal.get('Voting Starts')) / 1000
     const endTs = Date.parse(proposal.get('Voting Ends')) / 1000
@@ -231,9 +247,46 @@ https://discord.gg/TnXjkR5
         end: endTs,
         body: body,
         name: proposal.get('Project Name'),
-        type: "single-choice",
+        type: voteType,
         start: startTs,
         choices: ["Yes", "No"],
+        metadata: {
+            network: 1,
+            strategies: strategy
+        },
+        snapshot: blockHeight
+    }
+}
+
+// Configure the ballot for multiple proposals
+const buildBatchProposalPayload = (proposals, choices, roundNumber, voteType) => {
+    const strategy = getVoteCountStrategy(roundNumber)
+
+    const startTs = Date.parse(proposals[0].get('Voting Starts'))/1000
+    const endTs = Date.parse(proposals[0].get('Voting Ends'))/1000
+    const blockHeight = proposals[0].get('Snapshot Block')
+
+    let body = `## Proposals:`
+
+    proposals.forEach((x) => {
+        body += `
+${x.get('Project Name')} - [Click Here](${x.get('Proposal URL')})
+`
+    })
+
+    body += `
+### Engage in community conversation, questions and feedback
+[Join our discord](https://discord.gg/TnXjkR5)
+
+### Cast your vote below!`
+
+    return payload = {
+        end: endTs,
+        body: body,
+        name: `OceanDAO Round${roundNumber}`,
+        type: voteType,
+        start: startTs,
+        choices: choices,
         metadata: {
             network: 1,
             strategies: strategy
@@ -298,6 +351,7 @@ const calcTargetBlockHeight = (currentBlockHeight, targetUnixTimestamp, avgBlock
 }
 
 module.exports = {
+    strategy,
     getVoteCountStrategy,
     getVotesQuery,
     getProposalVotes,
@@ -305,7 +359,10 @@ module.exports = {
     getVoterScores,
     reduceVoterScores,
     reduceProposalScores,
-    buildProposalPayload,
+    buildGranularProposalPayload,
+    buildBatchProposalPayload,
     local_broadcast_proposal,
-    calcTargetBlockHeight
+    calcTargetBlockHeight,
+    VoteType,
+    BallotType
 }
