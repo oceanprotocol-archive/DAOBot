@@ -114,7 +114,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     await updateValues(oAuth, sheetName, 'A1:H' + (gsheetRows.length + 1), gsheetRows)
     console.log('\n[%s]\nDumped [%s] rows to Gsheets', (new Date()).toString(), Object.entries(gsheetRows).length)
 
-    return earmarkedResults.length + generalResults.length + partiallyFundedResults.length
+    return finalResults["earmarkedResults"]["winningProposals"].length + finalResults["generalResults"]["winningProposals"].length + finalResults["partiallyFunded"].length
 }
 
 module.exports = {processFundingRoundComplete};
