@@ -255,7 +255,7 @@ describe('Snapshot GraphQL test', () => {
                 console.log(`Voter [${voterAddress}] score is not found in snapshot`)
             }
         })
-    }).timeout(5000);
+    });
 
     it('Validates scores from SPRING quadratic voting', async () => {
         const strategy = [{
