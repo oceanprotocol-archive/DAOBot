@@ -4,7 +4,7 @@ dotenv.config();
 
 const moment = require('moment')
 const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
-const {RoundState, getCurrentRound} = require('../airtable/rounds/funding_rounds')
+const {RoundState, getCurrentRound, completeEarstructuresValues} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
@@ -57,11 +57,13 @@ const main = async () => {
     let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
     let lastRoundState = undefined
     let lastRoundVoteEnd = undefined
+    let lastRoundBallotType = undefined
 
     if( lastRound !== undefined && lastRound.length > 0 ) {
         lastRound = lastRound[0]
         lastRoundState = lastRound.get('Round State')
         lastRoundVoteEnd = lastRound.get('Voting Ends')
+        lastRoundBallotType = lastRound.get('Ballot Type')
     }
 
     const now = moment().utc().toISOString()
@@ -73,7 +75,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(lastRoundNumber)
-            await syncGSheetsActiveProposalVotes(lastRoundNumber)
+            await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
@@ -83,12 +85,12 @@ const main = async () => {
                 id: lastRound['id'],
                 fields: {
                     'Round State': RoundState.Ended,
+                    'Proposals Granted': proposalsFunded
                 }
             }, {
                 id: curRound['id'],
                 fields: {
-                    'Round State': RoundState.Started,
-                    'Proposals Granted': proposalsFunded
+                    'Round State': RoundState.Started
                 }
             }]
             await updateRoundRecord(roundUpdate)
@@ -119,35 +121,28 @@ const main = async () => {
             const basisCurrency = curRound.get('Basis Currency')
 
             let maxGrant = 0
-            let earmarked = 0
             let fundingAvailable = 0
 
             let maxGrantUSD = 0
-            let earmarkedUSD = 0
             let fundingAvailableUSD = 0
 
             switch(basisCurrency) {
                 case 'USD' :
                 maxGrantUSD = curRound.get('Max Grant USD')
-                earmarkedUSD = curRound.get('Earmarked USD')
                 fundingAvailableUSD = curRound.get('Funding Available USD')
 
                 maxGrant = maxGrantUSD/ tokenPrice
-                earmarked = earmarkedUSD / tokenPrice
                 fundingAvailable = fundingAvailableUSD / tokenPrice
                 break
 
                 case 'OCEAN': 
                 const maxGrantOCEAN = curRound.get('Max Grant')
-                const earmarkedOCEAN = curRound.get('Earmarked')
                 const fundingAvailableOCEAN = curRound.get('Funding Available')
 
                 maxGrant = maxGrantOCEAN
-                earmarked = earmarkedOCEAN
                 fundingAvailable = fundingAvailableOCEAN 
 
                 maxGrantUSD = maxGrantOCEAN *  tokenPrice
-                earmarkedUSD = earmarkedOCEAN * tokenPrice
                 fundingAvailableUSD = fundingAvailableOCEAN * tokenPrice               
                 break
 
@@ -162,10 +157,9 @@ const main = async () => {
                     'Proposals': allProposals.length,
                     'OCEAN Price': tokenPrice,
                     'Max Grant': maxGrant,
-                    'Earmarked': earmarked,
+                    'Earmarks': JSON.stringify(completeEarstructuresValues(curRound, tokenPrice, basisCurrency)),
                     'Funding Available': fundingAvailable,
                     'Max Grant USD': maxGrantUSD,
-                    'Earmarked USD': earmarkedUSD,
                     'Funding Available USD': fundingAvailableUSD
                 }
             }]
@@ -211,7 +205,7 @@ const main = async () => {
 
             // Update votes
             await syncAirtableActiveProposalVotes(curRoundNumber)
-            await syncGSheetsActiveProposalVotes(curRoundBallotType, curRoundNumber)
+            await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
         }
     }
 }

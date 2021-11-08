@@ -16,7 +16,7 @@ const {google} = require('googleapis');
 // DuplicateSheetRequest({sourceSheetId:'GranularSummary', insertSheetIndex:0, newSheetName:proposal.ipfsHash+'Summary'})
 // AddSheetRequest({title:proposal.ipfsHash})
 
-const spreadsheet = '1e4xb6m-aKcBhwob_p7ereSFneXFPpDjUbSjz13smmHI'
+const spreadsheet = process.env.GSHEET_BASEID
 
 // Executed queued requests on top of GSheets
 const processRequests = async (oAuth, requests) => {
