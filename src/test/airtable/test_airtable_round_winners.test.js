@@ -15,8 +15,8 @@ beforeEach(async function() {
         id: 'round_8',
         fields: {
             'OCEAN Price': 0.5,
-            'Earmarks': `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}}`,
-            'Funding Available USD': 53000,
+            'Earmarks': `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":30000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":50000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":30000}}`,
+            'Funding Available USD': 115000,
             'Basis Token': 'USD'
         },
         get: function (key) {
@@ -166,7 +166,7 @@ describe('Calculating Winners', function() {
         let earmarks = allProposals.filter(p => p.get('Earmarks') !== undefined)
         let earmarkedResults = calculateWinningAllProposals(earmarks, fundingRound, oceanPrice)
         should.equal(earmarkedResults.winningProposals.length, 0)
-        should.equal(earmarkedResults.fundsLeft, 114000)
+        should.equal(earmarkedResults.fundsLeft, 110000)
     });
 
     it('Validates 1 winning earmarked proposals', function() {
@@ -186,30 +186,33 @@ describe('Calculating Winners', function() {
         let earmarks = allProposals.filter(p => p.get('Earmarks') !== undefined)
         let earmarkedResults = calculateWinningAllProposals(earmarks, fundingRound, oceanPrice)
 
-        should.equal(earmarkedResults.winningProposals.length, 1)
+        should.equal(earmarkedResults.winningProposals.length, 2)
         should.equal(earmarkedResults.winningProposals[0].get('USD Granted'), 30000)
         should.equal(earmarkedResults.winningProposals[0].get('OCEAN Granted'), 60000)
 
         should.equal(earmarks.length, 2)
-        should.equal(earmarks[1].get('USD Granted'), 8000)
-        should.equal(earmarks[1].get('OCEAN Granted'), 16000)
+        should.equal(earmarks[1].get('USD Granted'), 20000)
+        should.equal(earmarks[1].get('OCEAN Granted'), 40000)
     });
 
     it('Validates all Final Result parameters are correct.', function() {
         let downvotedProposals = getDownvotedProposals(allProposals)
         should.equal(downvotedProposals.length, 1)
 
-        fundingRound.fields['Funding Available USD'] = 52500
+        fundingRound.fields['Funding Available USD'] = 115000
         allProposals[0].fields['Earmarks'] = Earmarks.NEW_OUTREACH
         allProposals[1].fields['Earmarks'] = Earmarks.NEW_OUTREACH
+        allProposals[5].fields['USD Requested'] = 3000
         let winningProposals = getWinningProposals(allProposals, fundingRound)
         let finalResults = calculateFinalResults(winningProposals, fundingRound)
 
+        console.log(finalResults)
+
         // Validate all winning, not funded, and downvoted proposals add up
-        should.equal(finalResults.earmarkedResults.winningProposals.length, 1)
+        should.equal(finalResults.earmarkedResults.winningProposals.length, 2)
         should.equal(finalResults.generalResults.winningProposals.length, 3)
         should.equal(finalResults.partiallyFunded.length, 1)
-        should.equal(finalResults.notFunded.length, 2)
+        should.equal(finalResults.notFunded.length, 1)
 
         should.equal(
             finalResults.earmarkedResults.winningProposals.length +
@@ -238,9 +241,11 @@ describe('Calculating Winners', function() {
             (total, p) => total + p.get('USD Granted'), 0
         )
 
+        console.log(earmarkedUSDGranted, generalUSDGranted, partialUSDGranted)
+
         should.equal(
             earmarkedUSDGranted+generalUSDGranted+partialUSDGranted,
-            fundingRound.get('Funding Available USD')
+            55000
         )
     });
 
@@ -261,10 +266,10 @@ describe('Calculating Winners', function() {
 
         // Validate all winning, not funded, and downvoted proposals add up
         should.equal(downvotedResults.length, 2)
-        should.equal(earmarkedResults.length, 2)
-        should.equal(generalResults.length, 5)
+        should.equal(earmarkedResults.length, 3)
+        should.equal(generalResults.length, 6)
         should.equal(partiallyFundedResults.length, 1)
-        should.equal(notFundedResults.length, 3)
+        should.equal(notFundedResults.length, 1)
     });
 
     it('Test new earmarks structure', function() {

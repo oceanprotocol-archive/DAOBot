@@ -168,7 +168,7 @@ const calculateFinalResults = (proposals, fundingRound) => {
 
     let remainder = general.filter(p => generalWinnerIds.lastIndexOf(p['id']) === -1 )
     let partiallyFunded = remainder.filter(p => p.get('USD Granted') > 0)
-    let notFunded = remainder.filter(p => p.get('USD Granted') === undefined || p.get('USD Granted') === 0)
+    let notFunded = proposals.filter(p => p.get('USD Granted') === undefined || p.get('USD Granted') === 0)
     notFunded.map(p => {
         p.fields['OCEAN Requested'] = 0
         p.fields['USD Granted'] = 0
