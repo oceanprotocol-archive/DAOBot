@@ -60,6 +60,7 @@ const filterCurrentRound = (roundsArr) => {
 
 const getCurrentRound = async () => {
     let nowDateString = moment().utc().toISOString()
+    console.log('NOW DATE: ', nowDateString)
     const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`)
     return roundParameters[0]
 }
@@ -98,6 +99,8 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
             let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
 
             p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
+            console.log('OCEAN PRICE: ', oceanPrice)
+            console.log('OCN REQ: ', Math.round( usdRequested / oceanPrice))
             p.fields['USD Granted'] = usdGranted + grantCarry
             p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
             p.fields['Proposal State'] = 'Granted'

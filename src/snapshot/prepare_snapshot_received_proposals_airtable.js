@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const {Standings} = require('../airtable/proposals/proposal_standings')
+const {Standings, getProposalRecord} = require('../airtable/proposals/proposal_standings')
 const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const {calcTargetBlockHeight} = require('../snapshot/snapshot_utils')
 const {web3} = require('../functions/web3')
@@ -46,6 +46,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
     let recordsPayload = []
 
     await Promise.all(proposals.map(async (proposal) => {
+        getProposalRecord(proposal)
         try {
             let wallet_0x = proposal.get('Wallet Address')
             let proposalStanding = proposal.get('Proposal Standing')
