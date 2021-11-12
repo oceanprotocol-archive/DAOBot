@@ -87,7 +87,7 @@ beforeEach(async function() {
             'Proposal URL': 'www.testurl.com',
             'Proposal State': State.Funded,
             'Proposal Standing': undefined,
-            'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Feb 01, 2021',
             'Refund Transaction': '0xRefundTx',
             'Disputed Status': undefined,
@@ -343,7 +343,7 @@ describe('Process Project Standings', function() {
         let badUrl0Count = badUrl0.split('\n')
         let badUrl1Count = badUrl1.split('\n')
         should.equal(badUrl0Count.length, 2)
-        should.equal(badUrl1Count.length, 3)
+        should.equal(badUrl1Count.length, 2)
 
         // Update initial proposal to be completed
         allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -354,7 +354,7 @@ describe('Process Project Standings', function() {
 
         // Validate first proposal is completed, and [Oustanding URLs] is correct.
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
-        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Incomplete)
+        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Completed)
 
         badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
         badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
@@ -362,7 +362,7 @@ describe('Process Project Standings', function() {
         should.equal(badUrl0Count.length, 1)
 
         badUrl1Count = badUrl1.split('\n')
-        should.equal(badUrl1Count.length, 2)
+        should.equal(badUrl1Count.length, 1)
     });
 
     it('Validates [Ongoing Disputed Proposals] are a bad state. Not Eligible for grants.', async function() {
@@ -399,26 +399,25 @@ describe('Process Project Standings', function() {
         }
     });
 
-    it('Validates projects not funded, do not receive a standing.', async function() {
+    it('Validates projects not funded, receive New Project.', async function() {
         // Set the very first proposal to not be completed
-        allProposals[0].fields['Proposal State'] = State.Rejected
         allProposals[1].fields['Proposal State'] = State.NotGranted
-        allProposals[2].fields['Proposal State'] = State.DownVoted
+        allProposals[1].fields['Project Name'] = 'test1'
+
+        allProposals[5].fields['Proposal State'] = State.NotGranted
+        allProposals[5].fields['Project Name'] = 'test2'
 
         // Zero every completion
         allProposals.forEach((x) => {
             x.fields['Deliverable Checklist'] = undefined
         })
-        // Complete the last one
-        allProposals[3].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
 
         // Process all proposals
         let proposalStandings = await processProposalStandings(allProposals);
         await processHistoricalStandings(proposalStandings);
 
-        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.NewProject)
-        should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.NewProject)
-        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.NewProject)
+        should.equal(proposalStandings['test1'][0].fields['Proposal Standing'], Standings.NewProject)
+        should.equal(proposalStandings['test2'][0].fields['Proposal Standing'], Standings.NewProject)
     });
 
     it('Validates downvoted/declined projects without standing receive previous standings.', async function() {
@@ -443,7 +442,7 @@ describe('Process Project Standings', function() {
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed)
         should.equal(proposalStandings['test'][1].fields['Proposal Standing'], Standings.Completed)
         should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.Completed)
-        should.equal(proposalStandings['test'][3].fields['Proposal Standing'], Standings.NewProject)
+        should.equal(proposalStandings['test'][3].fields['Proposal Standing'], Standings.Incomplete)
     });
 
     it('Validates State.Received proposals report Standing.NoOcean.', async function() {
@@ -503,6 +502,6 @@ describe('Process Project Standings', function() {
         await processHistoricalStandings(proposalStandings);
 
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed);
-        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.NewProject);
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.Incomplete);
     });
 });
