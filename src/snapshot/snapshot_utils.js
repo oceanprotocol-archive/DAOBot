@@ -197,7 +197,21 @@ const getProposalVotesGQL = async (ipfsHash) => {
         })
     };
     const response = await fetch("https://hub.snapshot.org/graphql", options)
-    return await response.json()
+
+    // If a user allocates all his voting power just to 1 proposal,
+    // on the snapshot response for that wallet, the choices array
+    // is somthing like: {"41":1e+41}".
+    // So we need to transform that 1e+41 into a natural number
+    // to correcly calculate the votes count and the sum of allocated tokens
+    let result = await response.json()
+    for ([_, vote] of Object.entries(result.data.votes)) {
+        for ([choiceIndex, voteCount] of Object.entries(vote.choice)) {
+            if (voteCount === 1e+41) 
+                vote.choice[choiceIndex] = 1
+        }
+    }
+
+    return result
 }
 
 const getVoterScores = async (strategy, voters, blockHeight) => {
