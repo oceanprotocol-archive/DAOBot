@@ -60,10 +60,12 @@ const sumSnapshotVotesToAirtable = async (proposals, scores) => {
 }
 
 const updateProposalRecords = async (records) => {
-    const splitReocrds = splitArr(records, 10)
-    await Promise.all(splitReocrds.map(batch =>
+    const splitRecords = splitArr(records, 10)
+    await Promise.all(splitRecords.map(batch =>{
+        //console.log(splitRecords)
         fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/Proposals`, {
             method: "patch", // make sure it is a "PATCH request"
+            view: "All Proposals",
             headers: {
                 Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
                 "Content-Type": "application/json",
@@ -76,7 +78,7 @@ const updateProposalRecords = async (records) => {
         .catch((err) => {
             console.log(err);
         })
-    ))
+    }))
 }
 
 const updateRoundRecord = async (record) => {

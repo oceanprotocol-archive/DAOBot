@@ -4,7 +4,7 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings} = require('../../airtable/proposals/proposal_standings')
+const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings, isNewProposal} = require('../../airtable/proposals/proposal_standings')
 const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS, WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS} = require('../config')
 
 var currentProposals = undefined
@@ -113,6 +113,38 @@ beforeEach(async function() {
             return this.fields[key];
         }
     },{
+        id: 'proposal_3',
+        fields: {
+            'Project Name': 'test',
+            'Proposal URL': 'www.testurl.com',
+            'Proposal State': State.Rejected,
+            'Proposal Standing': Standings.NoOcean,
+            'Deliverable Checklist': '[] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Mar 01, 2021',
+            'Refund Transaction': undefined,
+            'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
+        },
+        get: function (key) {
+            return this.fields[key];
+        }
+    },{
+        id: 'proposal_1',
+        fields: {
+            'Project Name': 'test',
+            'Proposal URL': 'www.testurl.com',
+            'Proposal State': State.Funded,
+            'Proposal Standing': Standings.Completed,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Jan 01, 2021',
+            'Refund Transaction': undefined,
+            'Disputed Status': undefined,
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        },
+        get: function (key) {
+            return this.fields[key];
+        }
+    },{
         id: 'proposal_4',
         fields: {
             'Project Name': 'test',
@@ -132,55 +164,55 @@ beforeEach(async function() {
 });
 
 describe('Calculating Proposal Standings', function() {
-   /*it('Sample data includes 4 proposals from one project', function() {
-        should.equal(allProposals.length, 4);
+    it('Sample data includes 6 proposals from one project', function() {
+        should.equal(allProposals.length, 6);
     });
 
     it('Validates all initial proposal standings', async function() {
-        let record = await getProposalRecord(allProposals[0]);
+        let record = await getProposalRecord(allProposals[0], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Incomplete);
 
-        record = await getProposalRecord(allProposals[1]);
+        record = await getProposalRecord(allProposals[1], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Refunded);
 
-        record = await getProposalRecord(allProposals[2]);
+        record = await getProposalRecord(allProposals[2], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Incomplete);
 
-        record = await getProposalRecord(allProposals[3]);
-        should.equal(record.fields['Proposal Standing'], Standings.Completed);
+        record = await getProposalRecord(allProposals[3], allProposals);
+        should.equal(record.fields['Proposal Standing'], Standings.NoOcean);
     });
 
     it('Validates Incomplete becomes Complete', async function() {
-        let record = await getProposalRecord(allProposals[0]);
+        let record = await getProposalRecord(allProposals[0], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Incomplete);
 
         allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
-        record = await getProposalRecord(allProposals[0]);
+        record = await getProposalRecord(allProposals[0], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Completed);
     });
 
     it('Validates Refunded proposals remains Refunded', async function() {
-        let record = await getProposalRecord(allProposals[1]);
+        let record = await getProposalRecord(allProposals[1], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Refunded);
 
         allProposals[1].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
-        record = await getProposalRecord(allProposals[1]);
+        record = await getProposalRecord(allProposals[1], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Refunded);
     });
 
     it('Validates Incomplete proposals become Completed', async function() {
-        let record = await getProposalRecord(allProposals[2]);
+        let record = await getProposalRecord(allProposals[2], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Incomplete);
 
         allProposals[2].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
-        record = await getProposalRecord(allProposals[2]);
+        record = await getProposalRecord(allProposals[2], allProposals);
         should.equal(record.fields['Proposal Standing'], Standings.Completed);
     });
 });
 
 describe('Process Project Standings', function() {
-    it('Sample data includes 4 proposals from one project', function() {
-        should.equal(allProposals.length, 4);
+    it('Sample data includes 6 proposals from one project', function() {
+        should.equal(allProposals.length, 6);
     });
 
     it('All proposalStandings are Completed or Refunded', async function() {
@@ -196,7 +228,7 @@ describe('Process Project Standings', function() {
         // Verify every proposal in history is completed or refunded
         let projectName = allProposals[0].get('Project Name')
         proposalStandings[projectName].forEach((x) => {
-            expect(x.fields['Proposal Standing']).to.be.oneOf([Standings.Completed, Standings.Refunded])
+            expect(x.fields['Proposal Standing']).to.be.oneOf([Standings.Completed, Standings.Refunded, Standings.NoOcean])
         })
     });
 
@@ -442,40 +474,35 @@ describe('Process Project Standings', function() {
         allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
         allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
         allProposals[0].fields['Proposal State'] = State.Rejected
-
-        //console.log(allProposals[0].fields)
+        allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
         // Process all proposals
         let proposalStandings = await processProposalStandings(allProposals);
-        //console.log(proposalStandings['test'][0])
         await processHistoricalStandings(proposalStandings);
 
         should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed);
-    });*/
+        should.equal(proposalStandings['test'][0].fields['Proposal State'], State.Accepted);
+    });
 
     it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function() {
         // Process all proposals
         allProposals[0].fields['Earmarks'] = 'New Entrants'
-        allProposals[0].fields['Deliverable Checklist'] = undefined
+        allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+        allProposals[0].fields['Proposal State'] = State.Rejected
+        allProposals[0].fields['Proposal Standing'] = Standings.NoOcean
+        allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+
+        allProposals[2].fields['Earmarks'] = 'New Entrants'
+        allProposals[2].fields['Deliverable Checklist'] = ''
+        allProposals[2].fields['Proposal State'] = State.Rejected
+        allProposals[2].fields['Proposal Standing'] = Standings.NoOcean
+        allProposals[2].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+
         let proposalStandings = await processProposalStandings(allProposals);
+
         await processHistoricalStandings(proposalStandings);
 
-        console.log(proposalStandings)
-
-        // Step 3 - Report the latest (top of stack) proposal standing from each project
-        // latestProposal should equal head of each project
-        let latestProposals = getProjectsLatestProposal(proposalStandings)
-
-        console.log(latestProposals)
-
-        console.log(latestProposals[0].fields['Proposal Standing'])
-
-        currentProposals[0].fields['Proposal State'] = State.Rejected
-        currentProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
-
-        let currentProposalStandings = await processProposalStandings(currentProposals)
-        updateCurrentRoundStandings(currentProposalStandings, latestProposals)
-
-        should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.NoOcean);
+        should.equal(proposalStandings['test'][0].fields['Proposal Standing'], Standings.Completed);
+        should.equal(proposalStandings['test'][2].fields['Proposal Standing'], Standings.NewProject);
     });
 });
