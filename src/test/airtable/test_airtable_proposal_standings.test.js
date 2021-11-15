@@ -10,8 +10,6 @@ const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS, WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS}
 var currentProposals = undefined
 var allProposals = []
 
-//WALLET_ADDRESS_WITH_ENOUGH_OCEANS =''
-
 beforeEach(async function() {
     currentProposals = [{
         id: 'proposal_5',
