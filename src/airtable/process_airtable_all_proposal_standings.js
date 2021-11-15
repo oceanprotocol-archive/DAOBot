@@ -13,11 +13,11 @@ const main = async () => {
     // Step 1 - Identify all proposal standings
     let allProposals = await getAllRoundProposals(curRoundNumber-1)
     let proposalStandings = await processProposalStandings(allProposals)
-    //console.log('\n======== Proposal Standings Found\n', JSON.stringify(proposalStandings))
+    console.log('\n======== Proposal Standings Found\n', JSON.stringify(proposalStandings))
 
     // Step 2 - Resolve & Report standings
     await processHistoricalStandings(proposalStandings)
-    //console.log('\n======== Reported Proposal Standings\n', JSON.stringify(proposalStandings))
+    console.log('\n======== Reported Proposal Standings\n', JSON.stringify(proposalStandings))
 
     // Add all historical proposals that we're going to update
     let rows = []

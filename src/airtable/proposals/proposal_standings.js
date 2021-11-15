@@ -139,15 +139,12 @@ const processProposalStandings = async (allProposals) => {
             let projectName = proposal.get('Project Name')
             let record = await getProposalRecord(proposal, allProposals)
             // Finally, track project standings
-            //console.log(proposalStandings[projectName])
             if (proposalStandings[projectName] === undefined) proposalStandings[projectName] = []
             proposalStandings[projectName].push(record)
         } catch (err) {
             console.log(err)
         }
     }
-
-    //console.log(proposalStandings)
 
     return proposalStandings
 }
