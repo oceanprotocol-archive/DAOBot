@@ -1,13 +1,13 @@
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv')
+dotenv.config()
 
 // const {local_broadcast_proposal} = require('../snapshot/snapshot_utils')
-const {web3} = require('../functions/web3')
+const { web3 } = require('../functions/web3')
 
-const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here';
+const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here'
 const account = web3.eth.accounts.privateKeyToAccount(pk)
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
+web3.eth.accounts.wallet.add(account)
+web3.eth.defaultAccount = account.address
 // const snapshot_url = process.env.SNAPSHOT_HUB_URL
 
 // const payload = {

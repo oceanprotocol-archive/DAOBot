@@ -1,5 +1,5 @@
 // @format
-const { deleteAll, processAll } = require("./project_summary.js");
+const { deleteAll, processAll } = require('./project_summary.js')
 
 (async () => {
   // NOTE: In this implementation, we consider the "Project Summary" table a
@@ -15,6 +15,6 @@ const { deleteAll, processAll } = require("./project_summary.js");
   // Reference:
   // - 1: https://en.wikipedia.org/w/index.php?title=Pivot_table&oldid=1047076369
   // - 2: https://github.com/oceanprotocol/DAOBot/pull/27#pullrequestreview-785866379
-  await deleteAll();
-  await processAll();
-})();
+  await deleteAll()
+  await processAll()
+})()

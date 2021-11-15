@@ -1,4 +1,5 @@
 {
-  "extends": ["oceanprotocol", "prettier/standard", "plugin:prettier/recommended"],
-  "plugins": ["prettier"]
+  'extends':
+    ['oceanprotocol', 'prettier/standard', 'plugin:prettier/recommended'],
+  'plugins': ['prettier']
 }

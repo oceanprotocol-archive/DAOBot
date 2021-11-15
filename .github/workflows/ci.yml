@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install 
+      - name: Install
         run: |
           npm install
 
@@ -46,9 +46,9 @@ jobs:
       - run: npm run lint
 
       - name: Tests
-        run: npm run test-github 
+        run: npm run test-github
         env:
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }} 
-          AIRTABLE_BASEID: ${{ secrets.AIRTABLE_BASEID }} 
-          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }} 
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASEID: ${{ secrets.AIRTABLE_BASEID }}
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
           ETH_PRIVATE_KEY: ${{ secrets.ETH_PRIVATE_KEY }}
