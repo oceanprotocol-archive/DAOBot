@@ -15,9 +15,10 @@ const {
 } = require("../../airtable/project_summary.js");
 
 describe("Creating project summaries", () => {
-  it("should populate a table", async done => {
+  it("should populate a table", async () => {
     const record = {
       fields: {
+        "ProjectId": "recJrtD0e7KQH19RG",
         "Project Name": "FantasyFinance",
         "Project Level": "Experienced Project",
         "Voted Yes": 3,
@@ -29,10 +30,9 @@ describe("Creating project summaries", () => {
     };
     const [id] = await populate([record]);
     assert(id.startsWith("rec"));
-    done();
   });
 
-  it("should delete records from a table", async done => {
+  it("should delete records from a table", async () => {
     const record = {
       fields: {
         "Project Name": "FantasyFinance",
@@ -48,14 +48,14 @@ describe("Creating project summaries", () => {
     assert(id.startsWith("rec"));
 
     const [removedId] = await remove([id]);
-    assert(id.startsWith("rec"));
-    done();
+    assert(removedId.startsWith("rec"));
   });
 
-  it("should delete ALL records from a table", async done => {
+  it("should delete ALL records from a table", async () => {
     const records = [
       {
         fields: {
+          "ProjectId": "recJdAk3H9yRMxrVx",
           "Project Name": "FantasyFinance",
           "Project Level": "Experienced Project",
           "Voted Yes": 3,
@@ -67,6 +67,7 @@ describe("Creating project summaries", () => {
       },
       {
         fields: {
+          "ProjectId": "recgUimxFRAXd8IG8",
           "Project Name": "LoserFinance",
           "Project Level": "New Project",
           "Voted Yes": 0,
@@ -84,10 +85,9 @@ describe("Creating project summaries", () => {
     assert(id1.startsWith("rec"));
     assert(id2.startsWith("rec"));
 
-    done();
   });
 
-  it("should summarize levels given the project standings", done => {
+  it("should summarize levels given the project standings", () => {
     assert.deepEqual(
       levels["Round 11"]({
         "Project Standing": {
@@ -136,18 +136,17 @@ describe("Creating project summaries", () => {
       }),
       "Veteran Project"
     );
-    done();
   });
 
-  it("should chunk any array to a max size of 10", done => {
+  it("should chunk any array to a max size of 10", () => {
     const chunks = chunk([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert.deepEqual(chunks, [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]]);
-    done();
   });
 
-  it("should return all projects in the 'Project Summary' table", async done => {
+  it("should return all projects in the 'Project Summary' table", async () => {
     const record = {
       fields: {
+        "ProjectId": "recJdAk3H9yRMxrVx",
         "Project Name": "FantasyFinance",
         "Project Level": "Experienced Project",
         "Voted Yes": 3,
@@ -162,27 +161,26 @@ describe("Creating project summaries", () => {
 
     const projects = await retrieve.projects();
     expect(projects).to.be.an("array");
-    // NOTE: All Airtable record ids start with the substring "rec"...
     assert(projects[0].startsWith("rec"));
-    done();
   });
 
-  it("should return the base with all data included", async done => {
+  it("should return the base with all data included", async () => {
     const proposals = await retrieve.proposals();
     expect(proposals).to.be.an("array");
     expect(proposals[0]).to.have.all.keys(
+      "RecordId",
       "Project Name",
       "Proposal Standing",
       "OCEAN Granted",
       "Voted Yes",
       "Voted No"
     );
-    done();
   });
 
-  it("should convert a project object it an airtable list", done => {
+  it("should convert a project object it an airtable list", () => {
     const projects = {
-      FantasyFinance: {
+      "recJdAk3H9yRMxrVx": {
+        "Project Name": "FantasyFinance",
         "Voted Yes": 3,
         "Voted No": 0,
         "OCEAN Granted": 3,
@@ -197,7 +195,8 @@ describe("Creating project summaries", () => {
           "In Dispute": 0
         }
       },
-      LoserFinance: {
+      "recJrtD0e7KQH19RG": {
+        "Project Name": "LoserFinance",
         "Voted Yes": 0,
         "Voted No": 1,
         "OCEAN Granted": 0,
@@ -216,6 +215,7 @@ describe("Creating project summaries", () => {
     assert.deepEqual(toAirtableList(projects), [
       {
         fields: {
+          "ProjectId": "recJdAk3H9yRMxrVx",
           "Project Name": "FantasyFinance",
           "Project Level": "Experienced Project",
           "Voted Yes": 3,
@@ -227,6 +227,7 @@ describe("Creating project summaries", () => {
       },
       {
         fields: {
+          "ProjectId": "recJrtD0e7KQH19RG",
           "Project Name": "LoserFinance",
           "Project Level": "New Project",
           "Voted Yes": 0,
@@ -237,7 +238,6 @@ describe("Creating project summaries", () => {
         }
       }
     ]);
-    done();
   });
 
   it("should return a project summary given a list of proposals", () => {
@@ -245,6 +245,7 @@ describe("Creating project summaries", () => {
       {
         "Project Name": "FantasyFinance",
         "Proposal Standing": "Completed",
+        "RecordId": "recJrtD0e7KQH19RG",
         "OCEAN Granted": 1,
         "Voted Yes": 1,
         "Voted No": 0
@@ -252,6 +253,7 @@ describe("Creating project summaries", () => {
       {
         "Project Name": "FantasyFinance",
         "Proposal Standing": "Completed",
+        "RecordId": "recJrtD0e7KQH19RG",
         "OCEAN Granted": 2,
         "Voted Yes": 2,
         "Voted No": 0
@@ -259,6 +261,7 @@ describe("Creating project summaries", () => {
       {
         "Project Name": "LoserFinance",
         "Proposal Standing": "In Dispute",
+        "RecordId": "recJrtD6r7KQH19RG",
         "OCEAN Granted": 0,
         "Voted Yes": 0,
         "Voted No": 1
@@ -267,7 +270,8 @@ describe("Creating project summaries", () => {
 
     const summary = summarize(proposals);
     expect(summary).to.eql({
-      FantasyFinance: {
+      "recJrtD0e7KQH19RG": {
+        "Project Name": "FantasyFinance",
         "Voted Yes": 3,
         "Voted No": 0,
         "OCEAN Granted": 3,
@@ -282,7 +286,8 @@ describe("Creating project summaries", () => {
           "In Dispute": 0
         }
       },
-      LoserFinance: {
+      "recJrtD6r7KQH19RG": {
+        "Project Name": "LoserFinance",
         "Voted Yes": 0,
         "Voted No": 1,
         "OCEAN Granted": 0,

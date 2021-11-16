@@ -7,6 +7,7 @@ const { AIRTABLE_API_KEY, AIRTABLE_BASEID } = process.env;
 const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASEID);
 
 const fields = [
+  "RecordId",
   "Project Name",
   "OCEAN Granted",
   "Voted Yes",
@@ -28,12 +29,16 @@ const deleteAll = async () => {
 };
 
 const processAll = async () => {
-  const proposals = await retrieve.proposals();
-  const projects = summarize(proposals);
-  const entries = toAirtableList(projects);
-  const chunks = chunk(entries);
-  for (let c of chunks) {
-    await populate(c);
+  try {
+    const proposals = await retrieve.proposals();
+    const projects = summarize(proposals);
+    const entries = toAirtableList(projects);
+    const chunks = chunk(entries);
+    for (let c of chunks) {
+      await populate(c);
+    }
+  } catch (err) {
+    console.error(err);
   }
 };
 
@@ -43,7 +48,7 @@ const chunk = projects => {
     chunks.push(projects.slice(i, i + maxRecordAmount));
   }
   return chunks;
-};
+}
 
 const populate = async projects => {
   return new Promise((resolve, reject) => {
@@ -79,29 +84,33 @@ const levels = {
 };
 
 const toAirtableList = projects => {
-  const l = [];
+  const airtableList = [];
+
   for (const [key, value] of Object.entries(projects)) {
-    value["Project Name"] = key;
+    value["ProjectId"] = key;
     value["Project Level"] = levels["Round 11"](value);
     delete value["Project Standing"];
 
-    l.push({
+    airtableList.push({
       fields: {
         ...value
       }
     });
   }
-  return l;
+  return airtableList;
 };
 
 const summarize = proposals => {
   const projects = {};
+  
   for (let proposal of proposals) {
-    const name = proposal["Project Name"];
-    let project = projects[name];
+    const proposalRecordId = proposal["RecordId"];
+
+    let project = projects[proposalRecordId];
 
     if (!project) {
       project = {
+        "Project Name": proposal["Project Name"],
         "Voted Yes": proposal["Voted Yes"],
         "Voted No": proposal["Voted No"],
         "OCEAN Granted": proposal["OCEAN Granted"],
@@ -126,9 +135,9 @@ const summarize = proposals => {
       project["Times Proposed"] += 1;
       project["Project Standing"][proposal["Proposal Standing"]] += 1;
     }
-    projects[name] = project;
+    projects[proposalRecordId] = project;
   }
-
+  
   return projects;
 };
 
@@ -159,7 +168,7 @@ const retrieve = {
     const proposals = [];
 
     return new Promise((resolve, reject) => {
-      base("All Proposals")
+      base("Proposals")
         .select({
           fields
         })
@@ -180,6 +189,8 @@ const retrieve = {
     });
   }
 };
+
+processAll()
 
 module.exports = {
   retrieve,
