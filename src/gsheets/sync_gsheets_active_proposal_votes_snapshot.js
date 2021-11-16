@@ -5,7 +5,7 @@ dotenv.config();
 
 const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
-const {getValues, addSheet, updateValues} = require('./gsheets_utils')
+const {getValues, addSheet, updateValues, emptySheet} = require('./gsheets_utils')
 const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores} = require('../snapshot/snapshot_utils');
 
 // Let's track the state of various proposals
@@ -29,7 +29,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=curRoundNumber)
+        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=1)
         console.log("Created new sheet [%s] at index [%s].", ipfsHash, curRoundNumber)
     }
 
@@ -227,6 +227,9 @@ const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundS
     // Get the sheet, otherwise create it
     const sheetName = `Round ${curRoundNumber} Results`
     var sheet = await getValues(oAuth, sheetName, 'A1:B3')
+    if (sheet !== undefined) {
+        await emptySheet(oAuth, ipfsHash, 'A1:B200')
+    }
     if (sheet === undefined) {
         var newSheets = await addSheet(oAuth, sheetName)
         console.log("Created new sheet [%s] at index 0.", sheetName)
@@ -282,6 +285,15 @@ const syncGSheetsActiveProposalVotes = async (curRoundNumber, curRoundBallotType
     const results = await getActiveProposalVotes(curRoundNumber)
     let voterScores = results[0]
     let proposalScores = results[1]
+
+    const oAuth = await initOAuthToken()
+    // DRY
+    // Get the sheet, otherwise create it
+    const ipfsHash = Object.entries(voterScores)[0][0]
+    var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
+    if (proposal !== undefined) {
+        await emptySheet(oAuth, ipfsHash, 'A1:B200')
+    }
 
     // Output the raw snapshot raw data into gsheets
     Object.entries(voterScores).map(async (p) => {
