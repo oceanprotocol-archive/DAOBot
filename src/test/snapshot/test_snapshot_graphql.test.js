@@ -173,6 +173,7 @@ describe('Snapshot GraphQL test', () => {
   })
 
   it('Validates scores from Single-Batch Voting', async () => {
+    jest.setTimeout(10000)
     const strategy = getVoteCountStrategy(1)
 
     let votes = []
