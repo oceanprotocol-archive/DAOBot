@@ -1,4 +1,5 @@
 const { getProposalsSelectQuery } = require('../airtable_utils')
+const { hasEnoughOceans } = require('../../snapshot/snapshot_utils')
 
 // Proposal States
 const State = {
@@ -17,6 +18,7 @@ const State = {
 // Project Standings
 const Standings = {
   Undefined: undefined,
+  NewProject: 'New Project',
   NoOcean: 'No Ocean',
   Unreported: 'Unreported',
   Completed: 'Completed',
@@ -24,7 +26,7 @@ const Standings = {
   Dispute: 'In Dispute',
   Incomplete: 'Incomplete & Inactive',
   Refunded: 'Funds Returned'
-}
+};
 
 const Disputed = {
   Undefined: undefined,
@@ -34,32 +36,24 @@ const Disputed = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (
-  proposalState,
-  deliverableChecklist,
-  completed,
-  timedOut,
-  refunded,
-  funded,
-  noOcean
-) => {
+const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, areOceansEnough, newProsal) => {
   let newStanding = undefined
 
-  if (
-    (proposalState === State.Received || proposalState === State.Rejected) &&
-    noOcean === true
-  )
-    newStanding = Standings.NoOcean
-  else if (funded === false && deliverableChecklist.length === 0)
-    newStanding = null
+  if ((proposalState === State.Received || proposalState === State.Rejected) && areOceansEnough === false) newStanding = Standings.NoOcean
+  else if (funded === false && newProsal) newStanding = Standings.NewProject
   else if (refunded === true) newStanding = Standings.Refunded
-  else if (completed === false && timedOut === true)
-    newStanding = Standings.Incomplete
-  else if (deliverableChecklist.length > 0)
-    newStanding = completed === true ? Standings.Completed : Standings.Progress
+  else if (completed === false && timedOut === true) newStanding = Standings.Incomplete
+  else if (deliverableChecklist.length > 0) newStanding = completed === true ? Standings.Completed : Standings.Progress
   else newStanding = Standings.Unreported
 
   return newStanding
+}
+
+const getProposalState = (proposalState, hasEnoughOceans) => {
+  if (hasEnoughOceans && proposalState === State.Rejected) {
+    proposalState = State.Accepted
+  }
+  return proposalState
 }
 
 // Splits deliverables rich text into a list
@@ -117,32 +111,21 @@ const getAllRoundProposals = async (maxRound, minRound = 1) => {
   return allProposals
 }
 
-const getProposalRecord = (proposal) => {
+const getProposalRecord = async (proposal, allProposals) => {
   let proposalURL = proposal.get('Proposal URL')
-  let proposalState = proposal.get('Proposal State')
+  let areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
+  let proposalState = getProposalState(proposal.get('Proposal State'), areOceansEnough)
   let currentStanding = proposal.get('Proposal Standing')
   let deliverableChecklist = proposal.get('Deliverable Checklist') || []
   let deliverableUpdate = proposal.get('Last Deliverable Update')
-  let refunded =
-    proposal.get('Refund Transaction') !== undefined ||
-    currentStanding === Standings.Refunded
+  let refunded = proposal.get('Refund Transaction') !== undefined || currentStanding === Standings.Refunded
   let disputed = proposal.get('Disputed Status')
   let funded = isFunded(proposalState)
-  let noOcean = proposal.get('Deployment Ready') === 'No'
-  let timedOut =
-    hasTimedOut(currentStanding, deliverableUpdate) &&
-    currentStanding !== Standings.Unreported
+  let timedOut = hasTimedOut(currentStanding, deliverableUpdate) && currentStanding !== Standings.Unreported
   let deliverables = splitDeliverableChecklist(deliverableChecklist)
   let completed = areDeliverablesComplete(deliverables)
-  let newStanding = getProjectStanding(
-    proposalState,
-    deliverables,
-    completed,
-    timedOut,
-    refunded,
-    funded,
-    noOcean
-  )
+  let newProposal = isNewProposal(proposal, allProposals)
+  let newStanding = getProjectStanding(proposalState, deliverables, completed, timedOut, refunded, funded, areOceansEnough, newProposal)
 
   return {
     id: proposal.id,
@@ -156,70 +139,63 @@ const getProposalRecord = (proposal) => {
   }
 }
 
-// Returns all Proposal Standings, indexed by Project Name
-const processProposalStandings = (allProposals) => {
-  let proposalStandings = {}
-  Promise.all(
-    allProposals.map((proposal) => {
-      try {
-        let projectName = proposal.get('Project Name')
-        let record = getProposalRecord(proposal)
 
-        // Finally, track project standings
-        if (proposalStandings[projectName] === undefined)
-          proposalStandings[projectName] = []
-        proposalStandings[projectName].push(record)
-      } catch (err) {
-        console.log(err)
-      }
-    })
-  )
+// Returns all Proposal Standings, indexed by Project Name
+const processProposalStandings = async (allProposals) => {
+  let proposalStandings = {}
+  for (const proposal of allProposals) {
+    try {
+      let projectName = proposal.get('Project Name')
+      let record = await getProposalRecord(proposal, allProposals)
+      // Finally, track project standings
+      if (proposalStandings[projectName] === undefined) proposalStandings[projectName] = []
+      proposalStandings[projectName].push(record)
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return proposalStandings
 }
 
 // Step 2 - Resolve historical standings
-const processHistoricalStandings = (proposalStandings) => {
-  for (const [, value] of Object.entries(proposalStandings)) {
-    let outstandingURL = ''
+const processHistoricalStandings = async (proposalStandings) => {
+  for (const [key, value] of Object.entries(proposalStandings)) {
+    let outstandingURL = ""
     let lastStanding = undefined
-    value.map((proposal) => {
+    for (const proposal of value) {
+      let areOceansEnough = await hasEnoughOceans(proposal.fields['Wallet Address'])
       proposal.fields['Outstanding Proposals'] = ''
+      if (proposal.fields['Proposal Standing'] === Standings.NoOcean) {
+        if (areOceansEnough) {
+          proposal.fields['Proposal State'] = State.Accepted
+          proposal.fields['Proposal Standing'] = isNewProject(proposal, proposalStandings) ? Standings.NewProject : Standings.Completed
+        }
+      }
+
       // DISPUTES: If a proposal is under dispute, the project standing becomes poor
       // INCOMPLETION: If a proposal is incomplete/timedout, the project standing becomes poor
-      if (
-        lastStanding !== Standings.Incomplete &&
-        lastStanding !== Standings.Dispute
-      ) {
-        if (proposal.fields['Proposal Standing'] === Standings.Incomplete)
-          lastStanding = Standings.Incomplete
-        else if (proposal.fields['Disputed Status'] === Disputed.Ongoing)
-          lastStanding = Standings.Dispute
-        else if (proposal.fields['Proposal Standing'] !== null)
-          lastStanding = proposal.fields['Proposal Standing']
+      if (lastStanding !== Standings.Incomplete && lastStanding !== Standings.Dispute) {
+        if (proposal.fields['Deployment Ready'] === 'Yes') proposal.fields['Proposal Standing'] = Standings.Progress
+        if (proposal.fields['Proposal Standing'] === Standings.Incomplete) lastStanding = Standings.Incomplete
+        else if (proposal.fields['Disputed Status'] === Disputed.Ongoing) lastStanding = Standings.Dispute
+        else if (proposal.fields['Proposal Standing'] !== null) lastStanding = proposal.fields['Proposal Standing']
       }
 
       // OUTSTANDING PROPOSAL URLS:
       // Collect the URL of proposals that are in poor condition.
       // Report the URL of all proposals that are in poor condition.
-      if (
-        proposal.fields['Proposal Standing'] === Standings.Incomplete ||
-        proposal.fields['Disputed Status'] === Disputed.Ongoing
-      ) {
-        outstandingURL += '- ' + proposal.fields['Proposal URL'] + '\n'
+      if (proposal.fields['Proposal Standing'] === Standings.Incomplete || proposal.fields['Disputed Status'] === Disputed.Ongoing) {
+        outstandingURL += "- " + proposal.fields['Proposal URL'] + "\n"
         proposal.fields['Outstanding Proposals'] = outstandingURL
         proposal.fields['Proposal Standing'] = lastStanding
-      } else if (
-        proposal.fields['Proposal Standing'] !== Standings.Incomplete &&
-        proposal.fields['Disputed Status'] !== Disputed.Ongoing &&
-        outstandingURL.length > 0
-      ) {
+      } else if (proposal.fields['Proposal Standing'] !== Standings.Incomplete && proposal.fields['Disputed Status'] !== Disputed.Ongoing && outstandingURL.length > 0) {
         proposal.fields['Outstanding Proposals'] = outstandingURL
         proposal.fields['Proposal Standing'] = lastStanding
       } else if (proposal.fields['Proposal Standing'] === null) {
         proposal.fields['Proposal Standing'] = lastStanding
       }
-    })
+    }
   }
 }
 
@@ -231,6 +207,16 @@ const getProjectsLatestProposal = (proposalStandings) => {
   }
 
   return latestProposals
+}
+
+const isNewProposal = (proposal, allProposals) => {
+  let completedProposals = 0
+  allProposals.forEach(currentProposal => {
+    if (currentProposal.fields['Project Name'] === proposal.fields['Project Name'] && currentProposal.fields['Proposal Standing'] === Standings.Completed) {
+      completedProposals += 1
+    }
+  });
+  return completedProposals === 0
 }
 
 // Update the Current Round's proposal records, to reflect the overall Project Standing.
@@ -251,14 +237,4 @@ const updateCurrentRoundStandings = (
   }
 }
 
-module.exports = {
-  State,
-  Standings,
-  Disputed,
-  getAllRoundProposals,
-  getProposalRecord,
-  processProposalStandings,
-  processHistoricalStandings,
-  getProjectsLatestProposal,
-  updateCurrentRoundStandings
-}
+module.exports = { State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings, isNewProposal };
