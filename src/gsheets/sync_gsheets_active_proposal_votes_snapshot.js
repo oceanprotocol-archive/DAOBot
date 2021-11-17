@@ -227,9 +227,6 @@ const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundS
     // Get the sheet, otherwise create it
     const sheetName = `Round ${curRoundNumber} Results`
     var sheet = await getValues(oAuth, sheetName, 'A1:B3')
-    if (sheet !== undefined) {
-        await emptySheet(oAuth, ipfsHash, 'A1:B200')
-    }
     if (sheet === undefined) {
         var newSheets = await addSheet(oAuth, sheetName)
         console.log("Created new sheet [%s] at index 0.", sheetName)
@@ -237,6 +234,9 @@ const dumpRoundSummaryToGSheets = async (curRoundNumber, proposalSummary, roundS
 
     // Dump flattened data from proposalSummary to sheet
     let flatObj = proposalSummary
+    if (sheet !== undefined) {
+        await emptySheet(oAuth, sheetName, `A1:F${flatObj.length + 1}`)
+    }
     flatObj.splice(0,0, ['ipfsHash','Project Name','Yes','No','Num Voters','Sum Votes'])
     await updateValues(oAuth, sheetName, 'A1:F'+flatObj.length, flatObj)
 
@@ -290,9 +290,10 @@ const syncGSheetsActiveProposalVotes = async (curRoundNumber, curRoundBallotType
     // DRY
     // Get the sheet, otherwise create it
     const ipfsHash = Object.entries(voterScores)[0][0]
+    const obj = Object.entries(voterScores)[0]
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal !== undefined) {
-        await emptySheet(oAuth, ipfsHash, 'A1:B200')
+        await emptySheet(oAuth, ipfsHash, `A1:B${Object.entries(voterScores)[0][1].length+1}`)
     }
 
     // Output the raw snapshot raw data into gsheets

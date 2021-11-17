@@ -4,7 +4,7 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
 const {initOAuthToken} = require('../gsheets/gsheets')
-const {getValues, addSheet, updateValues} = require('../gsheets/gsheets_utils')
+const {getValues, addSheet, updateValues, emptySheet} = require('../gsheets/gsheets_utils')
 const {getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet} = require('./rounds/funding_rounds')
 
 const clearFundedRecords = (proposals) => {
@@ -59,13 +59,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
     let sheetName = "Round" + curRoundNumber + "FinalResults"
 
-    // Get the sheet, otherwise create it
-    let sheet = await getValues(oAuth, sheetName, 'A1:B3')
-    if (sheet === undefined) {
-        sheet = await addSheet(oAuth, sheetName)
-        console.log("Created new sheet [%s].", sheetName)
-    }
-
     let gsheetRows = []
 
     // Flatten results onto gsheetRows
@@ -110,6 +103,16 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
         ]
     ]
     gsheetRows = gsheetRows.concat(burnedFunds)
+
+    // Get the sheet, otherwise create it
+    let sheet = await getValues(oAuth, sheetName, 'A1:B3')
+    if(sheet !== undefined) {
+        await emptySheet(oAuth,  sheetName, 'A1:H' + (gsheetRows.length + 1))
+    }
+    if (sheet === undefined) {
+        sheet = await addSheet(oAuth, sheetName)
+        console.log("Created new sheet [%s].", sheetName)
+    }
 
     await updateValues(oAuth, sheetName, 'A1:H' + (gsheetRows.length + 1), gsheetRows)
     console.log('\n[%s]\nDumped [%s] rows to Gsheets', (new Date()).toString(), Object.entries(gsheetRows).length)

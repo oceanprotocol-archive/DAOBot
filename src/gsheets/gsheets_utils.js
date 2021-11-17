@@ -78,12 +78,12 @@ const getValues = async (oAuth, ipfsHash, range) => {
     }
 }
 
-const emptySheet = async (oAuth, ipfsHash, range) => {
+const emptySheet = async (oAuth, sheetName, range) => {
     const sheets = google.sheets({version: 'v4', auth: oAuth});
     try {
         return await sheets.spreadsheets.values.clear({
             spreadsheetId: spreadsheet,
-            range: ipfsHash + '!' + range
+            range: sheetName + '!' + range
         })
     } catch(err) {
         console.log('[getValues] The API returned an error: ' + err);
