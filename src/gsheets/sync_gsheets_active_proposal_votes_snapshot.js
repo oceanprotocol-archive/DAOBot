@@ -5,7 +5,7 @@ dotenv.config();
 
 const {getProposalsSelectQuery} = require('../airtable/airtable_utils');
 const {initOAuthToken} = require('./gsheets')
-const {getValues, addSheet, updateValues, emptySheet} = require('./gsheets_utils')
+const {getValues, addSheet, updateValues} = require('./gsheets_utils')
 const {getVoteCountStrategy, getVoterScores, getProposalVotesGQL, reduceVoterScores, reduceProposalScores} = require('../snapshot/snapshot_utils');
 
 // Let's track the state of various proposals
@@ -29,7 +29,7 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     // Get the sheet, otherwise create it
     var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
     if (proposal === undefined) {
-        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=1)
+        var newSheets = await addSheet(oAuth, ipfsHash, indexOffset=curRoundNumber)
         console.log("Created new sheet [%s] at index [%s].", ipfsHash, curRoundNumber)
     }
 
