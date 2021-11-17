@@ -47,9 +47,24 @@ const addSheet = async (oAuth, sheetName, indexOffset=0) => {
     return processRequests(oAuth, requests)
 }
 
+// Clear values from Sheet
+const emptySheet = async (oAuth, sheetName, range) => {
+    const sheets = google.sheets({version: 'v4', auth: oAuth});
+    try {
+        return await sheets.spreadsheets.values.clear({
+            spreadsheetId: spreadsheet,
+            range: sheetName + '!' + range
+        })
+    } catch(err) {
+        console.log('[getValues] The API returned an error: ' + err);
+        return undefined
+    }
+}
+
 // Dump values to Sheet
 const updateValues = async (oAuth, sheetId, range, values) => {
     const sheets = google.sheets({version: 'v4', auth: oAuth});
+    await emptySheet(oAuth, sheetId, range) 
     try {
         return await sheets.spreadsheets.values.update({
             spreadsheetId: spreadsheet,
@@ -71,19 +86,6 @@ const getValues = async (oAuth, ipfsHash, range) => {
         return await sheets.spreadsheets.values.get({
             spreadsheetId: spreadsheet,
             range: ipfsHash + '!' + range
-        })
-    } catch(err) {
-        console.log('[getValues] The API returned an error: ' + err);
-        return undefined
-    }
-}
-
-const emptySheet = async (oAuth, sheetName, range) => {
-    const sheets = google.sheets({version: 'v4', auth: oAuth});
-    try {
-        return await sheets.spreadsheets.values.clear({
-            spreadsheetId: spreadsheet,
-            range: sheetName + '!' + range
         })
     } catch(err) {
         console.log('[getValues] The API returned an error: ' + err);
