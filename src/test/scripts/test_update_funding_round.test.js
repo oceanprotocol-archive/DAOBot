@@ -47,10 +47,12 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it('Validates basis currency chosen', async function () {
-    const currentRound = await getCurrentRound()
-    if (currentRound !== undefined) {
-      const basisCurrency = currentRound.get('Basis Currency')
-      should.not.equal(basisCurrency, undefined)
+    if (!process.env.GITHUB_ACTIONS_ENV) {
+      const currentRound = await getCurrentRound()
+      if (currentRound !== undefined) {
+        const basisCurrency = currentRound.get('Basis Currency')
+        should.not.equal(basisCurrency, undefined)
+      }
     }
   })
 
@@ -81,19 +83,25 @@ describe('Functionally test updateFundingRound', function () {
     }
   }) //.timeout(5000);
 
-  it('Processes proposals for snapshot.', async function () {
-    const currentRound = await getCurrentRound()
-    if (currentRound !== undefined) {
-      await prepareProposalsForSnapshot(currentRound)
 
-      await sleep(500)
-      const curRoundNumber = currentRound.get('Round')
-      let acceptedProposals = await getProposalsSelectQuery(
-        `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
-      )
-      expect(acceptedProposals.length).to.be.greaterThan(0)
+  it('Processes proposals for snapshot.', async function () {
+    if (!process.env.GITHUB_ACTIONS_ENV) {
+      const currentRound = await getCurrentRound()
+
+      if (currentRound !== undefined) {
+        await prepareProposalsForSnapshot(currentRound)
+
+        await sleep(500)
+        const curRoundNumber = currentRound.get('Round')
+        let acceptedProposals = await getProposalsSelectQuery(
+          `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
+        )
+        expect(acceptedProposals.length).to.be.greaterThan(0)
+      }
     }
   }) //.timeout(5000);
+
+
 
   it.skip('Deploys proposals to snapshot into multiple ballots.', async function () {
     const currentRound = await getCurrentRound()
