@@ -47,7 +47,7 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it('Validates basis currency chosen', async function () {
-    if (!process.env.GITHUB_ACTIONS_ENV) {
+    if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
       if (currentRound !== undefined) {
         const basisCurrency = currentRound.get('Basis Currency')
@@ -85,7 +85,7 @@ describe('Functionally test updateFundingRound', function () {
 
 
   it('Processes proposals for snapshot.', async function () {
-    if (!process.env.GITHUB_ACTIONS_ENV) {
+    if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
 
       if (currentRound !== undefined) {

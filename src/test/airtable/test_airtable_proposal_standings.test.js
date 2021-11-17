@@ -467,7 +467,7 @@ describe('Process Project Standings', function () {
   });
 
   it('Validate "No Ocean" property of "Proposal Standings" reported corectly', async function () {
-    if (!process.env.GITHUB_ACTIONS_ENV) {
+    if (!process.env.GACTIONS_ENV) {
       // Set the very first proposal to not be completed
       allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
       allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
@@ -484,7 +484,7 @@ describe('Process Project Standings', function () {
   });
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {
-    if (!process.env.GITHUB_ACTIONS_ENV) {
+    if (!process.env.GACTIONS_ENV) {
       // Process all proposals
       allProposals[0].fields['Earmarks'] = 'New Entrants'
       allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
