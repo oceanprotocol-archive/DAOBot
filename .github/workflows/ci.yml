@@ -52,3 +52,4 @@ jobs:
           AIRTABLE_BASEID: ${{ secrets.AIRTABLE_BASEID }}
           INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
           ETH_PRIVATE_KEY: ${{ secrets.ETH_PRIVATE_KEY }}
+          GACTIONS_ENV: ${{ secrets.GACTIONS_ENV }}
