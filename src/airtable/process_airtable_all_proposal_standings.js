@@ -6,10 +6,7 @@ const {updateProposalRecords} = require('./airtable_utils')
 const {getAllRoundProposals, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings} = require('./proposals/proposal_standings')
 const {getCurrentRound} = require('./rounds/funding_rounds')
 
-const main = async () => {
-    const curRound = await getCurrentRound()
-    const curRoundNumber = curRound.get('Round')
-
+const processAirtableProposalStandings = async (curRoundNumber) => {
     // Step 1 - Identify all proposal standings
     let allProposals = await getAllRoundProposals(curRoundNumber-1)
     let proposalStandings = await processProposalStandings(allProposals)
@@ -47,4 +44,6 @@ const main = async () => {
     console.log('\n[%s]\nUpdated [%s] rows to Airtable', (new Date()).toString(), Object.entries(rows).length)
 }
 
-main()
+module.exports = {
+    processAirtableProposalStandings
+}
