@@ -93,9 +93,9 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
     let fundsLeft = fundsAvailableUSD
     for (let p of proposals) {
         if( fundsLeft > 0 ) {
-            let usdRequested = 0;
-            let oceanRequested = 0;
-            let basisCurrency = p.get("Basis Currency");
+            let usdRequested = 0
+            let oceanRequested = 0
+            let basisCurrency = p.get("Basis Currency")
             if(basisCurrency === 'OCEAN') {
                 usdRequested = p.get('OCEAN Requested') * oceanPrice
                 oceanRequested = p.get('OCEAN Requested')
