@@ -97,17 +97,17 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
             let usdRequested = p.get('USD Requested')
             let grantCarry = p.get('USD Granted') || 0
             let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
+            let oceanGranted = Math.ceil((usdGranted + grantCarry ) / oceanPrice)
+            usdGranted = (oceanGranted * oceanPrice)
 
-            p.fields['OCEAN Requested'] = Math.round( usdRequested / oceanPrice)
-            console.log('OCEAN PRICE: ', oceanPrice)
-            console.log('OCN REQ: ', Math.round( usdRequested / oceanPrice))
+            p.fields['OCEAN Requested'] = Math.ceil(usdRequested / oceanPrice)
             p.fields['USD Granted'] = usdGranted + grantCarry
-            p.fields['OCEAN Granted'] = Math.round( (usdGranted + grantCarry ) / oceanPrice)
+            p.fields['OCEAN Granted'] = oceanGranted
             p.fields['Proposal State'] = 'Granted'
             fundsLeft -= usdGranted
 
             // If we reached the total, then it won via this grant pot
-            if (usdRequested === (usdGranted + grantCarry))
+            if (usdRequested <= (usdGranted + grantCarry))
                 winningProposals.push(p)
         } else {
             break
