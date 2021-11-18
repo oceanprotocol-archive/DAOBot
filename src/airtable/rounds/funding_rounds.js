@@ -106,23 +106,41 @@ const getDownvotedProposals = (proposals) => {
   return downvotedProposals
 }
 
-const calculateWinningProposalsForEarmark = (
-  proposals,
-  fundsAvailableUSD,
-  oceanPrice
-) => {
-  let winningProposals = []
-  let fundsLeft = fundsAvailableUSD
-  for (let p of proposals) {
-    if (fundsLeft > 0) {
-      let usdRequested = p.get('USD Requested')
-      let grantCarry = p.get('USD Granted') || 0
-      let usdGranted =
-        fundsLeft - (usdRequested - grantCarry) > 0
-          ? usdRequested - grantCarry
-          : fundsLeft
-      let oceanGranted = Math.ceil((usdGranted + grantCarry) / oceanPrice)
-      usdGranted = oceanGranted * oceanPrice
+const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, oceanPrice) => {
+    let winningProposals = []
+    let fundsLeft = fundsAvailableUSD
+    for (let p of proposals) {
+        if( fundsLeft > 0 ) {
+            let usdRequested = 0
+            let oceanRequested = 0
+            let basisCurrency = p.get("Basis Currency")
+            if(basisCurrency === 'OCEAN') {
+                usdRequested = p.get('OCEAN Requested') * oceanPrice
+                oceanRequested = p.get('OCEAN Requested')
+            } else {
+                usdRequested = p.get('USD Requested')
+                oceanRequested = Math.ceil(usdRequested / oceanPrice)
+            }
+
+            let grantCarry = p.get('USD Granted') || 0
+            let usdGranted = fundsLeft - ( usdRequested - grantCarry ) > 0 ? usdRequested - grantCarry : fundsLeft
+            let oceanGranted = Math.ceil((usdGranted + grantCarry ) / oceanPrice)
+            usdGranted = (oceanGranted * oceanPrice)
+
+            p.fields['OCEAN Requested'] = oceanRequested
+            p.fields['USD Requested'] = usdRequested
+            p.fields['USD Granted'] = usdGranted + grantCarry
+            p.fields['OCEAN Granted'] = oceanGranted
+            p.fields['Proposal State'] = 'Granted'
+            fundsLeft -= usdGranted
+
+            // If we reached the total, then it won via this grant pot
+            if (usdRequested <= (usdGranted + grantCarry))
+                winningProposals.push(p)
+        } else {
+            break
+        }
+    }
 
       p.fields['OCEAN Requested'] = Math.ceil(usdRequested / oceanPrice)
       p.fields['USD Granted'] = usdGranted + grantCarry
