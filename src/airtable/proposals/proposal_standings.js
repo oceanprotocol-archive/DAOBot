@@ -190,11 +190,26 @@ const processHistoricalStandings = async (proposalStandings) => {
     }
 }
 
+
+const hasBadStandingProposals = (proposalStandings) => {
+        let projectHasBadStandingProposals = false
+        for (const proposal of proposalStandings) {
+            console.log(JSON.stringify(proposal))
+            if(proposal.fields['Proposal Standing'] === Standings.Unreported){
+                projectHasBadStandingProposals = true
+                break
+            }
+
+        } 
+    return projectHasBadStandingProposals
+}
+
 // Step 3 - Report the latest (top of stack) proposal standing
 const getProjectsLatestProposal = (proposalStandings) => {
     let latestProposals = {}
     for (const [key, value] of Object.entries(proposalStandings)) {
         latestProposals[key] = value[value.length-1]
+        if(hasBadStandingProposals(value)) latestProposals[key].fields['Proposal State'] = State.Rejected
     }
 
     return latestProposals
