@@ -94,8 +94,8 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
     for (let p of proposals) {
         if( fundsLeft > 0 ) {
             let usdRequested = 0;
-            let basisCurrency = p.get("Basis Currency");
             let oceanRequested = 0;
+            let basisCurrency = p.get("Basis Currency");
             if(basisCurrency === 'OCEAN') {
                 usdRequested = p.get('OCEAN Requested') * oceanPrice
                 oceanRequested = p.get('OCEAN Requested')
@@ -110,6 +110,7 @@ const calculateWinningProposalsForEarmark = (proposals, fundsAvailableUSD, ocean
             usdGranted = (oceanGranted * oceanPrice)
 
             p.fields['OCEAN Requested'] = oceanRequested
+            p.fields['USD Requested'] = usdRequested
             p.fields['USD Granted'] = usdGranted + grantCarry
             p.fields['OCEAN Granted'] = oceanGranted
             p.fields['Proposal State'] = 'Granted'
