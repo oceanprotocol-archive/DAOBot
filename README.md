@@ -55,7 +55,6 @@ Instructions
 Example Crontab - Sync every 2 minutes 
 ```
 * * * * * sh /DAOBot/cron_update_funding_round.sh 2>&1
-*/5 * * * * sh /DAOBot/cron_update_standings.sh 2>&1
 */5 * * * * sh /DAOBot/cron_project_summary.sh 2>&1
 ```
 
