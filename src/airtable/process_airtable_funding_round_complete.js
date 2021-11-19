@@ -4,7 +4,7 @@ dotenv.config();
 
 const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
 const {initOAuthToken} = require('../gsheets/gsheets')
-const {getValues, addSheet, updateValues} = require('../gsheets/gsheets_utils')
+const {getValues, addSheet, updateValues, emptySheet} = require('../gsheets/gsheets_utils')
 const {getWinningProposals, calculateFinalResults, getDownvotedProposals, dumpResultsToGSheet} = require('./rounds/funding_rounds')
 
 const clearFundedRecords = (proposals) => {
