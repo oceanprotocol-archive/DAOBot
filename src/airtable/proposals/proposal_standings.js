@@ -36,11 +36,11 @@ const Disputed = {
 
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
-const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, areOceansEnough, newProsal) => {
+const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, areOceansEnough, hasCompletedProposal) => {
     let newStanding = undefined
 
     if( (proposalState === State.Received || proposalState === State.Rejected) && areOceansEnough === false ) newStanding = Standings.NoOcean
-    else if( funded === false && newProsal) newStanding = Standings.NewProject
+    else if( funded === false && !hasCompletedProposal) newStanding = Standings.NewProject
     else if( refunded === true ) newStanding = Standings.Refunded
     else if( completed === false && timedOut === true ) newStanding = Standings.Incomplete
     else if( deliverableChecklist.length > 0 ) newStanding = completed === true ? Standings.Completed : Standings.Progress
@@ -116,8 +116,8 @@ const getProposalRecord = async (proposal, allProposals) => {
     let timedOut = hasTimedOut(currentStanding, deliverableUpdate) && currentStanding !== Standings.Unreported
     let deliverables = splitDeliverableChecklist(deliverableChecklist)
     let completed = areDeliverablesComplete(deliverables)
-    let newProposal = isNewProposal(proposal, allProposals)
-    let newStanding = getProjectStanding(proposalState, deliverables, completed, timedOut, refunded, funded, areOceansEnough, newProposal)
+    let hasCompletedProposals = projectHasCompletedProposals(proposal, allProposals)
+    let newStanding = getProjectStanding(proposalState, deliverables, completed, timedOut, refunded, funded, areOceansEnough, hasCompletedProposals)
 
     return {
         id: proposal.id,
@@ -145,7 +145,6 @@ const processProposalStandings = async (allProposals) => {
             console.log(err)
         }
     }
-
     return proposalStandings
 }
 
@@ -160,7 +159,7 @@ const processHistoricalStandings = async (proposalStandings) => {
             if(proposal.fields['Proposal Standing'] === Standings.NoOcean){
                 if(areOceansEnough){
                     proposal.fields['Proposal State'] = State.Accepted
-                    proposal.fields['Proposal Standing'] = isNewProject(proposal,proposalStandings) ? Standings.NewProject : Standings.Completed
+                    proposal.fields['Proposal Standing'] = !projectHasCompletedProposals(proposal,proposalStandings) ? Standings.NewProject : Standings.Completed
                 }
             }
 
@@ -194,10 +193,12 @@ const processHistoricalStandings = async (proposalStandings) => {
 const hasBadStandingProposals = (proposalStandings) => {
         let projectHasBadStandingProposals = false
         for (const proposal of proposalStandings) {
-            console.log(JSON.stringify(proposal))
-            if(proposal.fields['Proposal Standing'] === Standings.Unreported){
+            if( (proposal.fields['Proposal Standing'] === Standings.Unreported) ||
+                proposal.fields['Proposal Standing'] === Standings.Incomplete ||
+                proposal.fields['Proposal Standing'] === Standings.Dispute )
+            {
                 projectHasBadStandingProposals = true
-                break
+                return projectHasBadStandingProposals
             }
 
         } 
@@ -215,14 +216,14 @@ const getProjectsLatestProposal = (proposalStandings) => {
     return latestProposals
 }
 
-const isNewProposal = (proposal, allProposals) => {
+const projectHasCompletedProposals = (proposal, allProposals) => {
     let completedProposals = 0
     allProposals.forEach(currentProposal => {
         if(currentProposal.fields['Project Name'] === proposal.fields['Project Name'] && currentProposal.fields['Proposal Standing'] === Standings.Completed){
             completedProposals += 1
         }
     });
-    return completedProposals === 0
+    return completedProposals !== 0
 }
 
 // Update the Current Round's proposal records, to reflect the overall Project Standing.
@@ -238,4 +239,4 @@ const updateCurrentRoundStandings = (currentRoundProposals, latestProposals) => 
     }
 }
 
-module.exports = {State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings, isNewProposal};
+module.exports = {State, Standings, Disputed, getAllRoundProposals, getProposalRecord, processProposalStandings, processHistoricalStandings, getProjectsLatestProposal, updateCurrentRoundStandings, projectHasCompletedProposals};

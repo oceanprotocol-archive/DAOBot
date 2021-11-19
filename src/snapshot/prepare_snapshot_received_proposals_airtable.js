@@ -28,7 +28,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
     let recordsPayload = []
 
     await Promise.all(proposals.map(async (proposal) => {
-        getProposalRecord(proposal)
+        getProposalRecord(proposal, proposals)
         try {
             let wallet_0x = proposal.get('Wallet Address')
             let proposalStanding = proposal.get('Proposal Standing')

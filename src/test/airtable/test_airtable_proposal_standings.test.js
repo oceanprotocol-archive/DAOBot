@@ -481,6 +481,22 @@ describe('Process Project Standings', function() {
         should.equal(proposalStandings['test'][0].fields['Proposal State'], State.Accepted);
     });
 
+    it('Validate all standings of a proposal are in a good standing ', async function() {
+       //  Set the first proposal to be 'Unreported'
+        allProposals[0].fields['Proposal Standing'] = Standings.Unreported
+        allProposals[0].fields['Deliverable Checklist'] = undefined
+        //  Set the third proposal to be 'Inactive'
+        allProposals[2].fields['Proposal Standing'] = Standings.Incomplete
+        allProposals[5].fields['Proposal State'] = State.Undefined
+
+        // Process all proposals
+        let proposalStandings = await processProposalStandings(allProposals);
+        await processHistoricalStandings(proposalStandings);
+        let latestProposal = getProjectsLatestProposal(proposalStandings)
+        
+        should.equal(latestProposal['test'].fields['Proposal State'], State.Rejected);
+    });
+
     it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function() {
         // Process all proposals
         allProposals[0].fields['Earmarks'] = 'New Entrants'
