@@ -83,7 +83,6 @@ describe('Functionally test updateFundingRound', function () {
     }
   }) //.timeout(5000);
 
-
   it('Processes proposals for snapshot.', async function () {
     if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
@@ -100,8 +99,6 @@ describe('Functionally test updateFundingRound', function () {
       }
     }
   }) //.timeout(5000);
-
-
 
   it.skip('Deploys proposals to snapshot into multiple ballots.', async function () {
     const currentRound = await getCurrentRound()
