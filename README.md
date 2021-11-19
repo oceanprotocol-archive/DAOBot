@@ -13,8 +13,13 @@ SNAPSHOT_HUB_URL=https://hub.snapshot.page
 ```
 ## ❓ How To: Access OceanDAO Airtable Data
 Anyone can access the live data for OceanDAO.
+Design: Consider this a document-based DB.
 
-You can view the [Proposals Airtable through this link](https://airtable.com/shrd5s7HSXc2vC1iC)
+You can view the [Proposals Airtable through this link](https://airtable.com/shrd5s7HSXc2vC1iC).
+This contains all proposals for each funding round, and all required params to execute voting + funding.
+
+You can view the [Funding Rounds Airtable through this link](https://airtable.com/shrvk1ENKwlG8vOBL)
+This contains all funding round params required to execute voting + funding OPS (Funding Started -> Voting Ended -> Declare Winners & Amounts.
 
 You can use our [Airtable API Endpoint via this link](https://airtable.com/appVer8ccYGnqSm2H/api/docs#javascript/introduction) and access it via `curl`.
 
