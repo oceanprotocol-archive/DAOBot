@@ -4,7 +4,7 @@ dotenv.config();
 
 const should = require('chai').should();
 const expect = require('chai').expect;
-const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings, isNewProposal} = require('../../airtable/proposals/proposal_standings')
+const {State, Standings, Disputed, getProposalRecord, getProjectsLatestProposal, processProposalStandings, processHistoricalStandings, updateCurrentRoundStandings, projectHasCompletedProposals} = require('../../airtable/proposals/proposal_standings')
 const {WALLET_ADDRESS_WITH_ENOUGH_OCEANS, WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS} = require('../config')
 
 var currentProposals = undefined
@@ -111,7 +111,7 @@ beforeEach(async function() {
             return this.fields[key];
         }
     },{
-        id: 'proposal_3',
+        id: 'proposal_4',
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
@@ -127,7 +127,7 @@ beforeEach(async function() {
             return this.fields[key];
         }
     },{
-        id: 'proposal_1',
+        id: 'proposal_5',
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
@@ -143,7 +143,7 @@ beforeEach(async function() {
             return this.fields[key];
         }
     },{
-        id: 'proposal_4',
+        id: 'proposal_6',
         fields: {
             'Project Name': 'test',
             'Proposal URL': 'www.testurl.com',
@@ -462,7 +462,7 @@ describe('Process Project Standings', function() {
 
         let currentProposalStandings = await processProposalStandings(currentProposals)
         updateCurrentRoundStandings(currentProposalStandings, latestProposals)
-
+        
         should.equal(currentProposalStandings['test'][0].fields['Proposal Standing'], Standings.NoOcean);
     });
 
@@ -481,13 +481,13 @@ describe('Process Project Standings', function() {
         should.equal(proposalStandings['test'][0].fields['Proposal State'], State.Accepted);
     });
 
-    it('Validate all standings of a proposal are in a good standing ', async function() {
+    it('Validate all project proposal standings are in a good standing state', async function() {
        //  Set the first proposal to be 'Unreported'
         allProposals[0].fields['Proposal Standing'] = Standings.Unreported
-        allProposals[0].fields['Deliverable Checklist'] = undefined
-        //  Set the third proposal to be 'Inactive'
+        allProposals[0].fields['Last Deliverable Update'] = 'May 01, 2021'
+
+        //  Set the third proposal to be 'Incomplete'
         allProposals[2].fields['Proposal Standing'] = Standings.Incomplete
-        allProposals[5].fields['Proposal State'] = State.Undefined
 
         // Process all proposals
         let proposalStandings = await processProposalStandings(allProposals);
