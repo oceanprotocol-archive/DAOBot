@@ -2,9 +2,13 @@
 require("dotenv").config();
 const process = require("process");
 const Airtable = require("airtable");
+const { v4: uuidv4 } = require('uuid');
 
 const { AIRTABLE_API_KEY, AIRTABLE_BASEID } = process.env;
 const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASEID);
+
+const PROPOSAL_TABLE_NAME = "Proposals"
+const PROJECT_SUMMARY_TABLE_NAME = "Project Summary"
 
 const fields = [
   "RecordId",
@@ -12,7 +16,8 @@ const fields = [
   "OCEAN Granted",
   "Voted Yes",
   "Voted No",
-  "Proposal Standing"
+  "Proposal Standing",
+  "UUID"
 ];
 
 const maxRecordAmount = 10;
@@ -30,7 +35,14 @@ const deleteAll = async () => {
 
 const processAll = async () => {
   try {
-    const proposals = await retrieve.proposals();
+    let proposals = await retrieve.proposals();
+    
+    // Updates all proposals that don't have UUID (it adds one)
+    await addUUID(proposals)
+
+    // Retrieve all proposal (now all with UUID) 
+    proposals = await retrieve.proposals();
+
     const projects = summarize(proposals);
     const entries = toAirtableList(projects);
     const chunks = chunk(entries);
@@ -52,7 +64,7 @@ const chunk = projects => {
 
 const populate = async projects => {
   return new Promise((resolve, reject) => {
-    base("Project Summary").create(projects, (err, records) => {
+    base(PROJECT_SUMMARY_TABLE_NAME).create(projects, (err, records) => {
       if (err) {
         reject(err);
       }
@@ -63,7 +75,7 @@ const populate = async projects => {
 
 const remove = async ids => {
   return new Promise((resolve, reject) => {
-    base("Project Summary").destroy(ids, (err, records) => {
+    base(PROJECT_SUMMARY_TABLE_NAME).destroy(ids, (err, records) => {
       if (err) {
         reject(err);
       }
@@ -71,6 +83,56 @@ const remove = async ids => {
     });
   });
 };
+
+const addUUID = async proposals => {
+  let groupedProposals = {};
+
+  // Grouping proposal by project name
+  proposals.forEach(proposal => {
+    const key = proposal['Project Name']
+
+    if (!groupedProposals[key]) {
+      groupedProposals[key] = [proposal]
+    } else {
+      groupedProposals[key].push(proposal)
+    }
+  })
+
+  // Add UUID if not available
+  for (const key in groupedProposals) {
+    const proposalsCollection = groupedProposals[key];
+
+    let proposalWithUUID = proposalsCollection.find(x => x['UUID'] !== undefined)
+
+    if (proposalWithUUID)  {
+      const uuid = proposalWithUUID['UUID']
+
+      proposalsCollection.forEach(async (proposal) => {
+        if (proposal['UUID'] === undefined) {
+          await updatedRecordById(proposal['RecordId'], { UUID: uuid })
+        }
+      })
+    } else {
+      const uuid = uuidv4();
+
+      proposalsCollection.forEach(async (proposal) => {
+        if (proposal['UUID'] === undefined) {
+          await updatedRecordById(proposal['RecordId'], { UUID: uuid })
+        }
+      })
+    }
+
+  }
+}
+
+const updatedRecordById = async (recordId, dataObject) => {
+  try {
+    await base(PROJECT_SUMMARY_TABLE_NAME).update(recordId, dataObject)
+  } catch (err) {
+    console.log('updatedRecordById | error = ', err)
+  }
+  
+}
 
 const levels = {
   // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r11-update-funding-levels
@@ -102,11 +164,11 @@ const toAirtableList = projects => {
 
 const summarize = proposals => {
   const projects = {};
-  
-  for (let proposal of proposals) {
-    const proposalRecordId = proposal["RecordId"];
 
-    let project = projects[proposalRecordId];
+  for (let proposal of proposals) {
+    const proposalUUID = proposal["UUID"];
+
+    let project = projects[proposalUUID];
 
     if (!project) {
       project = {
@@ -135,9 +197,9 @@ const summarize = proposals => {
       project["Times Proposed"] += 1;
       project["Project Standing"][proposal["Proposal Standing"]] += 1;
     }
-    projects[proposalRecordId] = project;
+    projects[proposalUUID] = project;
   }
-  
+
   return projects;
 };
 
@@ -146,7 +208,7 @@ const retrieve = {
     const projects = [];
 
     return new Promise((resolve, reject) => {
-      base("Project Summary")
+      base(PROJECT_SUMMARY_TABLE_NAME)
         .select()
         .eachPage(
           (records, next) => {
@@ -168,7 +230,7 @@ const retrieve = {
     const proposals = [];
 
     return new Promise((resolve, reject) => {
-      base("Proposals")
+      base(PROPOSAL_TABLE_NAME)
         .select({
           fields
         })
