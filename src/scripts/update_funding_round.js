@@ -22,7 +22,6 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 
     // Review all standings for Snapshot
     sleep(1000)
-    await processAirtableProposalStandings(curRoundNumber) // process proposal standings
     await prepareProposalsForSnapshot(curRound)
 }
 
@@ -53,6 +52,7 @@ const main = async () => {
         curRoundVoteEnd = curRound.get('Voting Ends')
         curRoundVoteType = curRound.get('Vote Type')
         curRoundBallotType = curRound.get('Ballot Type')
+        await processAirtableProposalStandings(curRoundNumber) // process proposal standings
     }
 
     const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
