@@ -14,6 +14,7 @@ const {syncGSheetsActiveProposalVotes} = require('../gsheets/sync_gsheets_active
 const {VoteType, BallotType} = require('../snapshot/snapshot_utils')
 const {sleep} = require('../functions/utils')
 const {getTokenPrice} = require('../functions/chainlink')
+const {processAirtableProposalStandings} = require('../airtable/process_airtable_all_proposal_standings')
 
 const prepareNewProposals = async (curRound, curRoundNumber) => {
     // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
@@ -51,6 +52,7 @@ const main = async () => {
         curRoundVoteEnd = curRound.get('Voting Ends')
         curRoundVoteType = curRound.get('Vote Type')
         curRoundBallotType = curRound.get('Ballot Type')
+        await processAirtableProposalStandings(curRoundNumber) // process proposal standings
     }
 
     const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
