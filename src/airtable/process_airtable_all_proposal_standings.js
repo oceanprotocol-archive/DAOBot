@@ -26,11 +26,11 @@ const main = async () => {
     }
 
     // Step 3 - Report the latest (top of stack) proposal standing
-    let latestProposalStandings = getProjectsLatestProposal(proposalStandings)
+    let latestProposalStandings = await getProjectsLatestProposal(proposalStandings)
 
     let currentRoundProposals = await getAllRoundProposals(curRoundNumber, curRoundNumber)
-    let currentProposalStandings = processProposalStandings(currentRoundProposals)
-    updateCurrentRoundStandings(currentProposalStandings, latestProposalStandings)
+    let currentProposalStandings = await processProposalStandings(currentRoundProposals)
+    await updateCurrentRoundStandings(currentProposalStandings, latestProposalStandings)
 
     // Add all current proposals that we're going to update
     for (const [key, value] of Object.entries(currentProposalStandings)) {
