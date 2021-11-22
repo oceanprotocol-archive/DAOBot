@@ -117,4 +117,14 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     return finalResults["earmarkedResults"]["winningProposals"].length + finalResults["generalResults"]["winningProposals"].length + finalResults["partiallyFunded"].length
 }
 
-module.exports = {processFundingRoundComplete};
+const computeBurnedFunds = async (curRound, curRoundNumber) => {
+    const activeProposals = await getProposalsSelectQuery(`{Round} = "${curRoundNumber}"`)
+    const winningProposals = getWinningProposals(activeProposals, curRoundNumber)
+    const finalResults = calculateFinalResults(winningProposals, curRound)
+    const oceanPrice = curRound.get('OCEAN Price')
+    
+    let burntFunds = (finalResults.earmarkedResults.fundsLeft + finalResults.generalResults.fundsLeft) / oceanPrice
+    return burntFunds
+}
+
+module.exports = {processFundingRoundComplete, computeBurnedFunds};
