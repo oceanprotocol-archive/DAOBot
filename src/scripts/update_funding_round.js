@@ -6,7 +6,7 @@ const moment = require('moment')
 const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
 const {RoundState, getCurrentRound, completeEarstructuresValues} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
-const {processFundingRoundComplete} = require('../airtable/process_airtable_funding_round_complete')
+const {processFundingRoundComplete, computeBurnedFunds} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
 const {submitProposalsToSnaphotGranular, submitProposalsToSnaphotBatch} = require('../snapshot/submit_snapshot_accepted_proposals_airtable')
 const {syncAirtableActiveProposalVotes} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
@@ -74,20 +74,20 @@ const main = async () => {
         // this is when the round is ending => switching to the next funding round
         if( lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd ) {
             console.log("Start next round.")
-
-            // Update votes
+            // Update votes and compute funds burned
+            const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
             await syncAirtableActiveProposalVotes(lastRoundNumber)
             await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
-
             // Start the next round
             const roundUpdate = [{
                 id: lastRound['id'],
                 fields: {
                     'Round State': RoundState.Ended,
-                    'Proposals Granted': proposalsFunded
+                    'Proposals Granted': proposalsFunded,
+                    'OCEAN Burned': fundsBurned
                 }
             }, {
                 id: curRound['id'],
