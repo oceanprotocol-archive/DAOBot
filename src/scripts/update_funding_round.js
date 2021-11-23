@@ -72,15 +72,13 @@ const main = async () => {
         // this is when the round is ending => switching to the next funding round
         if( lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd ) {
             console.log("Start next round.")
-
-            // Update votes
+            // Update votes and compute funds burned
+            const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
             await syncAirtableActiveProposalVotes(lastRoundNumber)
             await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
 
             // Complete round calculations
             const proposalsFunded = await processFundingRoundComplete(lastRound, lastRoundNumber)
-            const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
-
             // Start the next round
             const roundUpdate = [{
                 id: lastRound['id'],
