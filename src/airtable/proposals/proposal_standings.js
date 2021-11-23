@@ -34,6 +34,11 @@ const Disputed = {
     Resolved: 'Resolved'
 }
 
+const ProjectStandingsStatus = {
+    Good: 'Good',
+    Bad: 'Bad'
+}
+
 // Project standing has a basic set of rules/priorities.
 // TODO - Reimplement in https://xstate.js.org/docs/ if gets more complex
 const getProjectStanding = (proposalState, deliverableChecklist, completed, timedOut, refunded, funded, areOceansEnough, hasCompletedProposal) => {
@@ -190,19 +195,17 @@ const processHistoricalStandings = async (proposalStandings) => {
 }
 
 
-const hasBadStandingProposals = (proposalStandings) => {
-        let projectHasBadStandingProposals = false
+const getProjectStandingStatus = (proposalStandings) => {
         for (const proposal of proposalStandings) {
             if( (proposal.fields['Proposal Standing'] === Standings.Unreported) ||
                 proposal.fields['Proposal Standing'] === Standings.Incomplete ||
                 proposal.fields['Proposal Standing'] === Standings.Dispute )
             {
-                projectHasBadStandingProposals = true
-                return projectHasBadStandingProposals
+                return ProjectStandingsStatus.Bad
             }
 
         } 
-    return projectHasBadStandingProposals
+    return ProjectStandingsStatus.Good
 }
 
 // Step 3 - Report the latest (top of stack) proposal standing
@@ -210,7 +213,7 @@ const getProjectsLatestProposal = (proposalStandings) => {
     let latestProposals = {}
     for (const [key, value] of Object.entries(proposalStandings)) {
         latestProposals[key] = value[value.length-1]
-        if(hasBadStandingProposals(value)) latestProposals[key].fields['Proposal State'] = State.Rejected
+        if(getProjectStandingStatus(value) === ProjectStandingsStatus.Bad) latestProposals[key].fields['Proposal State'] = State.Rejected
     }
 
     return latestProposals

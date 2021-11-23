@@ -60,7 +60,6 @@ const filterCurrentRound = (roundsArr) => {
 
 const getCurrentRound = async () => {
     let nowDateString = moment().utc().toISOString()
-    console.log('NOW DATE: ', nowDateString)
     const roundParameters = await getRoundsSelectQuery(`AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`)
     return roundParameters[0]
 }
