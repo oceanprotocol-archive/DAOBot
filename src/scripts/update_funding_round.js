@@ -4,7 +4,7 @@ dotenv.config();
 
 const moment = require('moment')
 const {getProposalsSelectQuery, getRoundsSelectQuery, updateRoundRecord} = require('../airtable/airtable_utils')
-const {RoundState, getCurrentRound, completeEarstructuresValues} = require('../airtable/rounds/funding_rounds')
+const {RoundState, getCurrentRound, completeEarstructuresValues, calculateWinningAllProposals, calculateWinningProposalsForEarmark} = require('../airtable/rounds/funding_rounds')
 const {processAirtableNewProposals} = require('../airtable/process_airtable_new_proposals')
 const {processFundingRoundComplete, computeBurnedFunds} = require('../airtable/process_airtable_funding_round_complete')
 const {prepareProposalsForSnapshot} = require('../snapshot/prepare_snapshot_received_proposals_airtable')
@@ -167,7 +167,7 @@ const main = async () => {
             }]
 
             // Enter Due Diligence period
-             
+            calculateWinningProposalsForEarmark(allProposals, fundingAvailableUSD, tokenPrice)
             await updateRoundRecord(roundUpdate)
         }else if(curRoundState === RoundState.DueDiligence && now >= curRoundVoteStart) {
             console.log("Start Voting period.")
