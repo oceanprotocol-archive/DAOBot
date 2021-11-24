@@ -51,7 +51,7 @@ const getProjectStanding = (
   areOceansEnough,
   hasCompletedProposal
 ) => {
-  let newStanding = undefined
+  let newStanding
 
   if (
     (proposalState === State.Received || proposalState === State.Rejected) &&
@@ -112,8 +112,8 @@ const isFunded = (proposalState) => {
 }
 
 const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
-  let deliverableUpdate = new Date(lastDeliverableUpdate)
-  let timeOutDate = new Date(
+  const deliverableUpdate = new Date(lastDeliverableUpdate)
+  const timeOutDate = new Date(
     deliverableUpdate.setMonth(deliverableUpdate.getMonth() + 3)
   )
   return Date.now() > timeOutDate
@@ -122,10 +122,8 @@ const hasTimedOut = (currentStanding, lastDeliverableUpdate) => {
 // Step 1 - Get all proposal standings
 const getAllRoundProposals = async (maxRound, minRound = 1) => {
   let allProposals = []
-  for (i = minRound; i <= maxRound; i++) {
-    let roundProposals = await getProposalsSelectQuery(
-      (selectionQuery = `{Round} = "${i}"`)
-    )
+  for (let i = minRound; i <= maxRound; i++) {
+    const roundProposals = await getProposalsSelectQuery(`{Round} = "${i}"`)
     allProposals = allProposals.concat(roundProposals)
   }
 
@@ -133,30 +131,30 @@ const getAllRoundProposals = async (maxRound, minRound = 1) => {
 }
 
 const getProposalRecord = async (proposal, allProposals) => {
-  let proposalURL = proposal.get('Proposal URL')
-  let areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
-  let proposalState = getProposalState(
+  const proposalURL = proposal.get('Proposal URL')
+  const areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
+  const proposalState = getProposalState(
     proposal.get('Proposal State'),
     areOceansEnough
   )
-  let currentStanding = proposal.get('Proposal Standing')
-  let deliverableChecklist = proposal.get('Deliverable Checklist') || []
-  let deliverableUpdate = proposal.get('Last Deliverable Update')
-  let refunded =
+  const currentStanding = proposal.get('Proposal Standing')
+  const deliverableChecklist = proposal.get('Deliverable Checklist') || []
+  const deliverableUpdate = proposal.get('Last Deliverable Update')
+  const refunded =
     proposal.get('Refund Transaction') !== undefined ||
     currentStanding === Standings.Refunded
-  let disputed = proposal.get('Disputed Status')
-  let funded = isFunded(proposalState)
-  let timedOut =
+  const disputed = proposal.get('Disputed Status')
+  const funded = isFunded(proposalState)
+  const timedOut =
     hasTimedOut(currentStanding, deliverableUpdate) &&
     currentStanding !== Standings.Unreported
-  let deliverables = splitDeliverableChecklist(deliverableChecklist)
-  let completed = areDeliverablesComplete(deliverables)
-  let hasCompletedProposals = projectHasCompletedProposals(
+  const deliverables = splitDeliverableChecklist(deliverableChecklist)
+  const completed = areDeliverablesComplete(deliverables)
+  const hasCompletedProposals = projectHasCompletedProposals(
     proposal,
     allProposals
   )
-  let newStanding = getProjectStanding(
+  const newStanding = getProjectStanding(
     proposalState,
     deliverables,
     completed,
@@ -181,11 +179,11 @@ const getProposalRecord = async (proposal, allProposals) => {
 
 // Returns all Proposal Standings, indexed by Project Name
 const processProposalStandings = async (allProposals) => {
-  let proposalStandings = {}
+  const proposalStandings = {}
   for (const proposal of allProposals) {
     try {
-      let projectName = proposal.get('Project Name')
-      let record = await getProposalRecord(proposal, allProposals)
+      const projectName = proposal.get('Project Name')
+      const record = await getProposalRecord(proposal, allProposals)
       // Finally, track project standings
       if (proposalStandings[projectName] === undefined)
         proposalStandings[projectName] = []
@@ -199,11 +197,11 @@ const processProposalStandings = async (allProposals) => {
 
 // Step 2 - Resolve historical standings
 const processHistoricalStandings = async (proposalStandings) => {
-  for (const [key, value] of Object.entries(proposalStandings)) {
+  for (const [, value] of Object.entries(proposalStandings)) {
     let outstandingURL = ''
-    let lastStanding = undefined
+    let lastStanding
     for (const proposal of value) {
-      let areOceansEnough = await hasEnoughOceans(
+      const areOceansEnough = await hasEnoughOceans(
         proposal.fields['Wallet Address']
       )
       proposal.fields['Outstanding Proposals'] = ''
@@ -274,7 +272,7 @@ const getProjectStandingStatus = (proposalStandings) => {
 
 // Step 3 - Report the latest (top of stack) proposal standing
 const getProjectsLatestProposal = (proposalStandings) => {
-  let latestProposals = {}
+  const latestProposals = {}
   for (const [key, value] of Object.entries(proposalStandings)) {
     latestProposals[key] = value[value.length - 1]
     if (getProjectStandingStatus(value) === ProjectStandingsStatus.Bad)
@@ -304,7 +302,7 @@ const updateCurrentRoundStandings = (
   latestProposals
 ) => {
   for (const [key, value] of Object.entries(currentRoundProposals)) {
-    let latestProposal = latestProposals[key]
+    const latestProposal = latestProposals[key]
     if (latestProposal !== undefined) {
       if (value[0].fields['Proposal Standing'] !== Standings.NoOcean) {
         value[0].fields['Proposal Standing'] =

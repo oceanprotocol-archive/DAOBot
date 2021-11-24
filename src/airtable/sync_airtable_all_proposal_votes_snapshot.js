@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -29,8 +29,8 @@ const getAllProposalVotes = async () => {
   const curRoundNumber = curRound.get('Round')
 
   for (var roundNum = 1; roundNum < curRoundNumber; roundNum++) {
-    let strategy = getVoteCountStrategy(roundNum)
-    let roundProposals = await getProposalsSelectQuery(
+    const strategy = getVoteCountStrategy(roundNum)
+    const roundProposals = await getProposalsSelectQuery(
       `AND({Round} = "${roundNum}", NOT({Proposal State} = "Rejected"), "true")`
     )
     allProposals = allProposals.concat(roundProposals)

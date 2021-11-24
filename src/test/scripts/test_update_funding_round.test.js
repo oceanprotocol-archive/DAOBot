@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
 const should = require('chai').should()
-const expect = require('chai').expect
+const { expect } = require('chai')
 
 const moment = require('moment')
 const {
@@ -20,8 +20,7 @@ const {
   prepareProposalsForSnapshot
 } = require('../../snapshot/prepare_snapshot_received_proposals_airtable')
 const {
-  submitProposalsToSnaphotGranular,
-  submitProposalsToSnaphotBatch
+  submitProposalsToSnaphotGranular
 } = require('../../snapshot/submit_snapshot_accepted_proposals_airtable')
 const { sleep } = require('../../functions/utils')
 
@@ -32,9 +31,9 @@ const { sleep } = require('../../functions/utils')
 // 1. In DB - Delete a proposal "Round" + "Propoal State" params.
 describe('Functionally test updateFundingRound', function () {
   it('Validates moment + 15m', async function () {
-    let round = await getRoundsSelectQuery(`{Round} = "1"`)
-    let roundDueBy = moment(round[0].fields['Proposals Due By'])
-    let roundDueBy_plus15 = moment(round[0].fields['Proposals Due By']).add(
+    const round = await getRoundsSelectQuery(`{Round} = "1"`)
+    const roundDueBy = moment(round[0].fields['Proposals Due By'])
+    const roundDueBy_plus15 = moment(round[0].fields['Proposals Due By']).add(
       15,
       'minutes'
     )
@@ -57,7 +56,7 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it.skip('Validates proposals that are not been initialized.', async function () {
-    let inactiveProposals = await getProposalsSelectQuery(
+    const inactiveProposals = await getProposalsSelectQuery(
       `AND({Round} = "", {Proposal State} = "", "true")`
     )
     expect(inactiveProposals.length).to.be.greaterThan(0)
@@ -81,7 +80,7 @@ describe('Functionally test updateFundingRound', function () {
         should.equal(inactiveProposals.length, 0)
       }
     }
-  }) //.timeout(5000);
+  }) // .timeout(5000);
 
   it('Processes proposals for snapshot.', async function () {
     if (!process.env.GACTIONS_ENV) {
@@ -92,13 +91,13 @@ describe('Functionally test updateFundingRound', function () {
 
         await sleep(500)
         const curRoundNumber = currentRound.get('Round')
-        let acceptedProposals = await getProposalsSelectQuery(
+        const acceptedProposals = await getProposalsSelectQuery(
           `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
         )
         expect(acceptedProposals.length).to.be.greaterThan(0)
       }
     }
-  }) //.timeout(5000);
+  }) // .timeout(5000);
 
   it.skip('Deploys proposals to snapshot into multiple ballots.', async function () {
     const currentRound = await getCurrentRound()
@@ -108,10 +107,10 @@ describe('Functionally test updateFundingRound', function () {
       await submitProposalsToSnaphotGranular(curRoundNumber)
 
       await sleep(500)
-      let acceptedProposals = await getProposalsSelectQuery(
+      const acceptedProposals = await getProposalsSelectQuery(
         `AND({Round} = "${curRoundNumber}", {Proposal State} = "Running", "true")`
       )
       expect(acceptedProposals.length).to.be.greaterThan(0)
     }
-  }) //.timeout(90000);
+  }) // .timeout(90000);
 })

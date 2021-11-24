@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -20,9 +20,9 @@ var activeProposals = {}
 // var proposalVotes = {}
 
 const getActiveProposalVotes = async (curRoundNumber) => {
-  let proposalVotes = {}
-  let voterScores = {}
-  let proposalScores = {}
+  const proposalVotes = {}
+  const voterScores = {}
+  const proposalScores = {}
 
   activeProposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
@@ -32,7 +32,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
     activeProposals.map(async (proposal) => {
       try {
         const ipfsHash = proposal.get('ipfsHash')
-        let strategy = getVoteCountStrategy(proposal.get('Round'))
+        const strategy = getVoteCountStrategy(proposal.get('Round'))
 
         await getProposalVotesGQL(ipfsHash).then((result) => {
           proposalVotes[ipfsHash] = result.data.votes
@@ -65,7 +65,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
 
 const syncAirtableActiveProposalVotes = async (curRoundNumber) => {
   const results = await getActiveProposalVotes(curRoundNumber)
-  let proposalScores = results[1]
+  const proposalScores = results[1]
 
   const proposalVoteSummary = await sumSnapshotVotesToAirtable(
     activeProposals,

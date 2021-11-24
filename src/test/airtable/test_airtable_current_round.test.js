@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const expect = require('chai').expect
+const { expect } = require('chai')
 const should = require('chai').should()
 const {
   getCurrentRound,
@@ -118,7 +118,7 @@ describe('Get Current Round', function () {
     const originalDateNow = Date.now
     Date.now = mockDateNow
 
-    let currentRound = filterCurrentRound(allRounds)
+    const currentRound = filterCurrentRound(allRounds)
 
     Date.now = originalDateNow
     should.equal(currentRound.id, allRounds[1].id)
@@ -136,7 +136,7 @@ describe('Airtable test', () => {
     const originalDateNow = Date.now
     Date.now = mockDateNow
 
-    let roundsFound = await getRoundsSelectQuery(
+    const roundsFound = await getRoundsSelectQuery(
       `AND({Proposals Due By} <= "${mockDateMay}", {Voting Ends} >= "${mockDateMay}", "true")`
     )
 
@@ -163,9 +163,8 @@ describe('Airtable test', () => {
   })
 
   it('Validates current round funding based on selected currency', async () => {
-    const currentRound = await getCurrentRound()
     const round11 = allRounds[3]
-
+    const tokenPrice = 0.5
     const basisCurrency = round11.get('Basis Currency')
     should.exist(basisCurrency)
     expect(basisCurrency).equals('OCEAN')
@@ -179,11 +178,8 @@ describe('Airtable test', () => {
     const maxGrantUSD = maxGrant * oceanPrice
 
     expect(round11.get('Funding Available USD')).equals(fundingAvailableUSD)
-    for (earmark in earmarks) {
-      should.equal(
-        earmarks[earmark]['OCEAN'],
-        earmarks[earmark]['USD'] / tokenPrice
-      )
+    for (const earmark in earmarks) {
+      should.equal(earmarks[earmark].OCEAN, earmarks[earmark].USD / tokenPrice)
     }
     expect(round11.get('Max Grant USD')).equals(maxGrantUSD)
   })
@@ -201,6 +197,5 @@ describe('Airtable test', () => {
     const currentRound = await getCurrentRound()
 
     should.exist(currentRound)
-    expect(currentRound).not.to.be.undefined
   })
 })

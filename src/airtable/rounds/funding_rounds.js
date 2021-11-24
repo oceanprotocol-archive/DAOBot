@@ -28,19 +28,19 @@ const getFundingRound = async (roundNum) => {
 }
 
 const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
-  let earmarks = JSON.parse(curRound.get('Earmarks'))
+  const earmarks = JSON.parse(curRound.get('Earmarks'))
   switch (basisCurrency) {
     case 'USD':
-      for (let earmark in earmarks) {
-        earmarks[earmark]['OCEAN'] = parseFloat(
-          Number.parseFloat(earmarks[earmark]['USD'] / tokenPrice).toFixed(3)
+      for (const earmark in earmarks) {
+        earmarks[earmark].OCEAN = parseFloat(
+          Number.parseFloat(earmarks[earmark].USD / tokenPrice).toFixed(3)
         )
       }
       break
     case 'OCEAN':
-      for (let earmark in earmarks) {
-        earmarks[earmark]['USD'] = parseFloat(
-          Number.parseFloat(earmarks[earmark]['OCEAN'] * tokenPrice).toFixed(3)
+      for (const earmark in earmarks) {
+        earmarks[earmark].USD = parseFloat(
+          Number.parseFloat(earmarks[earmark].OCEAN * tokenPrice).toFixed(3)
         )
       }
       break
@@ -52,10 +52,10 @@ const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
 
 const filterCurrentRound = (roundsArr) => {
   try {
-    let timeNow = new Date(Date.now()).getTime()
-    let currentRound = roundsArr.filter(function (round) {
-      let startDate = new Date(round.get('Start Date'))
-      let endDate = new Date(round.get('Voting Ends'))
+    const timeNow = new Date(Date.now()).getTime()
+    const currentRound = roundsArr.filter(function (round) {
+      const startDate = new Date(round.get('Start Date'))
+      const endDate = new Date(round.get('Voting Ends'))
       return startDate.getTime() < timeNow && timeNow < endDate.getTime()
     })
     return currentRound[0]
@@ -65,7 +65,7 @@ const filterCurrentRound = (roundsArr) => {
 }
 
 const getCurrentRound = async () => {
-  let nowDateString = moment().utc().toISOString()
+  const nowDateString = moment().utc().toISOString()
   const roundParameters = await getRoundsSelectQuery(
     `AND({Start Date} <= "${nowDateString}", {Voting Ends} >= "${nowDateString}", "true")`
   )
@@ -73,7 +73,9 @@ const getCurrentRound = async () => {
 }
 
 const getWinningProposals = (proposals, curFundingRound) => {
-  let winners = proposals.filter((p) => p.get('Voted Yes') > p.get('Voted No'))
+  const winners = proposals.filter(
+    (p) => p.get('Voted Yes') > p.get('Voted No')
+  )
 
   // TODO - RA: Improve strategy/count configurations/versioning per funding round
   if (curFundingRound <= 8) {
@@ -94,7 +96,7 @@ const getWinningProposals = (proposals, curFundingRound) => {
 }
 
 const getDownvotedProposals = (proposals) => {
-  let downvotedProposals = proposals.filter(
+  const downvotedProposals = proposals.filter(
     (p) => p.get('Voted Yes') < p.get('Voted No')
   )
   downvotedProposals.map((p) => {
@@ -111,13 +113,13 @@ const calculateWinningProposalsForEarmark = (
   fundsAvailableUSD,
   oceanPrice
 ) => {
-  let winningProposals = []
+  const winningProposals = []
   let fundsLeft = fundsAvailableUSD
-  for (let p of proposals) {
+  for (const p of proposals) {
     if (fundsLeft > 0) {
       let usdRequested = 0
       let oceanRequested = 0
-      let basisCurrency = p.get('Basis Currency')
+      const basisCurrency = p.get('Basis Currency')
       if (basisCurrency === 'OCEAN') {
         usdRequested = p.get('OCEAN Requested') * oceanPrice
         oceanRequested = p.get('OCEAN Requested')
@@ -126,12 +128,12 @@ const calculateWinningProposalsForEarmark = (
         oceanRequested = Math.ceil(usdRequested / oceanPrice)
       }
 
-      let grantCarry = p.get('USD Granted') || 0
+      const grantCarry = p.get('USD Granted') || 0
       let usdGranted =
         fundsLeft - (usdRequested - grantCarry) > 0
           ? usdRequested - grantCarry
           : fundsLeft
-      let oceanGranted = Math.ceil((usdGranted + grantCarry) / oceanPrice)
+      const oceanGranted = Math.ceil((usdGranted + grantCarry) / oceanPrice)
       usdGranted = oceanGranted * oceanPrice
 
       p.fields['OCEAN Requested'] = oceanRequested
@@ -158,24 +160,24 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   const earmarksJson = JSON.parse(fundingRound.get('Earmarks'))
     ? JSON.parse(fundingRound.get('Earmarks'))
     : {}
-  let earmarkedWinnerIds = []
-  let earmarkedResults = {}
+  const earmarkedWinnerIds = []
+  const earmarkedResults = {}
   let fundsLeft = 0
-  let allWinningProposals = []
+  const allWinningProposals = []
   let usdEarmarked = 0
 
   for (const earmark in earmarksJson) {
-    let earmarkProposals = proposals.filter(
+    const earmarkProposals = proposals.filter(
       (proposal) => proposal.get('Earmarks') === earmark
     )
-    let currentUsdEarmarked = earmarksJson[earmark]['USD']
+    const currentUsdEarmarked = earmarksJson[earmark].USD
     if (earmarkProposals.length === 0) {
       earmarkedResults[earmark] = []
       usdEarmarked += currentUsdEarmarked
-      fundsLeft += earmarksJson[earmark]['USD']
+      fundsLeft += earmarksJson[earmark].USD
       continue
     }
-    let winningProposals = calculateWinningProposalsForEarmark(
+    const winningProposals = calculateWinningProposalsForEarmark(
       earmarkProposals,
       currentUsdEarmarked,
       oceanPrice
@@ -187,47 +189,47 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
     })
     fundsLeft += winningProposals.fundsLeft
     winningProposals.winningProposals
-      .map((x) => x['id'])
+      .map((x) => x.id)
       .forEach((proposalId) => {
         earmarkedWinnerIds.push(proposalId)
       })
   }
 
-  earmarkedResults['winnerIds'] = earmarkedWinnerIds
-  earmarkedResults['usdEarmarked'] = usdEarmarked
-  earmarkedResults['winningProposals'] = allWinningProposals
-  earmarkedResults['fundsLeft'] = fundsLeft
+  earmarkedResults.winnerIds = earmarkedWinnerIds
+  earmarkedResults.usdEarmarked = usdEarmarked
+  earmarkedResults.winningProposals = allWinningProposals
+  earmarkedResults.fundsLeft = fundsLeft
   return earmarkedResults
 }
 
 const calculateFinalResults = (proposals, fundingRound) => {
   let earmarkedResults = {}
-  oceanPrice = fundingRound.get('OCEAN Price')
+  const oceanPrice = fundingRound.get('OCEAN Price')
 
   earmarkedResults = calculateWinningAllProposals(
     proposals,
     fundingRound,
     oceanPrice
   )
-  let usdEarmarked = earmarkedResults.usdEarmarked
+  const { usdEarmarked } = earmarkedResults
 
-  let general = proposals.filter(
-    (p) => earmarkedResults.winnerIds.lastIndexOf(p['id']) === -1
+  const general = proposals.filter(
+    (p) => earmarkedResults.winnerIds.lastIndexOf(p.id) === -1
   )
 
-  let usdGeneral = fundingRound.get('Funding Available USD') - usdEarmarked
-  let generalResults = calculateWinningProposalsForEarmark(
+  const usdGeneral = fundingRound.get('Funding Available USD') - usdEarmarked
+  const generalResults = calculateWinningProposalsForEarmark(
     general,
     usdGeneral,
     oceanPrice
   )
-  let generalWinnerIds = generalResults.winningProposals.map((x) => x['id'])
+  const generalWinnerIds = generalResults.winningProposals.map((x) => x.id)
 
-  let remainder = general.filter(
-    (p) => generalWinnerIds.lastIndexOf(p['id']) === -1
+  const remainder = general.filter(
+    (p) => generalWinnerIds.lastIndexOf(p.id) === -1
   )
-  let partiallyFunded = remainder.filter((p) => p.get('USD Granted') > 0)
-  let notFunded = remainder.filter(
+  const partiallyFunded = remainder.filter((p) => p.get('USD Granted') > 0)
+  const notFunded = remainder.filter(
     (p) => p.get('USD Granted') === undefined || p.get('USD Granted') === 0
   )
   notFunded.map((p) => {
@@ -249,11 +251,11 @@ const dumpResultsToGSheet = async (results) => {
   // Flatten proposals into gsheet dump
   var flatObj = Object.entries(results).map((res) => {
     try {
-      let proposal = res[1]
-      let pctYes =
+      const proposal = res[1]
+      const pctYes =
         proposal.get('Voted Yes') /
         (proposal.get('Voted Yes') + proposal.get('Voted No'))
-      let greaterThan50Yes = pctYes >= 0.5
+      const greaterThan50Yes = pctYes >= 0.5
       return [
         proposal.get('Project Name'),
         proposal.get('Voted Yes'),

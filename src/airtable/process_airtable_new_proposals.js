@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -9,16 +9,16 @@ const {
 
 // DRY/PARAMETERIZE
 const processAirtableNewProposals = async (curRoundNumber) => {
-  let inactiveProposals = await getProposalsSelectQuery(
+  const inactiveProposals = await getProposalsSelectQuery(
     `AND({Round} = "", {Proposal State} = "", "true")`
   )
-  let proposalRecords = []
+  const proposalRecords = []
 
   await Promise.all(
     inactiveProposals.map(async (p) => {
       try {
         proposalRecords.push({
-          id: p['id'],
+          id: p.id,
           fields: {
             'Proposal State': 'Received',
             Round: curRoundNumber

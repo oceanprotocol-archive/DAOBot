@@ -8,9 +8,7 @@ const {
 const {
   buildGranularProposalPayload,
   buildBatchProposalPayload,
-  local_broadcast_proposal,
-  VoteType,
-  BallotType
+  local_broadcast_proposal
 } = require('./snapshot_utils')
 const { assert, sleep } = require('../functions/utils')
 const { web3 } = require('../functions/web3')
@@ -71,7 +69,7 @@ const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
     // Assert quality
     // Foreach may be locking/sync vs. Promise/all which may fire all at once
     // We probably want to throttle the deployment to snapshot w/ a sleep
-    let submittedProposals = []
+    const submittedProposals = []
     for (const proposal of acceptedProposals) {
       validateAccceptedProposal(proposal)
 
@@ -127,8 +125,8 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
       `AND({Round} = "${roundNumber}", {Proposal State} = "Accepted", "true")`
     )
 
-    let proposalIndex = {} // let's keep a dict of proposalName + y/n indexes
-    let proposalArr = [] // let's keep all proposals Y/N in an ordered array
+    const proposalIndex = {} // let's keep a dict of proposalName + y/n indexes
+    const proposalArr = [] // let's keep all proposals Y/N in an ordered array
     let index = 1
 
     for (const proposal of acceptedProposals) {
@@ -153,7 +151,7 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
     )
     console.log(result)
 
-    let submittedProposals = []
+    const submittedProposals = []
     if (result !== undefined) {
       for (const proposal of acceptedProposals) {
         try {

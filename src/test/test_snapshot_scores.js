@@ -1,5 +1,5 @@
 const snapshot = require('@snapshot-labs/snapshot.js')
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 
 const space = 'officialoceandao.eth'
 const strategies = [

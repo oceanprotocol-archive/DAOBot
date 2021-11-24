@@ -534,9 +534,9 @@ const getVoteCountStrategy = (roundNumber) => {
     return strategy[process.env.SNAPSHOT_STRATEGY]
   }
 
-  if (roundNumber < 5) return strategy['strategy_v0_1']
-  if (roundNumber < 9) return strategy['strategy_v0_2']
-  return strategy['strategy_v0_3']
+  if (roundNumber < 5) return strategy.strategy_v0_1
+  if (roundNumber < 9) return strategy.strategy_v0_2
+  return strategy.strategy_v0_3
 }
 
 const getVotesQuery = (ifpshash) => `query Votes {
@@ -575,9 +575,9 @@ const getProposalVotesGQL = async (ipfsHash) => {
   // is somthing like: {"41":1e+41}".
   // So we need to transform that 1e+41 into a natural number
   // to correcly calculate the votes count and the sum of allocated tokens
-  let result = await response.json()
-  for ([_, vote] of Object.entries(result.data.votes)) {
-    for ([choiceIndex, voteCount] of Object.entries(vote.choice)) {
+  const result = await response.json()
+  for (const [, vote] of Object.entries(result.data.votes)) {
+    for (const [choiceIndex, voteCount] of Object.entries(vote.choice)) {
       if (voteCount === 1e41) vote.choice[choiceIndex] = 1
     }
   }
@@ -619,14 +619,14 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (voterScores) => {
-  let scores = {}
+  const scores = {}
 
   Object.entries(voterScores).reduce((total, cur) => {
     const voterAllChoices = cur[1].choice
     const voterTotalBalance = cur[1].balance
 
     let voterVotesCount = 0
-    for (const [_, vote] of Object.entries(voterAllChoices)) {
+    for (const [, vote] of Object.entries(voterAllChoices)) {
       voterVotesCount += vote
     }
 
@@ -705,7 +705,7 @@ ${x.get('Project Name')} - [Click Here](${x.get('Proposal URL')})
 
 ### Cast your vote below!`
 
-  return (payload = {
+  return {
     end: endTs,
     body: body,
     name: `OceanDAO Round${roundNumber}`,
@@ -717,7 +717,7 @@ ${x.get('Project Name')} - [Click Here](${x.get('Proposal URL')})
       strategies: strategy
     },
     snapshot: blockHeight
-  })
+  }
 }
 
 const send = async (url, init) => {
@@ -752,11 +752,11 @@ const local_broadcast_proposal = async (
       })
     }
 
-    var encodedMsg = bufferToHex(new Buffer.from(msg.msg, 'utf8'))
+    var encodedMsg = bufferToHex(Buffer.from(msg.msg, 'utf8'))
     msg.sig = await web3.eth.sign(encodedMsg, msg.address)
 
     const url = pUrl === null ? `${hubUrl}/api/message` : `${pUrl}/api/message`
-    let init = {
+    const init = {
       method: 'POST',
       headers: {
         Accept: 'application/json',

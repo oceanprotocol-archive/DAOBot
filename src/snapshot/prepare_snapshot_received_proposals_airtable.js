@@ -31,24 +31,24 @@ const prepareProposalsForSnapshot = async (curRound) => {
   const startDate = new Date(voteStartTime)
   const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
 
-  let proposals = await getProposalsSelectQuery(
+  const proposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`
   )
-  let estimatedBlockHeight = calcTargetBlockHeight(
+  const estimatedBlockHeight = calcTargetBlockHeight(
     currentBlockHeight,
     voteStartTimestamp,
     avgBlockTime
   )
 
-  let recordsPayload = []
+  const recordsPayload = []
 
   await Promise.all(
     proposals.map(async (proposal) => {
       getProposalRecord(proposal, proposals)
       try {
-        let wallet_0x = proposal.get('Wallet Address')
-        let proposalStanding = proposal.get('Proposal Standing')
-        let goodStanding =
+        const wallet_0x = proposal.get('Wallet Address')
+        const proposalStanding = proposal.get('Proposal Standing')
+        const goodStanding =
           proposalStanding === Standings.Completed ||
           proposalStanding === Standings.Refunded ||
           proposalStanding === Standings.Undefined

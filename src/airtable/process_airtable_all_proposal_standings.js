@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -13,8 +13,8 @@ const {
 
 const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
-  let allProposals = await getAllRoundProposals(curRoundNumber - 1)
-  let proposalStandings = await processProposalStandings(allProposals)
+  const allProposals = await getAllRoundProposals(curRoundNumber - 1)
+  const proposalStandings = await processProposalStandings(allProposals)
   console.log(
     '\n======== Proposal Standings Found\n',
     JSON.stringify(proposalStandings)
@@ -29,20 +29,20 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
 
   // Add all historical proposals that we're going to update
   let rows = []
-  for (const [key, value] of Object.entries(proposalStandings)) {
+  for (const [, value] of Object.entries(proposalStandings)) {
     rows = rows.concat(value)
   }
 
   // Step 3 - Report the latest (top of stack) proposal standing
-  let latestProposalStandings = await getProjectsLatestProposal(
+  const latestProposalStandings = await getProjectsLatestProposal(
     proposalStandings
   )
 
-  let currentRoundProposals = await getAllRoundProposals(
+  const currentRoundProposals = await getAllRoundProposals(
     curRoundNumber,
     curRoundNumber
   )
-  let currentProposalStandings = await processProposalStandings(
+  const currentProposalStandings = await processProposalStandings(
     currentRoundProposals
   )
   await updateCurrentRoundStandings(
@@ -51,7 +51,7 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
   )
 
   // Add all current proposals that we're going to update
-  for (const [key, value] of Object.entries(currentProposalStandings)) {
+  for (const [, value] of Object.entries(currentProposalStandings)) {
     rows = rows.concat(value)
   }
 

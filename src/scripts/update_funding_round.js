@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -12,7 +12,6 @@ const {
   RoundState,
   getCurrentRound,
   completeEarstructuresValues,
-  calculateWinningAllProposals,
   calculateWinningProposalsForEarmark
 } = require('../airtable/rounds/funding_rounds')
 const {
@@ -35,7 +34,7 @@ const {
 const {
   syncGSheetsActiveProposalVotes
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
-const { VoteType, BallotType } = require('../snapshot/snapshot_utils')
+const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
 const { getTokenPrice } = require('../functions/chainlink')
 const {
@@ -58,15 +57,15 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 // DONE - Update existing round
 const main = async () => {
   const curRound = await getCurrentRound()
-  let curRoundNumber = undefined
-  let curRoundState = undefined
-  let curRoundStartDate = undefined
-  let curRoundProposalsDueBy = undefined
-  let curRoundProposalsDueBy_plus15 = undefined
-  let curRoundVoteStart = undefined
-  let curRoundVoteEnd = undefined
-  let curRoundVoteType = undefined
-  let curRoundBallotType = undefined
+  let curRoundNumber
+  let curRoundState
+  let curRoundStartDate
+  let curRoundProposalsDueBy
+  let curRoundProposalsDueBy_plus15
+  let curRoundVoteStart
+  let curRoundVoteEnd
+  let curRoundVoteType
+  let curRoundBallotType
 
   if (curRound !== undefined) {
     curRoundNumber = curRound.get('Round')
@@ -88,12 +87,12 @@ const main = async () => {
 
   const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
   let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
-  let lastRoundState = undefined
-  let lastRoundVoteEnd = undefined
-  let lastRoundBallotType = undefined
+  let lastRoundState
+  let lastRoundVoteEnd
+  let lastRoundBallotType
 
   if (lastRound !== undefined && lastRound.length > 0) {
-    lastRound = lastRound[0]
+    ;[lastRound] = lastRound
     lastRoundState = lastRound.get('Round State')
     lastRoundVoteEnd = lastRound.get('Voting Ends')
     lastRoundBallotType = lastRound.get('Ballot Type')
@@ -118,7 +117,7 @@ const main = async () => {
       // Start the next round
       const roundUpdate = [
         {
-          id: lastRound['id'],
+          id: lastRound.id,
           fields: {
             'Round State': RoundState.Ended,
             'Proposals Granted': proposalsFunded,
@@ -126,7 +125,7 @@ const main = async () => {
           }
         },
         {
-          id: curRound['id'],
+          id: curRound.id,
           fields: {
             'Round State': RoundState.Started
           }
@@ -139,7 +138,7 @@ const main = async () => {
       // Start the current round
       const roundUpdate = [
         {
-          id: curRound['id'],
+          id: curRound.id,
           fields: {
             'Round State': RoundState.Started
           }
@@ -160,7 +159,7 @@ const main = async () => {
 
       await prepareNewProposals(curRound, curRoundNumber)
 
-      let allProposals = await getProposalsSelectQuery(
+      const allProposals = await getProposalsSelectQuery(
         `{Round} = ${curRoundNumber}`
       )
       const tokenPrice = await getTokenPrice()
@@ -173,15 +172,16 @@ const main = async () => {
       let fundingAvailableUSD = 0
 
       switch (basisCurrency) {
-        case 'USD':
+        case 'USD': {
           maxGrantUSD = curRound.get('Max Grant USD')
           fundingAvailableUSD = curRound.get('Funding Available USD')
 
           maxGrant = maxGrantUSD / tokenPrice
           fundingAvailable = fundingAvailableUSD / tokenPrice
           break
+        }
 
-        case 'OCEAN':
+        case 'OCEAN': {
           const maxGrantOCEAN = curRound.get('Max Grant')
           const fundingAvailableOCEAN = curRound.get('Funding Available')
 
@@ -191,14 +191,15 @@ const main = async () => {
           maxGrantUSD = maxGrantOCEAN * tokenPrice
           fundingAvailableUSD = fundingAvailableOCEAN * tokenPrice
           break
+        }
 
         default:
           console.log('No Basis Currency was selected for this round.')
       }
 
-      let roundUpdate = [
+      const roundUpdate = [
         {
-          id: curRound['id'],
+          id: curRound.id,
           fields: {
             'Round State': RoundState.DueDiligence,
             Proposals: allProposals.length,
@@ -236,7 +237,7 @@ const main = async () => {
 
       const roundUpdate = [
         {
-          id: curRound['id'],
+          id: curRound.id,
           fields: {
             'Round State': RoundState.Voting
           }
@@ -252,13 +253,13 @@ const main = async () => {
 
       await prepareNewProposals(curRound, curRoundNumber)
 
-      let allProposals = await getProposalsSelectQuery(
+      const allProposals = await getProposalsSelectQuery(
         `{Round} = ${curRoundNumber}`
       )
       // Update proposal count
       const roundUpdate = [
         {
-          id: curRound['id'],
+          id: curRound.id,
           fields: {
             Proposals: allProposals.length
           }

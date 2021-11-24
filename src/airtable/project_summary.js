@@ -20,7 +20,7 @@ const deleteAll = async () => {
   const records = []
 
   const projects = await retrieve.projects()
-  for (let c of chunk(projects)) {
+  for (const c of chunk(projects)) {
     records.push(...(await remove(c)))
   }
 
@@ -32,14 +32,14 @@ const processAll = async () => {
   const projects = summarize(proposals)
   const entries = toAirtableList(projects)
   const chunks = chunk(entries)
-  for (let c of chunks) {
+  for (const c of chunks) {
     await populate(c)
   }
 }
 
 const chunk = (projects) => {
   const chunks = []
-  for (i = 0, j = projects.length; i < j; i += maxRecordAmount) {
+  for (let i = 0, j = projects.length; i < j; i += maxRecordAmount) {
     chunks.push(projects.slice(i, i + maxRecordAmount))
   }
   return chunks
@@ -96,7 +96,7 @@ const toAirtableList = (projects) => {
 
 const summarize = (proposals) => {
   const projects = {}
-  for (let proposal of proposals) {
+  for (const proposal of proposals) {
     const name = proposal['Project Name']
     let project = projects[name]
 

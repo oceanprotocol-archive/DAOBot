@@ -16,7 +16,7 @@ const getTokenPrice = async () => {
       process.env.CG_TOKEN_SLUG,
       CG_PARAMS
     )
-    return result.data.market_data.current_price['usd']
+    return result.data.market_data.current_price.usd
   } catch (err) {
     console.log(err)
   }

@@ -2,7 +2,7 @@ const fetch = require('cross-fetch')
 const base = require('airtable').base(process.env.AIRTABLE_BASEID)
 
 const splitArr = (arr, chunk) => {
-  let arrSplit = []
+  const arrSplit = []
   for (let i = 0; i < arr.length; i += chunk) {
     arrSplit.push(arr.slice(i, i + chunk))
   }
@@ -38,7 +38,7 @@ const getProposalsSelectQuery = async (selectQuery, sortQuery = []) => {
 }
 
 const sumSnapshotVotesToAirtable = async (proposals, scores) => {
-  let records = []
+  const records = []
   proposals.map((p) => {
     const batchIndex = p.get('Snapshot Batch Index')
     const batchNoIndex = p.get('Snapshot Batch Index No')

@@ -4,7 +4,7 @@ const { getTokenPrice } = require('../functions/coingecko')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const expect = require('chai').expect
+const { expect } = require('chai')
 
 describe('Validate token price', function () {
   it('Should validate token price > 0.0', async function () {

@@ -1,9 +1,9 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
 const should = require('chai').should()
-const expect = require('chai').expect
+const { expect } = require('chai')
 const {
   State,
   Standings,
@@ -12,15 +12,14 @@ const {
   getProjectsLatestProposal,
   processProposalStandings,
   processHistoricalStandings,
-  updateCurrentRoundStandings,
-  projectHasCompletedProposals
+  updateCurrentRoundStandings
 } = require('../../airtable/proposals/proposal_standings')
 const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
   WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
 } = require('../config')
 
-var currentProposals = undefined
+var currentProposals
 var allProposals = []
 
 beforeEach(async function () {
@@ -243,11 +242,11 @@ describe('Process Project Standings', function () {
     })
 
     // Process proposals and historical standings
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Verify every proposal in history is completed or refunded
-    let projectName = allProposals[0].get('Project Name')
+    const projectName = allProposals[0].get('Project Name')
     proposalStandings[projectName].forEach((x) => {
       expect(x.fields['Proposal Standing']).to.be.oneOf([
         Standings.Completed,
@@ -266,11 +265,11 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Validate that all proposals are Incomplete
-    let projectName = allProposals[0].get('Project Name')
+    const projectName = allProposals[0].get('Project Name')
     proposalStandings[projectName].forEach((x) => {
       should.equal(x.fields['Proposal Standing'], Standings.Incomplete)
     })
@@ -285,21 +284,21 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Validate that all proposals are Incomplete
-    let projectName = allProposals[0].get('Project Name')
+    const projectName = allProposals[0].get('Project Name')
     proposalStandings[projectName].forEach((x) => {
       should.equal(x.fields['Proposal Standing'], Standings.Incomplete)
     })
 
     // Step 3 - Report the latest (top of stack) proposal standing
     // Retrieve the last proposals from projectStandings
-    let latestProposals = getProjectsLatestProposal(proposalStandings)
+    const latestProposals = getProjectsLatestProposal(proposalStandings)
     should.equal(
-      latestProposals[projectName]['id'],
-      allProposals[allProposals.length - 1]['id']
+      latestProposals[projectName].id,
+      allProposals[allProposals.length - 1].id
     )
   })
 
@@ -312,27 +311,27 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
-    let latestProposals = getProjectsLatestProposal(proposalStandings)
+    const latestProposals = getProjectsLatestProposal(proposalStandings)
     should.equal(
-      latestProposals['test']['id'],
-      allProposals[allProposals.length - 1]['id']
+      latestProposals.test.id,
+      allProposals[allProposals.length - 1].id
     )
 
-    let currentProposalStandings = await processProposalStandings(
+    const currentProposalStandings = await processProposalStandings(
       currentProposals
     )
     updateCurrentRoundStandings(currentProposalStandings, latestProposals)
     should.equal(
-      currentProposalStandings['test'][0].fields['Proposal Standing'],
-      latestProposals['test'].fields['Proposal Standing']
+      currentProposalStandings.test[0].fields['Proposal Standing'],
+      latestProposals.test.fields['Proposal Standing']
     )
     should.equal(
-      currentProposalStandings['test'][0].fields['Proposal Standing'],
+      currentProposalStandings.test[0].fields['Proposal Standing'],
       Standings.Incomplete
     )
   })
@@ -346,27 +345,27 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Deliverable Checklist'] = '[] D1\n[x] D2\n[x] D3'
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
-    let latestProposals = getProjectsLatestProposal(proposalStandings)
+    const latestProposals = getProjectsLatestProposal(proposalStandings)
     should.equal(
-      latestProposals['test']['id'],
-      allProposals[allProposals.length - 1]['id']
+      latestProposals.test.id,
+      allProposals[allProposals.length - 1].id
     )
 
-    let currentProposalStandings = await processProposalStandings(
+    const currentProposalStandings = await processProposalStandings(
       currentProposals
     )
     updateCurrentRoundStandings(currentProposalStandings, latestProposals)
     should.equal(
-      currentProposalStandings['test'][0].fields['Proposal Standing'],
-      latestProposals['test'].fields['Proposal Standing']
+      currentProposalStandings.test[0].fields['Proposal Standing'],
+      latestProposals.test.fields['Proposal Standing']
     )
     should.equal(
-      currentProposalStandings['test'][0].fields['Proposal Standing'],
+      currentProposalStandings.test[0].fields['Proposal Standing'],
       Standings.Incomplete
     )
 
@@ -402,16 +401,16 @@ describe('Process Project Standings', function () {
 
     // Validate proposals are incomplete and bad URLs are reporting properly
     should.equal(
-      proposalStandings['test'][0].fields['Proposal Standing'],
+      proposalStandings.test[0].fields['Proposal Standing'],
       Standings.Incomplete
     )
     should.equal(
-      proposalStandings['test'][1].fields['Proposal Standing'],
+      proposalStandings.test[1].fields['Proposal Standing'],
       Standings.Incomplete
     )
 
-    let badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
-    let badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+    let badUrl0 = proposalStandings.test[0].fields['Outstanding Proposals']
+    let badUrl1 = proposalStandings.test[1].fields['Outstanding Proposals']
     let badUrl0Count = badUrl0.split('\n')
     let badUrl1Count = badUrl1.split('\n')
     should.equal(badUrl0Count.length, 2)
@@ -426,16 +425,16 @@ describe('Process Project Standings', function () {
 
     // Validate first proposal is completed, and [Oustanding URLs] is correct.
     should.equal(
-      proposalStandings['test'][0].fields['Proposal Standing'],
+      proposalStandings.test[0].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][1].fields['Proposal Standing'],
+      proposalStandings.test[1].fields['Proposal Standing'],
       Standings.Completed
     )
 
-    badUrl0 = proposalStandings['test'][0].fields['Outstanding Proposals']
-    badUrl1 = proposalStandings['test'][1].fields['Outstanding Proposals']
+    badUrl0 = proposalStandings.test[0].fields['Outstanding Proposals']
+    badUrl1 = proposalStandings.test[1].fields['Outstanding Proposals']
     badUrl0Count = badUrl0.split('\n')
     should.equal(badUrl0Count.length, 1)
 
@@ -452,12 +451,12 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Disputed Status'] = Disputed.Ongoing
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     for (let i = 1; i < proposalStandings.length; i++) {
       should.equal(
-        proposalStandings['test'][i].fields['Proposal Standing'],
+        proposalStandings.test[i].fields['Proposal Standing'],
         Standings.Dispute
       )
     }
@@ -472,12 +471,12 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Disputed Status'] = Disputed.Resolved
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     for (let i = 1; i < proposalStandings.length; i++) {
       should.equal(
-        proposalStandings['test'][i].fields['Proposal Standing'],
+        proposalStandings.test[i].fields['Proposal Standing'],
         Standings.Completed
       )
     }
@@ -497,15 +496,15 @@ describe('Process Project Standings', function () {
     })
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     should.equal(
-      proposalStandings['test1'][0].fields['Proposal Standing'],
+      proposalStandings.test1[0].fields['Proposal Standing'],
       Standings.NewProject
     )
     should.equal(
-      proposalStandings['test2'][0].fields['Proposal Standing'],
+      proposalStandings.test2[0].fields['Proposal Standing'],
       Standings.NewProject
     )
   })
@@ -526,23 +525,23 @@ describe('Process Project Standings', function () {
     allProposals[3].fields['Deliverable Checklist'] = undefined
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     should.equal(
-      proposalStandings['test'][0].fields['Proposal Standing'],
+      proposalStandings.test[0].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][1].fields['Proposal Standing'],
+      proposalStandings.test[1].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][2].fields['Proposal Standing'],
+      proposalStandings.test[2].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][3].fields['Proposal Standing'],
+      proposalStandings.test[3].fields['Proposal Standing'],
       Standings.Incomplete
     )
   })
@@ -554,24 +553,24 @@ describe('Process Project Standings', function () {
     })
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
-    let latestProposals = getProjectsLatestProposal(proposalStandings)
+    const latestProposals = getProjectsLatestProposal(proposalStandings)
 
     currentProposals[0].fields['Proposal State'] = State.Rejected
     currentProposals[0].fields['Wallet Address'] =
       WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
 
-    let currentProposalStandings = await processProposalStandings(
+    const currentProposalStandings = await processProposalStandings(
       currentProposals
     )
     updateCurrentRoundStandings(currentProposalStandings, latestProposals)
 
     should.equal(
-      currentProposalStandings['test'][0].fields['Proposal Standing'],
+      currentProposalStandings.test[0].fields['Proposal Standing'],
       Standings.NoOcean
     )
   })
@@ -583,15 +582,15 @@ describe('Process Project Standings', function () {
     allProposals[0].fields['Proposal State'] = State.Rejected
     allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
 
     should.equal(
-      proposalStandings['test'][0].fields['Proposal Standing'],
+      proposalStandings.test[0].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][0].fields['Proposal State'],
+      proposalStandings.test[0].fields['Proposal State'],
       State.Accepted
     )
   })
@@ -605,40 +604,37 @@ describe('Process Project Standings', function () {
     allProposals[2].fields['Proposal Standing'] = Standings.Incomplete
 
     // Process all proposals
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
-    let latestProposal = getProjectsLatestProposal(proposalStandings)
+    const latestProposal = getProjectsLatestProposal(proposalStandings)
 
-    should.equal(
-      latestProposal['test'].fields['Proposal State'],
-      State.Rejected
-    )
+    should.equal(latestProposal.test.fields['Proposal State'], State.Rejected)
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {
     // Process all proposals
-    allProposals[0].fields['Earmarks'] = 'New Entrants'
+    allProposals[0].fields.Earmarks = 'New Entrants'
     allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
     allProposals[0].fields['Proposal State'] = State.Rejected
     allProposals[0].fields['Proposal Standing'] = Standings.NoOcean
     allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
-    allProposals[2].fields['Earmarks'] = 'New Entrants'
+    allProposals[2].fields.Earmarks = 'New Entrants'
     allProposals[2].fields['Deliverable Checklist'] = ''
     allProposals[2].fields['Proposal State'] = State.Rejected
     allProposals[2].fields['Proposal Standing'] = Standings.NoOcean
     allProposals[2].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
-    let proposalStandings = await processProposalStandings(allProposals)
+    const proposalStandings = await processProposalStandings(allProposals)
 
     await processHistoricalStandings(proposalStandings)
 
     should.equal(
-      proposalStandings['test'][0].fields['Proposal Standing'],
+      proposalStandings.test[0].fields['Proposal Standing'],
       Standings.Completed
     )
     should.equal(
-      proposalStandings['test'][2].fields['Proposal Standing'],
+      proposalStandings.test[2].fields['Proposal Standing'],
       Standings.Incomplete
     )
   })

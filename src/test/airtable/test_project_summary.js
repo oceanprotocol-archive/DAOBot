@@ -1,7 +1,7 @@
 // @format
 require('dotenv').config()
-const assert = require('chai').assert
-const expect = require('chai').expect
+const { assert } = require('chai')
+const { expect } = require('chai')
 
 const {
   summarize,
@@ -47,7 +47,7 @@ describe('Creating project summaries', () => {
     const [id] = await populate([record])
     assert(id.startsWith('rec'))
 
-    const [removedId] = await remove([id])
+    await remove([id])
     assert(id.startsWith('rec'))
     done()
   })

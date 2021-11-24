@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const expect = require('chai').expect
+const { expect } = require('chai')
 const should = require('chai').should()
 const { getCurrentRound } = require('../../airtable/rounds/funding_rounds')
 const { web3 } = require('../../functions/web3')

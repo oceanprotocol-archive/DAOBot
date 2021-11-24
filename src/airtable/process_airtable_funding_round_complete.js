@@ -1,4 +1,4 @@
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -10,8 +10,7 @@ const { initOAuthToken } = require('../gsheets/gsheets')
 const {
   getValues,
   addSheet,
-  updateValues,
-  emptySheet
+  updateValues
 } = require('../gsheets/gsheets_utils')
 const {
   getWinningProposals,
@@ -52,7 +51,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   airtableRows = airtableRows.map((p) => {
     return {
-      id: p['id'],
+      id: p.id,
       fields: {
         'Proposal State': p.get('Proposal State'),
         'USD Granted': p.get('USD Granted'),
@@ -71,22 +70,22 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   )
 
   // Step 3 - Dump all results to a flattened list
-  let downvotedResults = await dumpResultsToGSheet(downvotedProposals)
-  let earmarkedResults = await dumpResultsToGSheet(
+  const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
+  const earmarkedResults = await dumpResultsToGSheet(
     finalResults.earmarkedResults.winningProposals
   )
-  let generalResults = await dumpResultsToGSheet(
+  const generalResults = await dumpResultsToGSheet(
     finalResults.generalResults.winningProposals
   )
-  let partiallyFundedResults = await dumpResultsToGSheet(
+  const partiallyFundedResults = await dumpResultsToGSheet(
     finalResults.partiallyFunded
   )
-  let notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
+  const notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
 
   // Finally, write to gsheets
   const oAuth = await initOAuthToken()
 
-  let sheetName = 'Round' + curRoundNumber + 'FinalResults'
+  const sheetName = 'Round' + curRoundNumber + 'FinalResults'
 
   // Get the sheet, otherwise create it
   let sheet = await getValues(oAuth, sheetName, 'A1:B3')
@@ -114,9 +113,9 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
 
-  let oceanUSD = curRound.get('OCEAN Price')
+  const oceanUSD = curRound.get('OCEAN Price')
   // 2x Rows => Header & Summed results
-  let burnedFunds = [
+  const burnedFunds = [
     ['Earmarked USD Burned', '', 'General USD Burned', '', 'Total USD Burned'],
     [
       finalResults.earmarkedResults.fundsLeft,
@@ -158,9 +157,9 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   )
 
   return (
-    finalResults['earmarkedResults']['winningProposals'].length +
-    finalResults['generalResults']['winningProposals'].length +
-    finalResults['partiallyFunded'].length
+    finalResults.earmarkedResults.winningProposals.length +
+    finalResults.generalResults.winningProposals.length +
+    finalResults.partiallyFunded.length
   )
 }
 
@@ -172,7 +171,7 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   const finalResults = calculateFinalResults(winningProposals, curRound)
   const oceanPrice = curRound.get('OCEAN Price')
 
-  let burntFunds =
+  const burntFunds =
     (finalResults.earmarkedResults.fundsLeft +
       finalResults.generalResults.fundsLeft) /
     oceanPrice

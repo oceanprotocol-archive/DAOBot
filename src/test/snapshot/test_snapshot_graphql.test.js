@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-global['fetch'] = require('cross-fetch')
+global.fetch = require('cross-fetch')
 const fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
@@ -8,7 +8,6 @@ dotenv.config()
 const should = require('chai').should()
 const { assert } = require('chai')
 const {
-  strategy,
   getVoteCountStrategy,
   getVotesQuery,
   reduceVoterScores,
@@ -164,7 +163,7 @@ describe('Snapshot GraphQL test', () => {
     return fetch('https://hub.snapshot.org/graphql', options)
       .then((resp) => resp.json())
       .then((resp) => {
-        votes = resp.data.votes
+        ;({ votes } = resp.data)
         should.equal(votes.length, 24)
       })
       .catch((e) => {
@@ -179,7 +178,7 @@ describe('Snapshot GraphQL test', () => {
     let votes = []
     await getProposalVotesGQL(singleBatchVoting_proposalIPFSHash).then(
       (result) => {
-        votes = result.data.votes
+        ;({ votes } = result.data)
       }
     )
     should.equal(votes.length, 89)
@@ -209,7 +208,7 @@ describe('Snapshot GraphQL test', () => {
       }
     })
     console.log(voterScores)
-  }) //.timeout(5000);
+  }) // .timeout(5000);
 
   it('Validates scores from Y/N granular voting', async () => {
     const strategy = getVoteCountStrategy(8)
@@ -217,7 +216,7 @@ describe('Snapshot GraphQL test', () => {
     let votes = []
     await getProposalVotesGQL(granularVoting_proposalIPFSHash).then(
       (result) => {
-        votes = result.data.votes
+        ;({ votes } = result.data)
       }
     )
     should.equal(votes.length, 23)
@@ -247,7 +246,7 @@ describe('Snapshot GraphQL test', () => {
       }
     })
     console.log(voterScores)
-  }) //.timeout(5000);
+  }) // .timeout(5000);
 
   it('Validates scores from UniV2/Sushi/Bancor', async () => {
     const strategy = getVoteCountStrategy(9)
@@ -255,7 +254,7 @@ describe('Snapshot GraphQL test', () => {
     let votes = []
     await getProposalVotesGQL(uni_sushi_bancor_proposalIPFSHash).then(
       (result) => {
-        votes = result.data.votes
+        ;({ votes } = result.data)
       }
     )
     should.equal(votes.length, 9)
@@ -310,7 +309,7 @@ describe('Snapshot GraphQL test', () => {
     let votes = []
     await getProposalVotesGQL(spring_dao_quadratic_proposalIPFSHash).then(
       (result) => {
-        votes = result.data.votes
+        ;({ votes } = result.data)
       }
     )
     should.equal(votes.length, 1)
