@@ -49,35 +49,35 @@ const addSheet = async (oAuth, sheetName, indexOffset = 0) => {
 
 // Clear values from Sheet
 const emptySheet = async (oAuth, sheetName, range) => {
-    const sheets = google.sheets({version: 'v4', auth: oAuth});
-    try {
-        return await sheets.spreadsheets.values.clear({
-            spreadsheetId: spreadsheet,
-            range: sheetName + '!' + range
-        })
-    } catch(err) {
-        console.log('[getValues] The API returned an error: ' + err);
-        return undefined
-    }
+  const sheets = google.sheets({ version: 'v4', auth: oAuth })
+  try {
+    return await sheets.spreadsheets.values.clear({
+      spreadsheetId: spreadsheet,
+      range: sheetName + '!' + range
+    })
+  } catch (err) {
+    console.log('[getValues] The API returned an error: ' + err)
+    return undefined
+  }
 }
 
 // Dump values to Sheet
 const updateValues = async (oAuth, sheetId, range, values) => {
-    const sheets = google.sheets({version: 'v4', auth: oAuth});
-    await emptySheet(oAuth, sheetId, range) 
-    try {
-        return await sheets.spreadsheets.values.update({
-            spreadsheetId: spreadsheet,
-            range: sheetId + '!' + range,
-            valueInputOption: "RAW",
-            resource: {
-                values: values,
-            }
-        })
-    } catch (err) {
-        console.log('[updateValues] The API returned an error: ' + err);
-        return undefined
-    }
+  const sheets = google.sheets({ version: 'v4', auth: oAuth })
+  await emptySheet(oAuth, sheetId, range)
+  try {
+    return await sheets.spreadsheets.values.update({
+      spreadsheetId: spreadsheet,
+      range: sheetId + '!' + range,
+      valueInputOption: 'RAW',
+      resource: {
+        values: values
+      }
+    })
+  } catch (err) {
+    console.log('[updateValues] The API returned an error: ' + err)
+    return undefined
+  }
 }
 
 const getValues = async (oAuth, ipfsHash, range) => {
@@ -93,4 +93,4 @@ const getValues = async (oAuth, ipfsHash, range) => {
   }
 }
 
-module.exports = {getValues, addSheet, updateValues, emptySheet};
+module.exports = { getValues, addSheet, updateValues, emptySheet }
