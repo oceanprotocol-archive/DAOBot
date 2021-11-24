@@ -1,7 +1,10 @@
 const dotenv = require('dotenv')
 dotenv.config()
 
-const { Standings } = require('../airtable/proposals/proposal_standings')
+const {
+  Standings,
+  getProposalRecord
+} = require('../airtable/proposals/proposal_standings')
 const {
   getProposalsSelectQuery,
   updateProposalRecords
@@ -41,6 +44,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
 
   await Promise.all(
     proposals.map(async (proposal) => {
+      getProposalRecord(proposal, proposals)
       try {
         let wallet_0x = proposal.get('Wallet Address')
         let proposalStanding = proposal.get('Proposal Standing')

@@ -13,7 +13,7 @@ const {
   processProposalStandings,
   processHistoricalStandings,
   updateCurrentRoundStandings,
-  isNewProposal
+  projectHasCompletedProposals
 } = require('../../airtable/proposals/proposal_standings')
 const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
@@ -77,6 +77,7 @@ beforeEach(async function () {
       }
     }
   ]
+
   allProposals = [
     {
       id: 'proposal_1',
@@ -130,7 +131,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_3',
+      id: 'proposal_4',
       fields: {
         'Project Name': 'test',
         'Proposal URL': 'www.testurl.com',
@@ -147,7 +148,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_1',
+      id: 'proposal_5',
       fields: {
         'Project Name': 'test',
         'Proposal URL': 'www.testurl.com',
@@ -164,7 +165,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_4',
+      id: 'proposal_6',
       fields: {
         'Project Name': 'test',
         'Proposal URL': 'www.testurl.com',
@@ -172,6 +173,23 @@ beforeEach(async function () {
         'Proposal Standing': undefined,
         'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
         'Last Deliverable Update': 'Apr 01, 2021',
+        'Refund Transaction': undefined,
+        'Disputed Status': undefined,
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_1_new_entrant',
+      fields: {
+        'Project Name': 'New Entrant',
+        'Proposal URL': 'www.new-entrant.com',
+        'Proposal State': undefined,
+        'Proposal Standing': undefined,
+        'Deliverable Checklist': undefined,
+        'Last Deliverable Update': undefined,
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
         'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
@@ -576,58 +594,70 @@ describe('Process Project Standings', function () {
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" reported corectly', async function () {
-    if (!process.env.GACTIONS_ENV) {
-      // Set the very first proposal to not be completed
-      allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
-      allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
-      allProposals[0].fields['Proposal State'] = State.Rejected
-      allProposals[0].fields['Wallet Address'] =
-        WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+    // Set the very first proposal to not be completed
+    allProposals[0].fields['Proposal Standings'] = Standings.NoOcean
+    allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+    allProposals[0].fields['Proposal State'] = State.Rejected
+    allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
-      // Process all proposals
-      let proposalStandings = await processProposalStandings(allProposals)
-      await processHistoricalStandings(proposalStandings)
+    // Process all proposals
+    let proposalStandings = await processProposalStandings(allProposals)
+    await processHistoricalStandings(proposalStandings)
 
-      should.equal(
-        proposalStandings['test'][0].fields['Proposal Standing'],
-        Standings.Completed
-      )
-      should.equal(
-        proposalStandings['test'][0].fields['Proposal State'],
-        State.Accepted
-      )
-    }
+    should.equal(
+      proposalStandings['test'][0].fields['Proposal Standing'],
+      Standings.Completed
+    )
+    should.equal(
+      proposalStandings['test'][0].fields['Proposal State'],
+      State.Accepted
+    )
+  })
+
+  it('Validate all project proposal standings are in a good standing state', async function () {
+    //  Set the first proposal to be 'Unreported'
+    allProposals[0].fields['Proposal Standing'] = Standings.Unreported
+    allProposals[0].fields['Last Deliverable Update'] = 'May 01, 2021'
+
+    //  Set the third proposal to be 'Incomplete'
+    allProposals[2].fields['Proposal Standing'] = Standings.Incomplete
+
+    // Process all proposals
+    let proposalStandings = await processProposalStandings(allProposals)
+    await processHistoricalStandings(proposalStandings)
+    let latestProposal = getProjectsLatestProposal(proposalStandings)
+
+    should.equal(
+      latestProposal['test'].fields['Proposal State'],
+      State.Rejected
+    )
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {
-    if (!process.env.GACTIONS_ENV) {
-      // Process all proposals
-      allProposals[0].fields['Earmarks'] = 'New Entrants'
-      allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
-      allProposals[0].fields['Proposal State'] = State.Rejected
-      allProposals[0].fields['Proposal Standing'] = Standings.NoOcean
-      allProposals[0].fields['Wallet Address'] =
-        WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+    // Process all proposals
+    allProposals[0].fields['Earmarks'] = 'New Entrants'
+    allProposals[0].fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+    allProposals[0].fields['Proposal State'] = State.Rejected
+    allProposals[0].fields['Proposal Standing'] = Standings.NoOcean
+    allProposals[0].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
-      allProposals[2].fields['Earmarks'] = 'New Entrants'
-      allProposals[2].fields['Deliverable Checklist'] = ''
-      allProposals[2].fields['Proposal State'] = State.Rejected
-      allProposals[2].fields['Proposal Standing'] = Standings.NoOcean
-      allProposals[2].fields['Wallet Address'] =
-        WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+    allProposals[2].fields['Earmarks'] = 'New Entrants'
+    allProposals[2].fields['Deliverable Checklist'] = ''
+    allProposals[2].fields['Proposal State'] = State.Rejected
+    allProposals[2].fields['Proposal Standing'] = Standings.NoOcean
+    allProposals[2].fields['Wallet Address'] = WALLET_ADDRESS_WITH_ENOUGH_OCEANS
 
-      let proposalStandings = await processProposalStandings(allProposals)
+    let proposalStandings = await processProposalStandings(allProposals)
 
-      await processHistoricalStandings(proposalStandings)
+    await processHistoricalStandings(proposalStandings)
 
-      should.equal(
-        proposalStandings['test'][0].fields['Proposal Standing'],
-        Standings.Completed
-      )
-      should.equal(
-        proposalStandings['test'][2].fields['Proposal Standing'],
-        Standings.Incomplete
-      )
-    }
+    should.equal(
+      proposalStandings['test'][0].fields['Proposal Standing'],
+      Standings.Completed
+    )
+    should.equal(
+      proposalStandings['test'][2].fields['Proposal Standing'],
+      Standings.Incomplete
+    )
   })
 })
