@@ -10,7 +10,6 @@ const {
   getProjectsLatestProposal,
   updateCurrentRoundStandings
 } = require('./proposals/proposal_standings')
-const { getCurrentRound } = require('./rounds/funding_rounds')
 
 const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
