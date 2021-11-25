@@ -1,0 +1,140 @@
+[
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Define round parameters ",
+        "body": "- [ ] Funding Amount\n - [ ] Funding Cap\n- [ ] Earmarks\n- [ ] Add new round parameters to the [Airtable Funding Rounds Table](https://airtable.com/appVer8ccYGnqSm2H/tbliawPTKlmd1lVA5/viwcabfq70TWi2BVz?blocks=hide)",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} [Engineering WG] Prepare Round - Review Schedule & Roadmap - Team sync",
+        "body": "- [ ] Review schedule for {{ROUND_NUMBER}}\n- [ ] Review and determine what new initiatives we are implementing for Round {{ROUND_NUMBER}}\n - [ ] Update internal roadmap",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Setup Airtable Views",
+        "body": "**Setup round [airtable](https://airtable.com/appVer8ccYGnqSm2H/tbls5o7pVfAUU39eX/viwzRZT1hkcoJC5gF?blocks=hide) views**\n- [ ]  Round {{ROUND_NUMBER}} All Proposals\n- [ ] Round {{ROUND_NUMBER}} General\n- [ ] Round {{ROUND_NUMBER}} Overview\n- [ ] Round {{ROUND_NUMBER}} Core Tech\n- [ ] Round {{ROUND_NUMBER}} New General\n- [ ] Round {{ROUND_NUMBER}} New Outreach",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Notion Pages",
+        "body": "**Setup round [Notion](https://www.notion.so/oceandao/Funding-Rounds-700b73d066e946558828d5c919d4f201) pages**\n- [ ] Round {{ROUND_NUMBER}} proposals page\n- [ ] Round {{ROUND_NUMBER}} votes page",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Site",
+        "body": "**Update [site](oceanprotocol.com/dao) with**:\n - [ ] Proposals submissions deadline: {{ROUND_PROPOSALS_END_DATE}}\n- [ ] Round {{ROUND_NUMBER}} funding available: {{ROUND_FUNDING_AVAILABLE}} OCEAN\n- [ ] Voting period : {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Wiki",
+        "body": "- [ ] Update [wiki](https://github.com/oceanprotocol/oceandao/wiki) with round details\n - Add round parameters\n - Port: {{ROUND_PORT_LINK}}\n- Funding tiers\n- [Important Links](https://github.com/oceanprotocol/oceandao/wiki#important-links) with round notion pages and the calendar",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Google Schedule",
+        "body": "**Add round events in the [cean Ecosystem Calendar](https://oceandao.notion.site/Ocean-Ecosystem-Calendar-4cefa1944a314128afd2ae0ea1a04eb6)**\n- [ ] OceanDAO - GR{{ROUND_NUMBER}}\n - Period: {{ROUND_PROPOSALS_START_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n - Description: Link to [port round]({{ROUND_PORT_LINK}})\n - [ ] R{{ROUND_NUMBER}} Last Week to Submit\n- Period: {{ROUND_PROPOSALS_LAST_WEEK_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n- Description: Get your proposal submissions in place!  https://oceanprotocol.com/dao\n- [ ] R{{ROUND_NUMBER}} Due Dilligence\n- Period: {{ROUND_PROPOSALS_END_DATE}} - {{ROUND_VOTING_START_DATE}}\n- [ ] R{{ROUND_NUMBER}} Voting Period\n- Period: {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}\n- Description: Cast your vote - link to the voting notion page.\n- [ ] R{{ROUND_NUMBER}} Last Day to Vote\n - Period: {{ROUND_VOTING_LAST_DAY_DATE}} - {{ROUND_VOTING_END_DATE}}\n - Description: Last day to get your votes in place!",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Prepare Round - Communication",
+        "body": "- [ ] Write a blog post for the new round",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Deploy Round - Port",
+        "body": "- [ ] Port goes live",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Proposals Submissions - Live-OPS",
+        "body": "- [ ] Review Port for new proposals\n- [ ] Add proposals to Airtable\n- [ ] Make sure every project provided all required informations and it's properly registered",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Before Voting Starts - Port",
+        "body": "- [ ] Close Port",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: Dev",
+            "Type: OPS"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Conclusions - Finance Transactions",
+        "body": "- [ ] Transactions to the winners\n- [ ] Burn remainder",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS",
+            "Type: Finance"
+        ]
+    },
+    {
+        "title": "R{{ROUND_NUMBER}} Conclusions - Communication",
+        "body": "- [ ] Write a blog post summarizing results/winners",
+        "assignees": [
+            "LoznianuAnamaria"
+        ],
+        "labels": [
+            "Type: OPS"
+        ]
+    }
+]
