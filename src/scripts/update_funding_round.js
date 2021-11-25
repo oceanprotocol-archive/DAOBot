@@ -40,6 +40,9 @@ const { getTokenPrice } = require('../functions/chainlink')
 const {
   processAirtableProposalStandings
 } = require('../airtable/process_airtable_all_proposal_standings')
+const {
+    checkAndGenerateNextRoundOpsSchedule
+} = require('../scripts/ops/generate_issues')
 
 const prepareNewProposals = async (curRound, curRoundNumber) => {
   // Prepare proposals for Snapshot (Check token balance, calc snapshot height)
@@ -83,6 +86,7 @@ const main = async () => {
     curRoundVoteType = curRound.get('Vote Type')
     curRoundBallotType = curRound.get('Ballot Type')
     await processAirtableProposalStandings(curRoundNumber) // process proposal standings
+    await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
   }
 
   const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
