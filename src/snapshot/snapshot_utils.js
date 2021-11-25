@@ -177,6 +177,7 @@ const getVotesQuery = (ifpshash) => `query Votes {
   ) {
     voter
     choice
+    created
   }
 }`
 
@@ -240,6 +241,7 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
         return {
             "address": newVoter,
             "choice": voter[1].choice,
+            "created": voter[1].created,
             "balance": strategyScore
         }
     })

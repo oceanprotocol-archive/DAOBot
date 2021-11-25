@@ -39,6 +39,8 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
             const vote = v[1]
             return [
                 vote.address,
+                JSON.stringify(vote.choice),
+                vote.created,
                 vote.balance
             ]
         } catch(err) {
@@ -47,8 +49,8 @@ const dumpFromSnapshotRawToGSheet = async (curRoundNumber, ipfsHash, voterScores
     })
 
     // Dump flattened data from snapshot to sheet
-    flatObj.splice(0,0, ['address','balace'])
-    await updateValues(oAuth, ipfsHash, 'A1:C'+flatObj.length, flatObj)
+    flatObj.splice(0,0, ['address', 'choice', 'created', 'balace'])
+    await updateValues(oAuth, ipfsHash, 'A1:E'+flatObj.length, flatObj)
 }
 
 // For each proposal, calculate their summary
@@ -255,7 +257,6 @@ const getActiveProposalVotes = async (curRoundNumber) => {
         try {
             const ipfsHash = proposal.get('ipfsHash')
             let strategy = getVoteCountStrategy(proposal.get('Round'))
-
             await getProposalVotesGQL(ipfsHash)
                 .then((result) => {
                     proposalVotes[ipfsHash] = result.data.votes
