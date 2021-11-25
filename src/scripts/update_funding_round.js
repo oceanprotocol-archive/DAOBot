@@ -41,7 +41,7 @@ const {
   processAirtableProposalStandings
 } = require('../airtable/process_airtable_all_proposal_standings')
 const {
-    checkAndGenerateNextRoundOpsSchedule
+  checkAndGenerateNextRoundOpsSchedule
 } = require('../scripts/ops/generate_issues')
 
 const prepareNewProposals = async (curRound, curRoundNumber) => {
