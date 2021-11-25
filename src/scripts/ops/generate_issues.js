@@ -1,16 +1,21 @@
 const moment = require('moment')
 const fetch = require('node-fetch')
-const roundRawIssues = require('../../utils/ops/repeatable_tasks.json');
+const roundRawIssues = require('../../utils/ops/repeatable_tasks.json')
 const {
     getRoundsSelectQuery,
     updateRoundRecord
   } = require('../../airtable/airtable_utils')
 
-const organisation = process.env.GITHUB_ORGANISATION || 'oceanprotocol';
-const repo = process.env.GITHUB_REPOSITORY || 'oceandao';
-const token = process.env.GITHUB_TOKEN;
+const organisation = process.env.GITHUB_ORGANISATION || 'oceanprotocol'
+const repo = process.env.GITHUB_REPOSITORY || 'oceandao'
+const token = process.env.GITHUB_TOKEN
+const buildType = process.eventNames.BUILD_TYPE || 'DEV'
 
 async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
+    // The function of generating the ops schedule runs only on PROD env 
+    if (buildType !== 'PROD') {
+        return 
+    }
     const nextRoundNumber = parseInt(currentRoundNumber, 10) + 1
     let nextRound = await getRoundsSelectQuery(`{Round} = ${nextRoundNumber}`)
 
