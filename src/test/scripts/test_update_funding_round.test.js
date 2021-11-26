@@ -46,13 +46,11 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it('Validates basis currency chosen', async function () {
-    if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
       if (currentRound !== undefined) {
         const basisCurrency = currentRound.get('Basis Currency')
         should.not.equal(basisCurrency, undefined)
       }
-    }
   })
 
   it.skip('Validates proposals that are not been initialized.', async function () {
@@ -83,7 +81,6 @@ describe('Functionally test updateFundingRound', function () {
   }) // .timeout(5000);
 
   it('Processes proposals for snapshot.', async function () {
-    if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
       if (currentRound !== undefined) {
         await prepareProposalsForSnapshot(currentRound)
@@ -96,7 +93,6 @@ describe('Functionally test updateFundingRound', function () {
         )
         expect(acceptedProposals.length).to.be.greaterThan(0)
       }
-    }
   }) // .timeout(5000);
 
   it.skip('Deploys proposals to snapshot into multiple ballots.', async function () {
