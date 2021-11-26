@@ -84,7 +84,7 @@ describe('Functionally test updateFundingRound', function () {
     const currentRound = await getCurrentRound()
     if (currentRound !== undefined) {
       await prepareProposalsForSnapshot(currentRound)
-      if(currentRound.get('Round State') !== 'Voting') return
+      if (currentRound.get('Round State') !== 'Voting') return
 
       await sleep(500)
       const curRoundNumber = currentRound.get('Round')
