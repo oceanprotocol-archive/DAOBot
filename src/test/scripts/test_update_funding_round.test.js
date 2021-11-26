@@ -46,11 +46,11 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it('Validates basis currency chosen', async function () {
-      const currentRound = await getCurrentRound()
-      if (currentRound !== undefined) {
-        const basisCurrency = currentRound.get('Basis Currency')
-        should.not.equal(basisCurrency, undefined)
-      }
+    const currentRound = await getCurrentRound()
+    if (currentRound !== undefined) {
+      const basisCurrency = currentRound.get('Basis Currency')
+      should.not.equal(basisCurrency, undefined)
+    }
   })
 
   it.skip('Validates proposals that are not been initialized.', async function () {
@@ -81,18 +81,18 @@ describe('Functionally test updateFundingRound', function () {
   }) // .timeout(5000);
 
   it('Processes proposals for snapshot.', async function () {
-      const currentRound = await getCurrentRound()
-      if (currentRound !== undefined) {
-        await prepareProposalsForSnapshot(currentRound)
-        if(currentRound.get('Round State') !== 'Voting') return
+    const currentRound = await getCurrentRound()
+    if (currentRound !== undefined) {
+      await prepareProposalsForSnapshot(currentRound)
+      if(currentRound.get('Round State') !== 'Voting') return
 
-        await sleep(500)
-        const curRoundNumber = currentRound.get('Round')
-        const acceptedProposals = await getProposalsSelectQuery(
-          `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
-        )
-        expect(acceptedProposals.length).to.be.greaterThan(0)
-      }
+      await sleep(500)
+      const curRoundNumber = currentRound.get('Round')
+      const acceptedProposals = await getProposalsSelectQuery(
+        `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
+      )
+      expect(acceptedProposals.length).to.be.greaterThan(0)
+    }
   }) // .timeout(5000);
 
   it.skip('Deploys proposals to snapshot into multiple ballots.', async function () {
