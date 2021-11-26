@@ -168,11 +168,14 @@ describe('Airtable test', () => {
     const tokenPrice = 0.5
     const basisCurrency = round11.get('Basis Currency')
     should.exist(basisCurrency)
+    const roundEarmark = round11.get('Earmarks')
     expect(basisCurrency).equals('OCEAN')
+    should.not.equal(roundEarmark,undefined)
+    should.not.equal(Object.keys(roundEarmark).length,0)
 
     const oceanPrice = round11.get('OCEAN Price')
     const fundingAvailable = round11.get('Funding Available')
-    const earmarks = JSON.parse(round11.get('Earmarks'))
+    const earmarks = JSON.parse(roundEarmark)
     const maxGrant = round11.get('Max Grant')
 
     const fundingAvailableUSD = fundingAvailable * oceanPrice
