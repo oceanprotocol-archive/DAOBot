@@ -1,5 +1,6 @@
 const dotenv = require('dotenv')
 dotenv.config()
+const Logger = require('../utils/logger')
 
 const {
   getProposalsSelectQuery,
@@ -86,7 +87,7 @@ const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
       )
 
       if (result !== undefined) {
-        console.log(result)
+        Logger.log(result)
         submittedProposals.push({
           id: proposal.id,
           fields: {
@@ -102,19 +103,19 @@ const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
 
     if (submittedProposals.length > 0) {
       await updateProposalRecords(submittedProposals)
-      console.log(
+      Logger.log(
         '[SUCCESS] Submitted [%s] proposals to Snapshot.',
         submittedProposals.length
       )
     }
     if (acceptedProposals.length !== submittedProposals.length)
-      console.log(
+      Logger.log(
         '[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.',
         acceptedProposals.length,
         submittedProposals.length
       )
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 
@@ -149,7 +150,7 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
       payload,
       process.env.SNAPSHOT_SPACE
     )
-    console.log(result)
+    Logger.log(result)
 
     const submittedProposals = []
     if (result !== undefined) {
@@ -167,26 +168,26 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
             }
           })
         } catch (err) {
-          console.log(err)
+          Logger.error(err)
         }
       }
     }
 
     if (submittedProposals.length > 0) {
       await updateProposalRecords(submittedProposals)
-      console.log(
+      Logger.log(
         '[SUCCESS] Submitted [%s] proposals to Snapshot.',
         submittedProposals.length
       )
     }
     if (acceptedProposals.length !== submittedProposals.length)
-      console.log(
+      Logger.log(
         '[WARNING] Accepted [%s] proposals, but only submitted [%s]. Please check logs.',
         acceptedProposals.length,
         submittedProposals.length
       )
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 

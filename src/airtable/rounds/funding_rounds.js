@@ -1,5 +1,6 @@
 const moment = require('moment')
 const { getRoundsSelectQuery } = require('../airtable_utils')
+const Logger = require('../../utils/logger')
 
 // Let's track the state of various proposals
 const RoundState = {
@@ -23,7 +24,7 @@ const getFundingRound = async (roundNum) => {
     )
     return roundParameters[0]
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 
@@ -45,7 +46,7 @@ const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
       }
       break
     default:
-      console.log('Basis currency value is wrong')
+      Logger.log('Basis currency value is wrong')
   }
   return earmarks
 }
@@ -60,7 +61,7 @@ const filterCurrentRound = (roundsArr) => {
     })
     return currentRound[0]
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 
@@ -267,7 +268,7 @@ const dumpResultsToGSheet = async (results) => {
         proposal.get('OCEAN Granted')
       ]
     } catch (err) {
-      console.log(err)
+      Logger.error(err)
     }
   })
 

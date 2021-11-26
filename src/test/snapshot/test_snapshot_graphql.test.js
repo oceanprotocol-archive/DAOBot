@@ -2,6 +2,7 @@
 
 global.fetch = require('cross-fetch')
 const fetch = require('cross-fetch')
+const Logger = require('../../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -167,7 +168,7 @@ describe('Snapshot GraphQL test', () => {
         should.equal(votes.length, 24)
       })
       .catch((e) => {
-        console.log(e)
+        Logger.error(e)
       })
   })
 
@@ -204,10 +205,10 @@ describe('Snapshot GraphQL test', () => {
           validationValue.toFixed(2)
         )
       } else {
-        console.log(`Voter [${voterAddress}] score is not found in snapshot`)
+        Logger.log(`Voter [${voterAddress}] score is not found in snapshot`)
       }
     })
-    console.log(voterScores)
+    Logger.log(voterScores)
   }) // .timeout(5000);
 
   it('Validates scores from Y/N granular voting', async () => {
@@ -242,10 +243,10 @@ describe('Snapshot GraphQL test', () => {
           validationValue.toFixed(2)
         )
       } else {
-        console.log(`Voter [${voterAddress}] score is not found in snapshot`)
+        Logger.log(`Voter [${voterAddress}] score is not found in snapshot`)
       }
     })
-    console.log(voterScores)
+    Logger.log(voterScores)
   }) // .timeout(5000);
 
   it('Validates scores from UniV2/Sushi/Bancor', async () => {
@@ -271,14 +272,14 @@ describe('Snapshot GraphQL test', () => {
     )
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
-    console.log(voterScores)
+    Logger.log(voterScores)
     reducedVoterScores.map((x) => {
       const voterAddress = Object.keys(x)[0]
       const validationValue = uni_sushi_bancor_voterValidation[voterAddress]
       if (validationValue !== undefined) {
         if (voterAddress === '0x61B15998893cC746B46C08FEdEE13a0d1b33bBa9') {
-          console.log(`Calculated score ${x[voterAddress].balance.toFixed(2)}`)
-          console.log(`Expected score ${validationValue.toFixed(2)}`)
+          Logger.log(`Calculated score ${x[voterAddress].balance.toFixed(2)}`)
+          Logger.log(`Expected score ${validationValue.toFixed(2)}`)
           assert.fail(
             'Snapshot score is not the same as expected => https://snapshot.org/#/officialoceandao.eth/proposal/QmQgfxvLqz88pL3ByK6U82bxezCU8MAiCSgxtTTCoR3fWm'
           )
@@ -289,7 +290,7 @@ describe('Snapshot GraphQL test', () => {
           )
         }
       } else {
-        console.log(`Voter [${voterAddress}] score is not found in snapshot`)
+        Logger.log(`Voter [${voterAddress}] score is not found in snapshot`)
       }
     })
   })
@@ -326,6 +327,6 @@ describe('Snapshot GraphQL test', () => {
     )
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
-    console.log(reducedVoterScores)
+    Logger.log(reducedVoterScores)
   })
 })

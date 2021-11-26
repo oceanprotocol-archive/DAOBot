@@ -1,6 +1,6 @@
 const fetch = require('cross-fetch')
 const base = require('airtable').base(process.env.AIRTABLE_BASEID)
-
+const Logger = require('../utils/logger')
 const splitArr = (arr, chunk) => {
   const arrSplit = []
   for (let i = 0; i < arr.length; i += chunk) {
@@ -18,7 +18,7 @@ const getRoundsSelectQuery = async (selectQuery) => {
       })
       .firstPage()
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 
@@ -33,7 +33,7 @@ const getProposalsSelectQuery = async (selectQuery, sortQuery = []) => {
       })
       .firstPage()
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 
@@ -80,10 +80,10 @@ const updateProposalRecords = async (records) => {
         }
       )
         .then((res) => {
-          console.log('Response from Airtable: ', res.status)
+          Logger.log('Response from Airtable: ', res.status)
         })
         .catch((err) => {
-          console.log(err)
+          Logger.error(err)
         })
     })
   )
@@ -102,10 +102,10 @@ const updateRoundRecord = async (record) => {
     }
   )
     .then((res) => {
-      console.log('Response from Airtable: ', res.status)
+      Logger.log('Response from Airtable: ', res.status)
     })
     .catch((err) => {
-      console.log(err)
+      Logger.error(err)
     })
 }
 

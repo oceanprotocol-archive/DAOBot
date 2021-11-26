@@ -1,5 +1,6 @@
 const { getProposalsSelectQuery } = require('../airtable_utils')
 const { hasEnoughOceans } = require('../../snapshot/snapshot_utils')
+const Logger = require('../../utils/logger')
 
 // Proposal States
 const State = {
@@ -189,7 +190,7 @@ const processProposalStandings = async (allProposals) => {
         proposalStandings[projectName] = []
       proposalStandings[projectName].push(record)
     } catch (err) {
-      console.log(err)
+      Logger.error(err)
     }
   }
   return proposalStandings

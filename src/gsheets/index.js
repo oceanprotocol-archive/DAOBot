@@ -1,6 +1,7 @@
 const fs = require('fs')
 const readline = require('readline')
 const { google } = require('googleapis')
+const Logger = require('../utils/logger')
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -11,7 +12,7 @@ const TOKEN_PATH = 'token.json'
 
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
-  if (err) return console.log('Error loading client secret file:', err)
+  if (err) return Logger.log('Error loading client secret file:', err)
 
   // Authorize a client with credentials, then call the Google Sheets API.
   authorize(JSON.parse(content), listResults)
@@ -24,7 +25,7 @@ fs.readFile('credentials.json', (err, content) => {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  console.log(credentials)
+  Logger.log(credentials)
   const { client_secret, client_id, redirect_uris } = credentials.installed
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
@@ -51,7 +52,7 @@ function getNewToken(oAuth2Client, callback) {
     access_type: 'offline',
     scope: SCOPES
   })
-  console.log('Authorize this app by visiting this url:', authUrl)
+  Logger.log('Authorize this app by visiting this url:', authUrl)
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -60,12 +61,12 @@ function getNewToken(oAuth2Client, callback) {
     rl.close()
     oAuth2Client.getToken(code, (err, token) => {
       if (err)
-        return console.error('Error while trying to retrieve access token', err)
+        return Logger.error('Error while trying to retrieve access token', err)
       oAuth2Client.setCredentials(token)
       // Store the token to disk for later program executions
       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-        if (err) return console.error(err)
-        console.log('Token stored to', TOKEN_PATH)
+        if (err) return Logger.error(err)
+        Logger.log('Token stored to', TOKEN_PATH)
       })
       callback(oAuth2Client)
     })
@@ -85,16 +86,16 @@ function listResults(auth) {
       range: 'Round4Results!A1:D15'
     },
     (err, res) => {
-      if (err) return console.log('The API returned an error: ' + err)
+      if (err) return Logger.log('The API returned an error: ' + err)
       const rows = res.data.values
       if (rows.length) {
-        console.log('Name, Votes:')
+        Logger.log('Name, Votes:')
         // Print columns B and
         rows.map((row) => {
-          console.log(`${row[1]}, ${row[2]}`)
+          Logger.log(`${row[1]}, ${row[2]}`)
         })
       } else {
-        console.log('No data found.')
+        Logger.log('No data found.')
       }
     }
   )

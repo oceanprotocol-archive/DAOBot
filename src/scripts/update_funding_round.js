@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -103,7 +104,7 @@ const main = async () => {
   if (curRoundState === undefined) {
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
-      console.log('Start next round.')
+      Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
       await syncAirtableActiveProposalVotes(lastRoundNumber)
@@ -133,7 +134,7 @@ const main = async () => {
       ]
       await updateRoundRecord(roundUpdate)
     } else if (now >= curRoundStartDate) {
-      console.log('Start current round.')
+      Logger.log('Start current round.')
 
       // Start the current round
       const roundUpdate = [
@@ -149,13 +150,13 @@ const main = async () => {
   } else {
     // this is logic for the current funding round, and the states within it
     if (curRoundState === RoundState.Started && now < curRoundProposalsDueBy) {
-      console.log('Update active round.')
+      Logger.log('Update active round.')
       await prepareNewProposals(curRound, curRoundNumber)
     } else if (
       curRoundState === RoundState.Started &&
       now >= curRoundProposalsDueBy
     ) {
-      console.log('Start DD period.')
+      Logger.log('Start DD period.')
 
       await prepareNewProposals(curRound, curRoundNumber)
 
@@ -194,7 +195,7 @@ const main = async () => {
         }
 
         default:
-          console.log('No Basis Currency was selected for this round.')
+          Logger.log('No Basis Currency was selected for this round.')
       }
 
       const roundUpdate = [
@@ -226,7 +227,7 @@ const main = async () => {
       curRoundState === RoundState.DueDiligence &&
       now >= curRoundVoteStart
     ) {
-      console.log('Start Voting period.')
+      Logger.log('Start Voting period.')
 
       // Submit to snapshot + Enter voting state
       if (curRoundBallotType === BallotType.Granular) {
@@ -249,7 +250,7 @@ const main = async () => {
       now <= curRoundProposalsDueBy_plus15
     ) {
       // 15 minute grace period from DD to allow Alex to update proposals
-      console.log('Update Proposals - Grace Period.')
+      Logger.log('Update Proposals - Grace Period.')
 
       await prepareNewProposals(curRound, curRoundNumber)
 
@@ -267,7 +268,7 @@ const main = async () => {
       ]
       await updateRoundRecord(roundUpdate)
     } else if (curRoundState === RoundState.Voting && now < curRoundVoteEnd) {
-      console.log('Update vote count.')
+      Logger.log('Update vote count.')
 
       // Update votes
       await syncAirtableActiveProposalVotes(curRoundNumber)
