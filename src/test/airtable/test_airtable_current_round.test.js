@@ -170,8 +170,8 @@ describe('Airtable test', () => {
     should.exist(basisCurrency)
     const roundEarmark = round11.get('Earmarks')
     expect(basisCurrency).equals('OCEAN')
-    should.not.equal(roundEarmark,undefined)
-    should.not.equal(Object.keys(roundEarmark).length,0)
+    should.not.equal(roundEarmark, undefined)
+    should.not.equal(Object.keys(roundEarmark).length, 0)
 
     const oceanPrice = round11.get('OCEAN Price')
     const fundingAvailable = round11.get('Funding Available')
