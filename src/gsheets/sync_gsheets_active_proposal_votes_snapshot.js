@@ -13,6 +13,7 @@ const {
   reduceVoterScores,
   reduceProposalScores
 } = require('../snapshot/snapshot_utils')
+const { sleep } = require('../functions/utils')
 
 // Let's track the state of various proposals
 let activeProposals = {}
@@ -70,7 +71,6 @@ const dumpFromSnapshotRawToGSheet = async (
             console.log(err)
         }
     })
-
     // Dump flattened data from snapshot to sheet
     flatObj.splice(0,0, ['address', 'choice', 'created', 'balace'])
     await updateValues(oAuth, ipfsHash, 'A1:E'+flatObj.length, flatObj)
@@ -358,19 +358,6 @@ const getActiveProposalVotes = async (curRoundNumber) => {
 
             voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
             proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
-
-        const scores = await getVoterScores(
-          strategy,
-          voters,
-          proposal.get('Snapshot Block')
-        )
-
-        voterScores[ipfsHash] = reduceVoterScores(
-          strategy,
-          proposalVotes[ipfsHash],
-          scores
-        )
-        proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
       } catch (err) {
         console.log(err)
       }
@@ -391,6 +378,7 @@ const syncGSheetsActiveProposalVotes = async (
 
   // Output the raw snapshot raw data into gsheets
   Object.entries(voterScores).map(async (p) => {
+    sleep(3000)
     await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
   })
 

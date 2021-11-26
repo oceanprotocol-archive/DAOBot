@@ -251,8 +251,6 @@ describe('Calculating Winners', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    console.log(finalResults)
-
     // Validate all winning, not funded, and downvoted proposals add up
     should.equal(finalResults.earmarkedResults.winningProposals.length, 2)
     should.equal(finalResults.generalResults.winningProposals.length, 3)
@@ -304,8 +302,6 @@ describe('Calculating Winners', function () {
       (total, p) => total + p.get('USD Granted'),
       0
     )
-
-    console.log(earmarkedUSDGranted, generalUSDGranted, partialUSDGranted)
 
     should.equal(
       earmarkedUSDGranted + generalUSDGranted + partialUSDGranted,

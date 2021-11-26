@@ -241,7 +241,6 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
 
 // Returns reduced voter score based on multiple strategies => {voter:{choice:int,balance:int}}
 const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
-<<<<<<< HEAD
     return Object.entries(proposalVotes).map((voter) => {
         let strategyScore = 0
         const newVoter = voter[1].voter
