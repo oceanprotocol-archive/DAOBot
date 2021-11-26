@@ -85,9 +85,9 @@ describe('Functionally test updateFundingRound', function () {
   it('Processes proposals for snapshot.', async function () {
     if (!process.env.GACTIONS_ENV) {
       const currentRound = await getCurrentRound()
-
       if (currentRound !== undefined) {
         await prepareProposalsForSnapshot(currentRound)
+        if(currentRound.get('Round State') !== 'Voting') return
 
         await sleep(500)
         const curRoundNumber = currentRound.get('Round')
