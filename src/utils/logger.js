@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 dotenv.config()
 const _get = (type, ...args) => {
-  if (process.env.GACTIONS_ENV) return
+  if (process.env.GACTIONS_ENV && type !== 'error') return
   switch (type) {
     case 'log':
       console.log(...args)
