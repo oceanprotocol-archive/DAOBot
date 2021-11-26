@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -63,7 +64,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   // Step 2 - Update all DB records
   await updateProposalRecords(airtableRows)
-  console.log(
+  Logger.log(
     '\n[%s]\nUpdated [%s] rows to Airtable',
     new Date().toString(),
     Object.entries(airtableRows).length
@@ -91,7 +92,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let sheet = await getValues(oAuth, sheetName, 'A1:B3')
   if (sheet === undefined) {
     sheet = await addSheet(oAuth, sheetName)
-    console.log('Created new sheet [%s].', sheetName)
+    Logger.log('Created new sheet [%s].', sheetName)
   }
 
   let gsheetRows = []
@@ -150,7 +151,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     'A1:H' + (gsheetRows.length + 1),
     gsheetRows
   )
-  console.log(
+  Logger.log(
     '\n[%s]\nDumped [%s] rows to Gsheets',
     new Date().toString(),
     Object.entries(gsheetRows).length

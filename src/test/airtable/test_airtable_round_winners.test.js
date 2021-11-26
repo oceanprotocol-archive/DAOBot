@@ -3,6 +3,7 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
+const Logger = require('../../utils/logger')
 
 const should = require('chai').should()
 const {
@@ -251,7 +252,7 @@ describe('Calculating Winners', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    console.log(finalResults)
+    Logger.log(finalResults)
 
     // Validate all winning, not funded, and downvoted proposals add up
     should.equal(finalResults.earmarkedResults.winningProposals.length, 2)
@@ -305,7 +306,7 @@ describe('Calculating Winners', function () {
       0
     )
 
-    console.log(earmarkedUSDGranted, generalUSDGranted, partialUSDGranted)
+    Logger.log(earmarkedUSDGranted, generalUSDGranted, partialUSDGranted)
 
     should.equal(
       earmarkedUSDGranted + generalUSDGranted + partialUSDGranted,

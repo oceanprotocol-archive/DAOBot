@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -25,7 +26,7 @@ const processAirtableNewProposals = async (curRoundNumber) => {
           }
         })
       } catch (err) {
-        console.log(err)
+        Logger.error(err)
       }
     })
   )

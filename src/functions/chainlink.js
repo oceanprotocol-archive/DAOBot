@@ -2,6 +2,7 @@ const { web3 } = require('./web3')
 const aggregatorV3InterfaceABI = require('./../utils/aggregatorV3InterfaceABI.json')
 const OceanUsdDataFeedContractAddress =
   '0x7ece4e4E206eD913D991a074A19C192142726797'
+const Logger = require('../utils/logger')
 
 const getTokenPrice = async () => {
   try {
@@ -14,7 +15,7 @@ const getTokenPrice = async () => {
 
     return price
   } catch (error) {
-    console.log(error)
+    Logger.error(error)
   }
 }
 

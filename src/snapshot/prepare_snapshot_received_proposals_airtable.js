@@ -14,6 +14,7 @@ const {
   hasEnoughOceans
 } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
+const Logger = require('../utils/logger')
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
@@ -77,14 +78,14 @@ const prepareProposalsForSnapshot = async (curRound) => {
           })
         }
       } catch (err) {
-        console.log(err)
+        Logger.error(err)
       }
     })
   )
 
   if (recordsPayload.length > 0) {
     await updateProposalRecords(recordsPayload)
-    console.log('Updated [%s] records', recordsPayload.length)
+    Logger.log('Updated [%s] records', recordsPayload.length)
   }
 
   return recordsPayload.length

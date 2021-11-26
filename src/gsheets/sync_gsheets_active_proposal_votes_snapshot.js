@@ -1,6 +1,7 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 const { BallotType } = require('../snapshot/snapshot_utils')
+const Logger = require('../utils/logger')
 dotenv.config()
 
 const { getProposalsSelectQuery } = require('../airtable/airtable_utils')
@@ -40,7 +41,7 @@ const dumpFromSnapshotRawToGSheet = async (
   var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
   if (proposal === undefined) {
     await addSheet(oAuth, ipfsHash, { indexOffset: curRoundNumber })
-    console.log(
+    Logger.log(
       'Created new sheet [%s] at index [%s].',
       ipfsHash,
       curRoundNumber
@@ -53,7 +54,7 @@ const dumpFromSnapshotRawToGSheet = async (
       const vote = v[1]
       return [vote.address, vote.balance]
     } catch (err) {
-      console.log(err)
+      Logger.error(err)
     }
   })
 
@@ -289,7 +290,7 @@ const dumpRoundSummaryToGSheets = async (
   var sheet = await getValues(oAuth, sheetName, 'A1:B3')
   if (sheet === undefined) {
     await addSheet(oAuth, sheetName)
-    console.log('Created new sheet [%s] at index 0.', sheetName)
+    Logger.log('Created new sheet [%s] at index 0.', sheetName)
   }
 
   // Dump flattened data from proposalSummary to sheet
@@ -356,7 +357,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
         )
         proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
       } catch (err) {
-        console.log(err)
+        Logger.error(err)
       }
     })
   )
@@ -392,7 +393,7 @@ const syncGSheetsActiveProposalVotes = async (
   )
   await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
-  console.log('Updated GSheets')
+  Logger.log('Updated GSheets')
 }
 
 module.exports = { syncGSheetsActiveProposalVotes }
