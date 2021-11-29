@@ -13,7 +13,8 @@ const State = {
   NotGranted: 'Not Granted',
   DownVoted: 'Down Voted',
   Granted: 'Granted',
-  Funded: 'Funded'
+  Funded: 'Funded',
+  Withdrawn: 'Withdrawn'
 }
 
 // Project Standings
