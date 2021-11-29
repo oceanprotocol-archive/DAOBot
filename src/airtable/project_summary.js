@@ -106,23 +106,13 @@ const addUUID = async (proposals) => {
       (x) => x.UUID !== undefined
     )
 
-    if (proposalWithUUID) {
-      const uuid = proposalWithUUID.UUID
+    const uuid = proposalWithUUID ? proposalWithUUID.UUID : uuidv4()
 
-      proposalsCollection.forEach(async (proposal) => {
-        if (proposal.UUID === undefined) {
-          await updatedRecordById(proposal.RecordId, { UUID: uuid })
-        }
-      })
-    } else {
-      const uuid = uuidv4()
-
-      proposalsCollection.forEach(async (proposal) => {
-        if (proposal.UUID === undefined) {
-          await updatedRecordById(proposal.RecordId, { UUID: uuid })
-        }
-      })
-    }
+    proposalsCollection.forEach(async (proposal) => {
+      if (proposal.UUID === undefined) {
+        await updatedRecordById(proposal.RecordId, { UUID: uuid })
+      }
+    })
   }
 }
 
@@ -251,8 +241,6 @@ const retrieve = {
     })
   }
 }
-
-processAll()
 
 module.exports = {
   retrieve,
