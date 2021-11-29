@@ -19,7 +19,6 @@ const {
   getDownvotedProposals,
   dumpResultsToGSheet
 } = require('./rounds/funding_rounds')
-const { State } = require('./proposals/proposal_standings')
 
 const clearFundedRecords = (proposals) => {
   proposals.map((p) => {
@@ -166,9 +165,9 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 }
 
 const computeBurnedFunds = async (curRound, curRoundNumber) => {
-    const activeProposals = await getProposalsSelectQuery(
-        `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Withdrawn"), "true")`
-        )
+  const activeProposals = await getProposalsSelectQuery(
+    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Withdrawn"), "true")`
+  )
 
   const winningProposals = getWinningProposals(activeProposals, curRoundNumber)
   const finalResults = calculateFinalResults(winningProposals, curRound)
