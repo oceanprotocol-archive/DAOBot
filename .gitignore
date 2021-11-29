@@ -4,3 +4,4 @@
 log_*
 credentials.json
 token.json
+.vscode/

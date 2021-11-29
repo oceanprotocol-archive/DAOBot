@@ -1,14 +1,17 @@
-const {getTokenPrice} = require('../../src/functions/chainlink')
-const dotenv = require('dotenv');
-dotenv.config();
+/* eslint-env mocha */
 
-const expect = require('chai').expect;
+const { getTokenPrice } = require('../functions/coingecko')
+const dotenv = require('dotenv')
+dotenv.config()
+const Logger = require('../utils/logger')
 
-describe('Validate token price', function() {
-    it('Should validate token price > 0.0', async function () {
-        const tokenPrice = await getTokenPrice()
-        console.log('Chainlink: Token Price', tokenPrice)
+const { expect } = require('chai')
 
-        expect(tokenPrice).to.be.greaterThan(0.0);
-    });
+describe('Validate token price', function () {
+  it('Should validate token price > 0.0', async function () {
+    const tokenPrice = await getTokenPrice()
+    Logger.log('Chainlink: Token Price', tokenPrice)
+
+    expect(tokenPrice).to.be.greaterThan(0.0)
+  })
 })

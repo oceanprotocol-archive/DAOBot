@@ -1,29 +1,37 @@
-global['fetch'] = require('cross-fetch');
-const dotenv = require('dotenv');
-dotenv.config();
+global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
+const dotenv = require('dotenv')
+dotenv.config()
 
-const {getProposalsSelectQuery, updateProposalRecords} = require('./airtable_utils')
+const {
+  getProposalsSelectQuery,
+  updateProposalRecords
+} = require('./airtable_utils')
 
 // DRY/PARAMETERIZE
 const processAirtableNewProposals = async (curRoundNumber) => {
-    let inactiveProposals = await getProposalsSelectQuery(`AND({Round} = "", {Proposal State} = "", "true")`)
-    let proposalRecords = []
+  const inactiveProposals = await getProposalsSelectQuery(
+    `AND({Round} = "", {Proposal State} = "", "true")`
+  )
+  const proposalRecords = []
 
-    await Promise.all(inactiveProposals.map(async (p) => {
-        try {
-            proposalRecords.push({
-                id: p['id'],
-                fields: {
-                    'Proposal State': 'Received',
-                    'Round': curRoundNumber
-                }
-            })
-        } catch (err) {
-            console.log(err)
-        }
-    }))
+  await Promise.all(
+    inactiveProposals.map(async (p) => {
+      try {
+        proposalRecords.push({
+          id: p.id,
+          fields: {
+            'Proposal State': 'Received',
+            Round: curRoundNumber
+          }
+        })
+      } catch (err) {
+        Logger.error(err)
+      }
+    })
+  )
 
-    updateProposalRecords(proposalRecords)
+  updateProposalRecords(proposalRecords)
 }
 
-module.exports = {processAirtableNewProposals};
+module.exports = { processAirtableNewProposals }
