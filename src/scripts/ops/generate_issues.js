@@ -9,7 +9,7 @@ const {
 const organisation = process.env.GITHUB_ORGANISATION || 'oceanprotocol'
 const repo = process.env.GITHUB_REPOSITORY || 'oceandao'
 const token = process.env.GITHUB_TOKEN
-const buildType = process.eventNames.BUILD_TYPE || 'DEV'
+const buildType = process.env.BUILD_TYPE || 'DEV'
 
 async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
   // The function of generating the ops schedule runs only on PROD env
