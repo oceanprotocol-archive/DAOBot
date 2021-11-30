@@ -38,10 +38,12 @@ const processAll = async () => {
     let proposals = await retrieve.proposals()
 
     // Updates all proposals that don't have UUID (it adds one)
-    await addUUID(proposals)
+    const shouldRetrieveProposals = await addUUID(proposals)
 
     // Retrieve all proposal (now all with UUID)
-    proposals = await retrieve.proposals()
+    if (shouldRetrieveProposals) {
+      proposals = await retrieve.proposals()
+    }
 
     const projects = summarize(proposals)
     const entries = toAirtableList(projects)
@@ -85,6 +87,7 @@ const remove = async (ids) => {
 }
 
 const addUUID = async (proposals) => {
+  let shouldRetrieveProposals = false
   const groupedProposals = {}
 
   // Grouping proposal by project name
@@ -111,9 +114,12 @@ const addUUID = async (proposals) => {
     proposalsCollection.forEach(async (proposal) => {
       if (proposal.UUID === undefined) {
         await updatedRecordById(proposal.RecordId, { UUID: uuid })
+        shouldRetrieveProposals = true
       }
     })
   }
+
+  return shouldRetrieveProposals
 }
 
 const updatedRecordById = async (recordId, dataObject) => {
