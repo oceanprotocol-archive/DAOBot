@@ -261,9 +261,10 @@ const processHistoricalStandings = async (proposalStandings) => {
 const getProjectStandingStatus = (proposalStandings) => {
   for (const proposal of proposalStandings) {
     if (
-      proposal.fields['Proposal Standing'] === Standings.Unreported ||
-      proposal.fields['Proposal Standing'] === Standings.Incomplete ||
-      proposal.fields['Proposal Standing'] === Standings.Dispute
+      proposal.fields['Proposal State'] === State.Funded &&
+      (proposal.fields['Proposal Standing'] === Standings.Unreported ||
+        proposal.fields['Proposal Standing'] === Standings.Incomplete ||
+        proposal.fields['Proposal Standing'] === Standings.Dispute)
     ) {
       return ProjectStandingsStatus.Bad
     }
