@@ -16,6 +16,14 @@ const {
   getVoterScores
 } = require('../../snapshot/snapshot_utils')
 
+beforeEach(() => {
+  jest.setTimeout(8000)
+})
+
+afterAll(() => {
+  jest.clearAllTimers()
+})
+
 const singleBatchVoting_blockHeight = 11457494
 const singleBatchVoting_proposalIPFSHash =
   'QmPLfq9J2Mr4FDAWpYaBq2veYJpiKVgU6JkXYUvV8qa2FC'

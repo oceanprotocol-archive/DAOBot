@@ -1,28 +1,33 @@
 const dotenv = require('dotenv')
+const logger = require('pino')({
+  level: process.env.LOG_LEVEL || 'info',
+  transport: {
+    target: 'pino-pretty'
+  }
+})
 dotenv.config()
 const _get = (type, ...args) => {
-  if (process.env.GACTIONS_ENV && type !== 'error') return
   switch (type) {
     case 'log':
-      console.log(...args)
+      logger.info(...args)
       break
     case 'error':
-      console.error(...args)
+      logger.error(...args)
       break
     case 'warn':
-      console.warn(...args)
-      break
-    case 'info':
-      console.info(...args)
+      logger.warn(...args)
       break
     case 'debug':
-      console.debug(...args)
+      logger.debug(...args)
       break
     case 'trace':
-      console.trace(...args)
+      logger.trace(...args)
+      break
+    case 'info':
+      logger.info(...args)
       break
     default:
-      console.log(...args)
+      logger.info(...args)
       break
   }
 }
