@@ -1,11 +1,11 @@
 const dotenv = require('dotenv')
+dotenv.config()
 const logger = require('pino')({
   level: process.env.LOG_LEVEL || 'info',
   transport: {
     target: 'pino-pretty'
   }
 })
-dotenv.config()
 const _get = (type, ...args) => {
   switch (type) {
     case 'log':
