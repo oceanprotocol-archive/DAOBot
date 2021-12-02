@@ -257,7 +257,7 @@ describe('Process Project Standings', function () {
 
     // expect last elements Proposal Standing to be `Standings.Completed`
     expect(
-      proposalStandings[projectName].find((x) => x.id == 'proposal_6').fields[
+      proposalStandings[projectName].find((x) => x.id === 'proposal_6').fields[
         'Proposal Standing'
       ]
     ).to.equal(Standings.Completed)
