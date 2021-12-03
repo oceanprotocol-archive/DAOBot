@@ -20,6 +20,8 @@ afterAll(() => {
 // Tests Skip. Use them to verify that data is getting synced/dumped properly.
 describe('GSheets Sync functionality', function () {
   it('Validates Round 8 is working', async function () {
-    await syncGSheetsActiveProposalVotes(curRoundNumber, BallotType.Batch)
+    const curRoundNumber = 8
+    const ballotType = BallotType.Granular
+    await syncGSheetsActiveProposalVotes(curRoundNumber, ballotType)
   })
 })

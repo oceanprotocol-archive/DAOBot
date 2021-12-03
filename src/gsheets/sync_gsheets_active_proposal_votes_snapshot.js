@@ -78,6 +78,7 @@ const dumpFromSnapshotRawToGSheet = async (
 
 // For each proposal, calculate their summary
 const calculateProposalSummary = async (
+  curRoundBallotType,
   proposals,
   voterScores,
   proposalScores
@@ -335,7 +336,7 @@ const dumpRoundSummaryToGSheets = async (
 }
 
 // DRY
-const getActiveProposalVotes = async (curRoundNumber) => {
+const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
     let proposalVotes = {}
     let voterScores = {}
     let proposalScores = {}
@@ -358,7 +359,7 @@ const getActiveProposalVotes = async (curRoundNumber) => {
             const scores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
 
             voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
-            proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
+            proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, voterScores[ipfsHash])
       } catch (err) {
         console.log(err)
       }
@@ -368,27 +369,24 @@ const getActiveProposalVotes = async (curRoundNumber) => {
   return [voterScores, proposalScores]
 }
 
-const timer = ms => new Promise(res => setTimeout(res, ms))
-
 const syncGSheetsActiveProposalVotes = async (
   curRoundNumber,
   curRoundBallotType
 ) => {
   // Retrieve all active proposals from Airtable
-  const results = await getActiveProposalVotes(curRoundNumber)
+  const results = await getActiveProposalVotes(curRoundNumber, curRoundBallotType)
   const voterScores = results[0]
   const proposalScores = results[1]
 
-  let index = 0
-
   // Output the raw snapshot raw data into gsheets
-  Object.entries(voterScores).map(async (p) => {
+  /*Object.entries(voterScores).map(async (p) => {
     await timer(3000)
     await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
-  })
+  })*/
 
   // Output the round summary
-  /*proposalSummary = await calculateProposalSummary(
+  proposalSummary = await calculateProposalSummary(
+    curRoundBallotType,
     activeProposals,
     voterScores,
     proposalScores
@@ -399,7 +397,7 @@ const syncGSheetsActiveProposalVotes = async (
     voterScores,
     proposalScores
   )
-  await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)*/
+  await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
   console.log('Updated GSheets')
 }

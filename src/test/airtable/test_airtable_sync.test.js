@@ -11,12 +11,14 @@ const {
 const {
   processFundingRoundComplete
 } = require('../../airtable/process_airtable_funding_round_complete')
+const { BallotType } = require('../../snapshot/snapshot_utils')
 
 // Tests Skip. Use them to verify that data is getting syncd/dumped properly.
 describe('Airtable sync functionality', function () {
   it.skip('Validates Round 8 Sync is working', async function () {
     const curRoundNumber = 8
-    await syncAirtableActiveProposalVotes(curRoundNumber)
+    const curRoundBallotType = BallotType.Granular
+    await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
   }) // .timeout(10000)
 
   it.skip('Validates Round 8 Completion is working', async function () {
