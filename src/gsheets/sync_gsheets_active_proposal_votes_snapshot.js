@@ -40,7 +40,7 @@ const dumpFromSnapshotRawToGSheet = async (
   // Get the sheet, otherwise create it
   var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
   if (proposal === undefined) {
-    await addSheet(oAuth, ipfsHash, { indexOffset: curRoundNumber })
+    await addSheet(oAuth, ipfsHash, curRoundNumber)
     console.log(
       'Created new sheet [%s] at index [%s].',
       ipfsHash,
@@ -301,9 +301,10 @@ const dumpRoundSummaryToGSheets = async (
   // Get the sheet, otherwise create it
   const sheetName = `Round ${curRoundNumber} Results`
   var sheet = await getValues(oAuth, sheetName, 'A1:B3')
+  console.log(sheet)
   if (sheet === undefined) {
-    await addSheet(oAuth, sheetName)
-    console.log('Created new sheet [%s] at index 0.', sheetName)
+    await addSheet(oAuth, sheetName, curRoundNumber)
+    await console.log('Created new sheet [%s] at index 0.', sheetName)
   }
 
   // Dump flattened data from proposalSummary to sheet
@@ -367,6 +368,8 @@ const getActiveProposalVotes = async (curRoundNumber) => {
   return [voterScores, proposalScores]
 }
 
+const timer = ms => new Promise(res => setTimeout(res, ms))
+
 const syncGSheetsActiveProposalVotes = async (
   curRoundNumber,
   curRoundBallotType
@@ -376,14 +379,16 @@ const syncGSheetsActiveProposalVotes = async (
   const voterScores = results[0]
   const proposalScores = results[1]
 
+  let index = 0
+
   // Output the raw snapshot raw data into gsheets
   Object.entries(voterScores).map(async (p) => {
-    sleep(3000)
+    await timer(3000)
     await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
   })
 
   // Output the round summary
-  proposalSummary = await calculateProposalSummary(
+  /*proposalSummary = await calculateProposalSummary(
     activeProposals,
     voterScores,
     proposalScores
@@ -394,7 +399,7 @@ const syncGSheetsActiveProposalVotes = async (
     voterScores,
     proposalScores
   )
-  await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
+  await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)*/
 
   console.log('Updated GSheets')
 }
