@@ -61,7 +61,10 @@ const getAllProposalVotes = async () => {
             proposalVotes[ipfsHash],
             voterScores
           )
-          proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, reducedVoterScores)
+          proposalScores[ipfsHash] = reduceProposalScores(
+            curRoundBallotType,
+            reducedVoterScores
+          )
         } catch (err) {
           Logger.error(err)
         }

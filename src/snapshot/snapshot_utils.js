@@ -242,35 +242,34 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
 
 // Returns reduced voter score based on multiple strategies => {voter:{choice:int,balance:int}}
 const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
-    return Object.entries(proposalVotes).map((voter) => {
-        let strategyScore = 0
-        const newVoter = voter[1].voter
-        for (i = 0; i < strategy.length; i++) {
-            const curStratScore = voterScores[i][newVoter]
-            if( curStratScore !== undefined )
-                strategyScore += curStratScore
-        }
-        return {
-            "address": newVoter,
-            "choice": voter[1].choice,
-            "created": voter[1].created,
-            "balance": strategyScore
-        }
-    })
+  return Object.entries(proposalVotes).map((voter) => {
+    let strategyScore = 0
+    const newVoter = voter[1].voter
+    for (let i = 0; i < strategy.length; i++) {
+      const curStratScore = voterScores[i][newVoter]
+      if (curStratScore !== undefined) strategyScore += curStratScore
+    }
+    return {
+      address: newVoter,
+      choice: voter[1].choice,
+      created: voter[1].created,
+      balance: strategyScore
+    }
+  })
 }
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (ballotType, voterScores) => {
-  const scores = ballotType === BallotType.Granular ? {1:0, 2:0} : {}
+  const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
     const voterAllChoices = cur[1].choice
     const voterTotalBalance = cur[1].balance
 
-    if(ballotType === BallotType.Granular){
-      if(scores[voterAllChoices] === undefined) scores[voterAllChoices] = 0
+    if (ballotType === BallotType.Granular) {
+      if (scores[voterAllChoices] === undefined) scores[voterAllChoices] = 0
       scores[voterAllChoices] += voterTotalBalance
-    }else{
+    } else {
       let voterVotesCount = 0
       for (const [, vote] of Object.entries(voterAllChoices)) {
         voterVotesCount += vote

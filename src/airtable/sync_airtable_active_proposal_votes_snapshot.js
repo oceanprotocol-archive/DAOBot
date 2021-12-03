@@ -54,7 +54,10 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
           proposalVotes[ipfsHash],
           scores
         )
-        proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, voterScores[ipfsHash])
+        proposalScores[ipfsHash] = reduceProposalScores(
+          curRoundBallotType,
+          voterScores[ipfsHash]
+        )
       } catch (err) {
         Logger.error(err)
       }
@@ -64,8 +67,14 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   return [voterScores, proposalScores]
 }
 
-const syncAirtableActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
-  const results = await getActiveProposalVotes(curRoundNumber, curRoundBallotType)
+const syncAirtableActiveProposalVotes = async (
+  curRoundNumber,
+  curRoundBallotType
+) => {
+  const results = await getActiveProposalVotes(
+    curRoundNumber,
+    curRoundBallotType
+  )
   const proposalScores = results[1]
 
   const proposalVoteSummary = await sumSnapshotVotesToAirtable(

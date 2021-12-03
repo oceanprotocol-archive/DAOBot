@@ -14,7 +14,6 @@ const {
   reduceVoterScores,
   reduceProposalScores
 } = require('../snapshot/snapshot_utils')
-const { sleep } = require('../functions/utils')
 
 // Let's track the state of various proposals
 let activeProposals = {}
@@ -30,6 +29,8 @@ let roundSummary = {}
 // 2. Creates sheet if doesn't exist
 // 3. Flatten proposals into an array of values
 // 4. Dumps flat scores & header from snapshot
+
+/*
 const dumpFromSnapshotRawToGSheet = async (
   curRoundNumber,
   ipfsHash,
@@ -58,28 +59,28 @@ const dumpFromSnapshotRawToGSheet = async (
       Logger.error(err)
     }
   })
-    // Flatten votes from this proposal
-    var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
-        try {
-            const vote = v[1]
-            return [
-                vote.address,
-                JSON.stringify(vote.choice),
-                vote.created,
-                vote.balance
-            ]
-        } catch(err) {
-            console.log(err)
-        }
-    })
-    // Dump flattened data from snapshot to sheet
-    flatObj.splice(0,0, ['address', 'choice', 'created', 'balace'])
-    await updateValues(oAuth, ipfsHash, 'A1:E'+flatObj.length, flatObj)
+  // Flatten votes from this proposal
+  var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
+    try {
+      const vote = v[1]
+      return [
+        vote.address,
+        JSON.stringify(vote.choice),
+        vote.created,
+        vote.balance
+      ]
+    } catch (err) {
+      console.log(err)
+    }
+  })
+  // Dump flattened data from snapshot to sheet
+  flatObj.splice(0, 0, ['address', 'choice', 'created', 'balace'])
+  await updateValues(oAuth, ipfsHash, 'A1:E' + flatObj.length, flatObj)
 }
+*/
 
 // For each proposal, calculate their summary
 const calculateProposalSummary = async (
-  curRoundBallotType,
   proposals,
   voterScores,
   proposalScores
@@ -128,8 +129,7 @@ const calculateProposalSummary = async (
 const calculateRoundSummary = async (
   curRoundBallotType,
   proposals,
-  voterScores,
-  proposalScores
+  voterScores
 ) => {
   // push all votes, from all proposals into a single object
   let votes = []
@@ -338,29 +338,42 @@ const dumpRoundSummaryToGSheets = async (
 
 // DRY
 const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
-    let proposalVotes = {}
-    let voterScores = {}
-    let proposalScores = {}
+  const proposalVotes = {}
+  const voterScores = {}
+  const proposalScores = {}
 
-    activeProposals = await getProposalsSelectQuery(`AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`)
+  activeProposals = await getProposalsSelectQuery(
+    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
+  )
 
-    await Promise.all(activeProposals.map(async (proposal) => {
-        try {
-            const ipfsHash = proposal.get('ipfsHash')
-            let strategy = getVoteCountStrategy(proposal.get('Round'))
-            await getProposalVotesGQL(ipfsHash)
-                .then((result) => {
-                    proposalVotes[ipfsHash] = result.data.votes
-                })
-            const voters = []
-            for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
-                voters.push(proposalVotes[ipfsHash][i].voter)
-            }
+  await Promise.all(
+    activeProposals.map(async (proposal) => {
+      try {
+        const ipfsHash = proposal.get('ipfsHash')
+        const strategy = getVoteCountStrategy(proposal.get('Round'))
+        await getProposalVotesGQL(ipfsHash).then((result) => {
+          proposalVotes[ipfsHash] = result.data.votes
+        })
+        const voters = []
+        for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
+          voters.push(proposalVotes[ipfsHash][i].voter)
+        }
 
-            const scores = await getVoterScores(strategy, voters, proposal.get('Snapshot Block'))
+        const scores = await getVoterScores(
+          strategy,
+          voters,
+          proposal.get('Snapshot Block')
+        )
 
-            voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
-            proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, voterScores[ipfsHash])
+        voterScores[ipfsHash] = reduceVoterScores(
+          strategy,
+          proposalVotes[ipfsHash],
+          scores
+        )
+        proposalScores[ipfsHash] = reduceProposalScores(
+          curRoundBallotType,
+          voterScores[ipfsHash]
+        )
       } catch (err) {
         Logger.error(err)
       }
@@ -375,19 +388,23 @@ const syncGSheetsActiveProposalVotes = async (
   curRoundBallotType
 ) => {
   // Retrieve all active proposals from Airtable
-  const results = await getActiveProposalVotes(curRoundNumber, curRoundBallotType)
+  const results = await getActiveProposalVotes(
+    curRoundNumber,
+    curRoundBallotType
+  )
   const voterScores = results[0]
   const proposalScores = results[1]
 
   // Output the raw snapshot raw data into gsheets
-  /*Object.entries(voterScores).map(async (p) => {
+  /*
+  Object.entries(voterScores).map(async (p) => {
     await timer(3000)
     await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
-  })*/
+  })
+  */
 
   // Output the round summary
   proposalSummary = await calculateProposalSummary(
-    curRoundBallotType,
     activeProposals,
     voterScores,
     proposalScores
@@ -395,8 +412,7 @@ const syncGSheetsActiveProposalVotes = async (
   roundSummary = await calculateRoundSummary(
     curRoundBallotType,
     activeProposals,
-    voterScores,
-    proposalScores
+    voterScores
   )
   await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
