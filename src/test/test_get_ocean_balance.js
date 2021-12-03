@@ -6,6 +6,7 @@ dotenv.config()
 
 // const {getProposalsSelectQuery, updateProposalRecords} = require('../airtable/airtable_utils')
 const { web3 } = require('../functions/web3')
+const Logger = require('../utils/logger')
 
 const OCEAN_ERC20_0x = '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
 const OCEAN_ERC20_ABI = require('../utils/oceanERC20ABI.json')
@@ -17,7 +18,7 @@ const main = async () => {
   let balance = await oceanContract.methods.balanceOf(WALLET_0x).call()
   // Adjust for 18 decimals
   balance /= 10 ** 18
-  console.log('Wallet balance is [%s]', balance)
+  Logger.log('Wallet balance is [%s]', balance)
 }
 
 main()

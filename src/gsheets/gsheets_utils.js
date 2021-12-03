@@ -1,4 +1,5 @@
 const { google } = require('googleapis')
+const Logger = require('../utils/logger')
 
 // AUTOMATED
 // EVENTS
@@ -28,7 +29,7 @@ const processRequests = async (oAuth, requests) => {
       resource: batchUpdateRequest
     })
   } catch (err) {
-    console.log('[processRequests] The API returned an error: ' + err)
+    Logger.error('[processRequests] The API returned an error: ' + err)
     return undefined
   }
 }
@@ -56,7 +57,7 @@ const emptySheet = async (oAuth, sheetName, range) => {
       range: sheetName + '!' + range
     })
   } catch (err) {
-    console.log('[getValues] The API returned an error: ' + err)
+    Logger.error('[getValues] The API returned an error: ' + err)
     return undefined
   }
 }
@@ -75,7 +76,7 @@ const updateValues = async (oAuth, sheetId, range, values) => {
       }
     })
   } catch (err) {
-    console.log('[updateValues] The API returned an error: ' + err)
+    Logger.error('[updateValues] The API returned an error: ' + err)
     return undefined
   }
 }
@@ -88,7 +89,7 @@ const getValues = async (oAuth, ipfsHash, range) => {
       range: ipfsHash + '!' + range
     })
   } catch (err) {
-    console.log('[getValues] The API returned an error: ' + err)
+    Logger.error('[getValues] The API returned an error: ' + err)
     return undefined
   }
 }

@@ -91,6 +91,7 @@ beforeEach(async function () {
         'Earmark Percentage': 0.35,
         'Max Grant': 32000,
         Earmarked: 140000,
+        Earmarks: `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":15000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":20000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":25000}}`,
         'Funding Available': 500000,
         'OCEAN Price': 1.06,
         'Funding Available USD': 530000,
@@ -167,11 +168,14 @@ describe('Airtable test', () => {
     const tokenPrice = 0.5
     const basisCurrency = round11.get('Basis Currency')
     should.exist(basisCurrency)
+    const roundEarmark = round11.get('Earmarks')
     expect(basisCurrency).equals('OCEAN')
+    should.not.equal(roundEarmark, undefined)
+    should.not.equal(Object.keys(roundEarmark).length, 0)
 
     const oceanPrice = round11.get('OCEAN Price')
     const fundingAvailable = round11.get('Funding Available')
-    const earmarks = round11.get('Earmarks')
+    const earmarks = JSON.parse(roundEarmark)
     const maxGrant = round11.get('Max Grant')
 
     const fundingAvailableUSD = fundingAvailable * oceanPrice

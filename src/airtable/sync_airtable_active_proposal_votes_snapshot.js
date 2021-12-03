@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -55,7 +56,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
         )
         proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, voterScores[ipfsHash])
       } catch (err) {
-        console.log(err)
+        Logger.error(err)
       }
     })
   )
@@ -71,9 +72,9 @@ const syncAirtableActiveProposalVotes = async (curRoundNumber, curRoundBallotTyp
     activeProposals,
     proposalScores
   )
-  console.log('============')
+  Logger.log('============')
   await updateProposalRecords(proposalVoteSummary)
-  console.log(
+  Logger.log(
     '[%s]\nUpdated [%s] rows to Airtable',
     new Date().toString(),
     proposalVoteSummary.length

@@ -159,7 +159,7 @@ const retrieve = {
     const proposals = []
 
     return new Promise((resolve, reject) => {
-      base('All Proposals')
+      base('Proposals')
         .select({
           fields
         })

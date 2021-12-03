@@ -1,6 +1,7 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 const { BallotType } = require('../snapshot/snapshot_utils')
+const Logger = require('../utils/logger')
 dotenv.config()
 
 const { getProposalsSelectQuery } = require('../airtable/airtable_utils')
@@ -54,7 +55,7 @@ const dumpFromSnapshotRawToGSheet = async (
       const vote = v[1]
       return [vote.address, vote.balance]
     } catch (err) {
-      console.log(err)
+      Logger.error(err)
     }
   })
     // Flatten votes from this proposal
@@ -361,7 +362,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
             voterScores[ipfsHash] = reduceVoterScores(strategy, proposalVotes[ipfsHash], scores)
             proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, voterScores[ipfsHash])
       } catch (err) {
-        console.log(err)
+        Logger.error(err)
       }
     })
   )
@@ -399,7 +400,7 @@ const syncGSheetsActiveProposalVotes = async (
   )
   await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
-  console.log('Updated GSheets')
+  Logger.log('Updated GSheets')
 }
 
 module.exports = { syncGSheetsActiveProposalVotes }

@@ -14,8 +14,16 @@ const {
   deleteAll
 } = require('../../airtable/project_summary.js')
 
+beforeEach(() => {
+  jest.setTimeout(8000)
+})
+
+afterAll(() => {
+  jest.clearAllTimers()
+})
+
 describe('Creating project summaries', () => {
-  it('should populate a table', async (done) => {
+  it('should populate a table', async () => {
     const record = {
       fields: {
         'Project Name': 'FantasyFinance',
@@ -29,10 +37,9 @@ describe('Creating project summaries', () => {
     }
     const [id] = await populate([record])
     assert(id.startsWith('rec'))
-    done()
   })
 
-  it('should delete records from a table', async (done) => {
+  it('should delete records from a table', async () => {
     const record = {
       fields: {
         'Project Name': 'FantasyFinance',
@@ -49,10 +56,9 @@ describe('Creating project summaries', () => {
 
     await remove([id])
     assert(id.startsWith('rec'))
-    done()
   })
 
-  it('should delete ALL records from a table', async (done) => {
+  it('should delete ALL records from a table', async () => {
     const records = [
       {
         fields: {
@@ -83,11 +89,9 @@ describe('Creating project summaries', () => {
     const [id1, id2] = await deleteAll()
     assert(id1.startsWith('rec'))
     assert(id2.startsWith('rec'))
-
-    done()
   })
 
-  it('should summarize levels given the project standings', (done) => {
+  it('should summarize levels given the project standings', () => {
     assert.deepEqual(
       levels['Round 11']({
         'Project Standing': {
@@ -136,16 +140,14 @@ describe('Creating project summaries', () => {
       }),
       'Veteran Project'
     )
-    done()
   })
 
-  it('should chunk any array to a max size of 10', (done) => {
+  it('should chunk any array to a max size of 10', () => {
     const chunks = chunk([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
     assert.deepEqual(chunks, [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [11]])
-    done()
   })
 
-  it("should return all projects in the 'Project Summary' table", async (done) => {
+  it("should return all projects in the 'Project Summary' table", async () => {
     const record = {
       fields: {
         'Project Name': 'FantasyFinance',
@@ -164,10 +166,9 @@ describe('Creating project summaries', () => {
     expect(projects).to.be.an('array')
     // NOTE: All Airtable record ids start with the substring "rec"...
     assert(projects[0].startsWith('rec'))
-    done()
   })
 
-  it('should return the base with all data included', async (done) => {
+  it('should return the base with all data included', async () => {
     const proposals = await retrieve.proposals()
     expect(proposals).to.be.an('array')
     expect(proposals[0]).to.have.all.keys(
@@ -177,10 +178,9 @@ describe('Creating project summaries', () => {
       'Voted Yes',
       'Voted No'
     )
-    done()
   })
 
-  it('should convert a project object it an airtable list', (done) => {
+  it('should convert a project object it an airtable list', () => {
     const projects = {
       FantasyFinance: {
         'Voted Yes': 3,
@@ -237,7 +237,6 @@ describe('Creating project summaries', () => {
         }
       }
     ])
-    done()
   })
 
   it('should return a project summary given a list of proposals', () => {

@@ -8,6 +8,7 @@ const { web3 } = require('../functions/web3')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
 const network = '1'
 const provider = snapshot.utils.getProvider(network)
+const Logger = require('../utils/logger')
 
 // Consts
 const OCEAN_ERC20_0x = '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
@@ -374,7 +375,7 @@ const send = async (url, init) => {
         throw res
       })
       .catch((e) => {
-        console.log(e)
+        Logger.error(e)
       })
   })
 }
@@ -412,7 +413,7 @@ const local_broadcast_proposal = async (
     }
     return send(url, init)
   } catch (err) {
-    console.log('ERROR: Broadcast Proposal: ', err)
+    Logger.error('ERROR: Broadcast Proposal: ', err)
   }
 }
 

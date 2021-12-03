@@ -46,12 +46,10 @@ describe('Functionally test updateFundingRound', function () {
   })
 
   it('Validates basis currency chosen', async function () {
-    if (!process.env.GACTIONS_ENV) {
-      const currentRound = await getCurrentRound()
-      if (currentRound !== undefined) {
-        const basisCurrency = currentRound.get('Basis Currency')
-        should.not.equal(basisCurrency, undefined)
-      }
+    const currentRound = await getCurrentRound()
+    if (currentRound !== undefined) {
+      const basisCurrency = currentRound.get('Basis Currency')
+      should.not.equal(basisCurrency, undefined)
     }
   })
 
@@ -83,19 +81,17 @@ describe('Functionally test updateFundingRound', function () {
   }) // .timeout(5000);
 
   it('Processes proposals for snapshot.', async function () {
-    if (!process.env.GACTIONS_ENV) {
-      const currentRound = await getCurrentRound()
+    const currentRound = await getCurrentRound()
+    if (currentRound !== undefined) {
+      await prepareProposalsForSnapshot(currentRound)
+      if (currentRound.get('Round State') !== 'Voting') return
 
-      if (currentRound !== undefined) {
-        await prepareProposalsForSnapshot(currentRound)
-
-        await sleep(500)
-        const curRoundNumber = currentRound.get('Round')
-        const acceptedProposals = await getProposalsSelectQuery(
-          `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
-        )
-        expect(acceptedProposals.length).to.be.greaterThan(0)
-      }
+      await sleep(500)
+      const curRoundNumber = currentRound.get('Round')
+      const acceptedProposals = await getProposalsSelectQuery(
+        `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
+      )
+      expect(acceptedProposals.length).to.be.greaterThan(0)
     }
   }) // .timeout(5000);
 

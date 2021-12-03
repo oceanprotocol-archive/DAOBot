@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -62,7 +63,7 @@ const getAllProposalVotes = async () => {
           )
           proposalScores[ipfsHash] = reduceProposalScores(curRoundBallotType, reducedVoterScores)
         } catch (err) {
-          console.log(err)
+          Logger.error(err)
         }
       })
     )
@@ -72,19 +73,16 @@ const getAllProposalVotes = async () => {
 // This updates every record with the latest snapshot votes
 const main = async () => {
   await getAllProposalVotes()
-  console.log(
-    '\n============ Total Proposal Scores [%s]',
-    proposalScores.length
-  )
+  Logger.log('\n============ Total Proposal Scores [%s]', proposalScores.length)
 
   proposalVoteSummary = await sumSnapshotVotesToAirtable(
     allProposals,
     proposalScores
   )
-  console.log('\n============ Total Proposals [%s]', proposalVoteSummary.length)
+  Logger.log('\n============ Total Proposals [%s]', proposalVoteSummary.length)
 
   await updateProposalRecords(proposalVoteSummary)
-  console.log(
+  Logger.log(
     '[%s]\nUpdated [%s] rows to Airtable',
     new Date().toString(),
     proposalVoteSummary.length
