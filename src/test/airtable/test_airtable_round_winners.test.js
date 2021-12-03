@@ -129,6 +129,18 @@ beforeEach(async function () {
       get: function (key) {
         return this.fields[key]
       }
+    },
+    {
+      id: 'proposal_9',
+      fields: {
+        'Project Name': 'Pinkie Cherry',
+        'USD Requested': 1000,
+        'Voted Yes': 0,
+        'Voted No': 0
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
     }
   ]
 })
@@ -172,8 +184,8 @@ describe('Calculating Winners', function () {
     }
   })
 
-  it('Sample data includes 8 proposals', function () {
-    should.equal(allProposals.length, 8)
+  it('Sample data includes 9 proposals', function () {
+    should.equal(allProposals.length, 9)
   })
 
   it('Retrieves all winning proposals sorted by vote count', function () {
@@ -187,7 +199,7 @@ describe('Calculating Winners', function () {
   it('Retrieves all losing proposals sorted by vote count', function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
 
-    should.equal(downvotedProposals.length, 2)
+    should.equal(downvotedProposals.length, 3)
     should.equal(downvotedProposals[0].id, 'proposal_2')
   })
 
@@ -243,7 +255,7 @@ describe('Calculating Winners', function () {
 
   it('Validates all Final Result parameters are correct.', function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
-    should.equal(downvotedProposals.length, 2)
+    should.equal(downvotedProposals.length, 3)
 
     fundingRound.fields['Funding Available USD'] = 115000
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
@@ -316,14 +328,14 @@ describe('Calculating Winners', function () {
 
   it('Validates gsheet output is correct.', async function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
-    should.equal(downvotedProposals.length, 2)
+    const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
+    should.equal(downvotedProposals.length, 3)
 
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[1].fields.Earmarks = Earmarks.NEW_OUTREACH
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
     const earmarkedResults = await dumpResultsToGSheet(
       finalResults.earmarkedResults.winningProposals
     )
@@ -334,10 +346,9 @@ describe('Calculating Winners', function () {
       finalResults.partiallyFunded
     )
     const notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
-
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(downvotedResults.length, 3)
     should.equal(earmarkedResults.length, 2)
+    should.equal(downvotedResults.length, 4)
     should.equal(generalResults.length, 6)
     should.equal(partiallyFundedResults.length, 1)
     should.equal(notFundedResults.length, 1)
