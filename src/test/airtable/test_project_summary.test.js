@@ -26,6 +26,7 @@ describe('Creating project summaries', () => {
   it('should populate a table', async () => {
     const record = {
       fields: {
+        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
         'Project Name': 'FantasyFinance',
         'Project Level': 'Experienced Project',
         'Voted Yes': 3,
@@ -42,6 +43,7 @@ describe('Creating project summaries', () => {
   it('should delete records from a table', async () => {
     const record = {
       fields: {
+        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
         'Project Name': 'FantasyFinance',
         'Project Level': 'Experienced Project',
         'Voted Yes': 3,
@@ -54,14 +56,15 @@ describe('Creating project summaries', () => {
     const [id] = await populate([record])
     assert(id.startsWith('rec'))
 
-    await remove([id])
-    assert(id.startsWith('rec'))
+    const [removedId] = await remove([id])
+    assert(removedId.startsWith('rec'))
   })
 
   it('should delete ALL records from a table', async () => {
     const records = [
       {
         fields: {
+          ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
           'Project Name': 'FantasyFinance',
           'Project Level': 'Experienced Project',
           'Voted Yes': 3,
@@ -73,6 +76,7 @@ describe('Creating project summaries', () => {
       },
       {
         fields: {
+          ProjectId: '7c17baed-327d-44ad-b09b-7fc5314aa143',
           'Project Name': 'LoserFinance',
           'Project Level': 'New Project',
           'Voted Yes': 0,
@@ -150,6 +154,7 @@ describe('Creating project summaries', () => {
   it("should return all projects in the 'Project Summary' table", async () => {
     const record = {
       fields: {
+        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
         'Project Name': 'FantasyFinance',
         'Project Level': 'Experienced Project',
         'Voted Yes': 3,
@@ -164,7 +169,6 @@ describe('Creating project summaries', () => {
 
     const projects = await retrieve.projects()
     expect(projects).to.be.an('array')
-    // NOTE: All Airtable record ids start with the substring "rec"...
     assert(projects[0].startsWith('rec'))
   })
 
@@ -172,17 +176,20 @@ describe('Creating project summaries', () => {
     const proposals = await retrieve.proposals()
     expect(proposals).to.be.an('array')
     expect(proposals[0]).to.have.all.keys(
+      'RecordId',
       'Project Name',
       'Proposal Standing',
       'OCEAN Granted',
       'Voted Yes',
-      'Voted No'
+      'Voted No',
+      'UUID'
     )
   })
 
   it('should convert a project object it an airtable list', () => {
     const projects = {
-      FantasyFinance: {
+      '78d91b81-768c-4fef-81c8-07baf3bd72e9': {
+        'Project Name': 'FantasyFinance',
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
@@ -197,7 +204,8 @@ describe('Creating project summaries', () => {
           'In Dispute': 0
         }
       },
-      LoserFinance: {
+      '7c17baed-327d-44ad-b09b-7fc5314aa143': {
+        'Project Name': 'LoserFinance',
         'Voted Yes': 0,
         'Voted No': 1,
         'OCEAN Granted': 0,
@@ -216,6 +224,7 @@ describe('Creating project summaries', () => {
     assert.deepEqual(toAirtableList(projects), [
       {
         fields: {
+          ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
           'Project Name': 'FantasyFinance',
           'Project Level': 'Experienced Project',
           'Voted Yes': 3,
@@ -227,6 +236,7 @@ describe('Creating project summaries', () => {
       },
       {
         fields: {
+          ProjectId: '7c17baed-327d-44ad-b09b-7fc5314aa143',
           'Project Name': 'LoserFinance',
           'Project Level': 'New Project',
           'Voted Yes': 0,
@@ -244,29 +254,36 @@ describe('Creating project summaries', () => {
       {
         'Project Name': 'FantasyFinance',
         'Proposal Standing': 'Completed',
+        RecordId: 'recJrtD0e7KQH19RG',
         'OCEAN Granted': 1,
         'Voted Yes': 1,
-        'Voted No': 0
+        'Voted No': 0,
+        UUID: '78d91b81-768c-4fef-81c8-07baf3bd72e9'
       },
       {
         'Project Name': 'FantasyFinance',
         'Proposal Standing': 'Completed',
+        RecordId: 'recJrtD0e7KQH19RG',
         'OCEAN Granted': 2,
         'Voted Yes': 2,
-        'Voted No': 0
+        'Voted No': 0,
+        UUID: '78d91b81-768c-4fef-81c8-07baf3bd72e9'
       },
       {
         'Project Name': 'LoserFinance',
         'Proposal Standing': 'In Dispute',
+        RecordId: 'recJrtD6r7KQH19RG',
         'OCEAN Granted': 0,
         'Voted Yes': 0,
-        'Voted No': 1
+        'Voted No': 1,
+        UUID: '7c17baed-327d-44ad-b09b-7fc5314aa143'
       }
     ]
 
     const summary = summarize(proposals)
     expect(summary).to.eql({
-      FantasyFinance: {
+      '78d91b81-768c-4fef-81c8-07baf3bd72e9': {
+        'Project Name': 'FantasyFinance',
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
@@ -281,7 +298,8 @@ describe('Creating project summaries', () => {
           'In Dispute': 0
         }
       },
-      LoserFinance: {
+      '7c17baed-327d-44ad-b09b-7fc5314aa143': {
+        'Project Name': 'LoserFinance',
         'Voted Yes': 0,
         'Voted No': 1,
         'OCEAN Granted': 0,

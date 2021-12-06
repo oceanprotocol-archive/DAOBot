@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/gsheets/index.js",
+  "jest": {
+    "testTimeout": 15000
+  },
   "scripts": {
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
@@ -34,6 +37,7 @@
     "pino": "^7.4.1",
     "pino-pretty": "^7.2.0",
     "typescript": "^4.2.4",
+    "uuid": "^8.3.2",
     "web3": "^1.2.11"
   },
   "engines": {
