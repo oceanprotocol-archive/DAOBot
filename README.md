@@ -83,6 +83,18 @@ More Coming... Read each script for more details.
 - src/gsheets/sync_gsheets_active_proposal_votes.js
 - src/snapshot/submit_snapshot_accepted_proposals.js
 
+## ✅ Testing - How to test DAOBot
+
+```text
+DAOBot uses `Jest` library for running the test files.
+To run all the test use the following command: 
+`npm run test`.
+To run a single file the following command is needed:
+`jest pathToFile/filename`.
+The `env` variable used for testing are different from ones specified in the project and they are set inside github actions Secrets file.
+```
+
+
 ## 🏛 License
 
 ```text
@@ -99,5 +111,5 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-```
+
 
