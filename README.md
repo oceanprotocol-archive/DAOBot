@@ -5,14 +5,27 @@ This bot pipes data from a few different sources, so we can efficiently report D
 - `npm install`
 - Create a `.env` file with the following envs:
 ```
+#The ID and Key used for connecting to Airtable
 AIRTABLE_API_KEY=KEY_HERE
 AIRTABLE_BASEID=ID_HERE
+
+#BASEID of the GSHEET
 GSHEET_BASEID=ID_HERE
+
+#Used to instantiate a web3 provider
 INFURA_API_KEY=KEY_HERE
+
+#Used to connect the account to web3
 ETH_PRIVATE_KEY=KEY_HERE
+
+#Wallet addresses used for the tests. They are necessary in order to pass all the tests.
 WALLET_ADDRESS_WITH_ENOUGH_OCEANS=ADDRESS_HERE
 WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS=ADDRESS_HERE
+
+#The parameters for connecting to Snapshot. If not proviede the test Snapshot would be used by defoult.
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
+
+#Is used for getting the token price. For Ocean token price use 'ocean-protocol'
 CG_TOKEN_SLUG=SLUG_HERE
 ```
 ## ❓ How To: Access OceanDAO Airtable Data
