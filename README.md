@@ -45,12 +45,12 @@ Run the sync_airtable.js script using `node` inside the CLI.
 
 `user@vm:in/your/cli/DAOBot/$ node src/airtable/sync_airtable_active_proposal_votes.js >> log_sync_airtable_active_proposal_votes.csv`
 
-## Airtable - Configure DAOBot to use your Airtable 
+## 📊 Airtable - Configure DAOBot to use your Airtable 
 
 Configure your AIRTABLE_API_KEY + AIRTABLE_BASEID to execute the airtable/db sync.
 `user@vm:in/your/cli/DAOBot/$node src/airtable/sync_airtable_active_proposal_votes.js`
 
-## GSheets - Point DAOBot to GSheet, get Vote Results
+## 📄 GSheets - Point DAOBot to GSheet, get Vote Results
 You can use DAOBot to dump votes from Snapshot, onto GSheets.
 You can [instantly setup your GSheet, to render inside Notion.](https://www.notion.vip/charts/)
 
@@ -75,7 +75,7 @@ Example Crontab - Sync every 2 minutes
 */5 * * * * sh /DAOBot/cron_project_summary.sh 2>&1
 ```
 
-## RUN/CRON - DAOBot Main entry points
+## ⏲️ RUN/CRON - DAOBot Main entry points
 
 These are the scripts that you should run to execute DAOBt.
 More Coming... Read each script for more details.
