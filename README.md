@@ -7,11 +7,13 @@ This bot pipes data from a few different sources, so we can efficiently report D
 ```
 AIRTABLE_API_KEY=KEY_HERE
 AIRTABLE_BASEID=ID_HERE
+GSHEET_BASEID=ID_HERE
 INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
 WALLET_ADDRESS_WITH_ENOUGH_OCEANS=ADDRESS_HERE
 WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS=ADDRESS_HERE
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
+CG_TOKEN_SLUG=SLUG_HERE
 ```
 ## ❓ How To: Access OceanDAO Airtable Data
 Anyone can access the live data for OceanDAO.
