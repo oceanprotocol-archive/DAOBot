@@ -615,7 +615,7 @@ describe('Process Project Standings', function () {
     await processHistoricalStandings(proposalStandings)
     const latestProposal = getProjectsLatestProposal(proposalStandings)
 
-    should.equal(latestProposal.test.fields['Proposal State'], State.Rejected)
+    should.equal(latestProposal.test.fields['Bad Status'], true)
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {
