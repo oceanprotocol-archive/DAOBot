@@ -59,6 +59,7 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
   // drop all extra columns
   rows.forEach((x) => {
     if (x.fields['Proposal URL']) delete x.fields['Proposal URL']
+    if (x.fields['Bad Status']) delete x.fields['Bad Status']
   })
 
   // Finally, update all DB records

@@ -286,7 +286,7 @@ const getProjectsLatestProposal = (proposalStandings) => {
   for (const [key, value] of Object.entries(proposalStandings)) {
     latestProposals[key] = value[value.length - 1]
     if (getProjectStandingStatus(value) === ProjectStandingsStatus.Bad)
-      latestProposals[key].fields['Proposal State'] = State.Rejected
+      latestProposals[key].fields['Bad Status'] = true
   }
 
   return latestProposals
@@ -314,9 +314,9 @@ const updateCurrentRoundStandings = (
   for (const [key, value] of Object.entries(currentRoundProposals)) {
     const latestProposal = latestProposals[key]
     if (latestProposal !== undefined) {
-      if (value[0].fields['Proposal Standing'] !== Standings.NoOcean) {
-        value[0].fields['Proposal Standing'] =
-          latestProposal.fields['Proposal Standing']
+      if (latestProposal.fields['Bad Status'] === true) {
+        value[0].fields['Proposal Standing'] = Standings.Unreported
+        value[0].fields['Proposal State'] = State.Rejected
         value[0].fields['Outstanding Proposals'] =
           latestProposal.fields['Outstanding Proposals']
       }
