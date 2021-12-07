@@ -73,9 +73,16 @@ const getProjectStanding = (
 }
 
 const getProposalState = (proposalState, hasEnoughOceans) => {
-  if (hasEnoughOceans && proposalState === State.Rejected) {
+  // TODO find a better logic for this
+  if (
+    hasEnoughOceans &&
+    (proposalState === State.Rejected || proposalState === State.Undefined)
+  ) {
     proposalState = State.Accepted
+  } else if (proposalState === State.Undefined) {
+    proposalState = State.Rejected
   }
+
   return proposalState
 }
 
