@@ -315,7 +315,8 @@ const updateCurrentRoundStandings = (
     const latestProposal = latestProposals[key]
     if (latestProposal !== undefined) {
       if (latestProposal.fields['Bad Status'] === true) {
-        value[0].fields['Proposal Standing'] = Standings.Unreported
+        value[0].fields['Proposal Standing'] =
+          latestProposal.fields['Proposal Standing']
         value[0].fields['Proposal State'] = State.Rejected
         value[0].fields['Outstanding Proposals'] =
           latestProposal.fields['Outstanding Proposals']
