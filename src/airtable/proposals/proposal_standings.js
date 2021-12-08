@@ -187,12 +187,18 @@ const getProposalRecord = async (proposal, allProposals) => {
 }
 
 // Returns all Proposal Standings, indexed by Project Name
-const processProposalStandings = async (allProposals) => {
+const processProposalStandings = async (
+  allProposals,
+  previousProposals = []
+) => {
   const proposalStandings = {}
   for (const proposal of allProposals) {
     try {
       const projectName = proposal.get('Project Name')
-      const record = await getProposalRecord(proposal, allProposals)
+      const record = await getProposalRecord(
+        proposal,
+        allProposals.concat(previousProposals)
+      )
       // Finally, track project standings
       if (proposalStandings[projectName] === undefined)
         proposalStandings[projectName] = []

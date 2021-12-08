@@ -44,7 +44,8 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
     curRoundNumber
   )
   const currentProposalStandings = await processProposalStandings(
-    currentRoundProposals
+    currentRoundProposals,
+    allProposals
   )
   await updateCurrentRoundStandings(
     currentProposalStandings,
