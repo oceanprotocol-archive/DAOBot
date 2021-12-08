@@ -1,5 +1,4 @@
 ## 🤖 OceanDAO Bot
-
 This bot pipes data from a few different sources, so we can efficiently report DAO-Related informaiton.
 - Make sure you have `node` and `npm`
 - `npm install`
@@ -28,6 +27,8 @@ SNAPSHOT_HUB_URL=https://hub.snapshot.page
 #Is used for getting the token price. For Ocean token price use 'ocean-protocol'
 CG_TOKEN_SLUG=SLUG_HERE
 ```
+
+
 ## ❓ How To: Access OceanDAO Airtable Data
 Anyone can access the live data for OceanDAO.
 Design: Consider this a document-based DB.
@@ -45,10 +46,11 @@ Run the sync_airtable.js script using `node` inside the CLI.
 
 `user@vm:in/your/cli/DAOBot/$ node src/airtable/sync_airtable_active_proposal_votes.js >> log_sync_airtable_active_proposal_votes.csv`
 
-## 📊 Airtable - Configure DAOBot to use your Airtable 
 
+## 📊 Airtable - Configure DAOBot to use your Airtable 
 Configure your AIRTABLE_API_KEY + AIRTABLE_BASEID to execute the airtable/db sync.
 `user@vm:in/your/cli/DAOBot/$node src/airtable/sync_airtable_active_proposal_votes.js`
+
 
 ## 📄 GSheets - Point DAOBot to GSheet, get Vote Results
 You can use DAOBot to dump votes from Snapshot, onto GSheets.
@@ -60,8 +62,29 @@ This bot also connects with GSheets.
 2. Follow cli prompts. token.json should be generated  
 `user@vm:in/your/cli/DAOBot/$node src/gsheets/sync_gsheets_active_proposal_votes.js >> log_sync_gsheets_active_proposal_votes.csv`
 
-## ⏲️ CRON - Configure DAOBOT Crontab
 
+## 📄 Snapshot - Vote for proposals and get vote results
+Snapshot is used inside Ocean DAO to allow people to vote for the proposals in the voting period of each round.
+A new Snapshot instance is created for each round by the DAOBot using the following function
+In order for the DAOBot to create the right instance of Snapshot, for each round there should be specified the right parameters inside the Funding Round table from Airtable at the current round line
+The parameters used for creating the Snapshot instance are:
+1. Vote Type
+   - single-choice: each voter may select a single choice to give his total voting power to.
+   - weighted: each voter may spread voting power across any number of choices.
+2. Ballot Type
+   - Batch: 
+   - Granular:
+
+You can also specify where should DAOBot create the snapshot instance by setting the env variables.
+1. Test
+   - space: spring-dao => https://snapshot.org/#/spring-dao
+   - snapshot-url: snapshot.org
+2. Production
+   - space: officialoceandao.eth => https://snapshot.org/#/officialoceandao.eth
+   - snapshot-url: snapshot.org
+
+
+## ⏲️ CRON - Configure DAOBOT Crontab
 The bash scripts located in the root `/DAOBot/` directory should allow you to run the node sync-scripts, from cron.
 
 Instructions  
@@ -75,16 +98,16 @@ Example Crontab - Sync every 2 minutes
 */5 * * * * sh /DAOBot/cron_project_summary.sh 2>&1
 ```
 
-## ⏲️ RUN/CRON - DAOBot Main entry points
 
+## ⏲️ RUN/CRON - DAOBot Main entry points
 These are the scripts that you should run to execute DAOBt.
 More Coming... Read each script for more details.
 - src/airtable/sync_airtable_active_proposal_votes.js
 - src/gsheets/sync_gsheets_active_proposal_votes.js
 - src/snapshot/submit_snapshot_accepted_proposals.js
 
-## ✅ Testing - How to test DAOBot
 
+## ✅ Testing - How to test DAOBot
 ```text
 DAOBot uses `Jest` library for running the test files.
 To run all the test use the following command: 
@@ -96,7 +119,6 @@ The `env` variable used for testing are different from ones specified in the pro
 
 
 ## 🏛 License
-
 ```text
 Copyright 2021 Ocean Protocol Foundation Ltd.
 
