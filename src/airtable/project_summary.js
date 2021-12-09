@@ -2,16 +2,22 @@
 require('dotenv').config()
 const process = require('process')
 const Airtable = require('airtable')
+const { v4: uuidv4 } = require('uuid')
 
 const { AIRTABLE_API_KEY, AIRTABLE_BASEID } = process.env
 const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASEID)
 
+const PROPOSAL_TABLE_NAME = 'Proposals'
+const PROJECT_SUMMARY_TABLE_NAME = 'Project Summary'
+
 const fields = [
+  'RecordId',
   'Project Name',
   'OCEAN Granted',
   'Voted Yes',
   'Voted No',
-  'Proposal Standing'
+  'Proposal Standing',
+  'UUID'
 ]
 
 const maxRecordAmount = 10
@@ -28,12 +34,25 @@ const deleteAll = async () => {
 }
 
 const processAll = async () => {
-  const proposals = await retrieve.proposals()
-  const projects = summarize(proposals)
-  const entries = toAirtableList(projects)
-  const chunks = chunk(entries)
-  for (const c of chunks) {
-    await populate(c)
+  try {
+    let proposals = await retrieve.proposals()
+
+    // Updates all proposals that don't have UUID (it adds one)
+    const shouldRetrieveProposals = await addUUID(proposals)
+
+    // Retrieve all proposal (now all with UUID)
+    if (shouldRetrieveProposals) {
+      proposals = await retrieve.proposals()
+    }
+
+    const projects = summarize(proposals)
+    const entries = toAirtableList(projects)
+    const chunks = chunk(entries)
+    for (const c of chunks) {
+      await populate(c)
+    }
+  } catch (err) {
+    console.error(err)
   }
 }
 
@@ -47,7 +66,7 @@ const chunk = (projects) => {
 
 const populate = async (projects) => {
   return new Promise((resolve, reject) => {
-    base('Project Summary').create(projects, (err, records) => {
+    base(PROJECT_SUMMARY_TABLE_NAME).create(projects, (err, records) => {
       if (err) {
         reject(err)
       }
@@ -58,13 +77,57 @@ const populate = async (projects) => {
 
 const remove = async (ids) => {
   return new Promise((resolve, reject) => {
-    base('Project Summary').destroy(ids, (err, records) => {
+    base(PROJECT_SUMMARY_TABLE_NAME).destroy(ids, (err, records) => {
       if (err) {
         reject(err)
       }
       resolve(records.map((r) => r.getId()))
     })
   })
+}
+
+const addUUID = async (proposals) => {
+  let shouldRetrieveProposals = false
+  const groupedProposals = {}
+
+  // Grouping proposal by project name
+  proposals.forEach((proposal) => {
+    const key = proposal['Project Name']
+
+    if (!groupedProposals[key]) {
+      groupedProposals[key] = [proposal]
+    } else {
+      groupedProposals[key].push(proposal)
+    }
+  })
+
+  // Add UUID if not available
+  for (const key in groupedProposals) {
+    const proposalsCollection = groupedProposals[key]
+
+    const proposalWithUUID = proposalsCollection.find(
+      (x) => x.UUID !== undefined
+    )
+
+    const uuid = proposalWithUUID ? proposalWithUUID.UUID : uuidv4()
+
+    proposalsCollection.forEach(async (proposal) => {
+      if (proposal.UUID === undefined) {
+        await updatedRecordById(proposal.RecordId, { UUID: uuid })
+        shouldRetrieveProposals = true
+      }
+    })
+  }
+
+  return shouldRetrieveProposals
+}
+
+const updatedRecordById = async (recordId, dataObject) => {
+  try {
+    await base(PROJECT_SUMMARY_TABLE_NAME).update(recordId, dataObject)
+  } catch (err) {
+    console.log('updatedRecordById | error = ', err)
+  }
 }
 
 const levels = {
@@ -79,29 +142,33 @@ const levels = {
 }
 
 const toAirtableList = (projects) => {
-  const l = []
+  const airtableList = []
+
   for (const [key, value] of Object.entries(projects)) {
-    value['Project Name'] = key
+    value.ProjectId = key
     value['Project Level'] = levels['Round 11'](value)
     delete value['Project Standing']
 
-    l.push({
+    airtableList.push({
       fields: {
         ...value
       }
     })
   }
-  return l
+  return airtableList
 }
 
 const summarize = (proposals) => {
   const projects = {}
+
   for (const proposal of proposals) {
-    const name = proposal['Project Name']
-    let project = projects[name]
+    const proposalUUID = proposal.UUID
+
+    let project = projects[proposalUUID]
 
     if (!project) {
       project = {
+        'Project Name': proposal['Project Name'],
         'Voted Yes': proposal['Voted Yes'],
         'Voted No': proposal['Voted No'],
         'OCEAN Granted': proposal['OCEAN Granted'],
@@ -126,7 +193,7 @@ const summarize = (proposals) => {
       project['Times Proposed'] += 1
       project['Project Standing'][proposal['Proposal Standing']] += 1
     }
-    projects[name] = project
+    projects[proposalUUID] = project
   }
 
   return projects
@@ -137,7 +204,7 @@ const retrieve = {
     const projects = []
 
     return new Promise((resolve, reject) => {
-      base('Project Summary')
+      base(PROJECT_SUMMARY_TABLE_NAME)
         .select()
         .eachPage(
           (records, next) => {
@@ -159,7 +226,7 @@ const retrieve = {
     const proposals = []
 
     return new Promise((resolve, reject) => {
-      base('Proposals')
+      base(PROPOSAL_TABLE_NAME)
         .select({
           fields
         })

@@ -73,9 +73,16 @@ const getProjectStanding = (
 }
 
 const getProposalState = (proposalState, hasEnoughOceans) => {
-  if (hasEnoughOceans && proposalState === State.Rejected) {
+  // TODO find a better logic for this
+  if (
+    hasEnoughOceans &&
+    (proposalState === State.Rejected || proposalState === State.Undefined)
+  ) {
     proposalState = State.Accepted
+  } else if (proposalState === State.Undefined) {
+    proposalState = State.Rejected
   }
+
   return proposalState
 }
 
@@ -180,12 +187,18 @@ const getProposalRecord = async (proposal, allProposals) => {
 }
 
 // Returns all Proposal Standings, indexed by Project Name
-const processProposalStandings = async (allProposals) => {
+const processProposalStandings = async (
+  allProposals,
+  previousProposals = []
+) => {
   const proposalStandings = {}
   for (const proposal of allProposals) {
     try {
       const projectName = proposal.get('Project Name')
-      const record = await getProposalRecord(proposal, allProposals)
+      const record = await getProposalRecord(
+        proposal,
+        allProposals.concat(previousProposals)
+      )
       // Finally, track project standings
       if (proposalStandings[projectName] === undefined)
         proposalStandings[projectName] = []
@@ -262,9 +275,10 @@ const processHistoricalStandings = async (proposalStandings) => {
 const getProjectStandingStatus = (proposalStandings) => {
   for (const proposal of proposalStandings) {
     if (
-      proposal.fields['Proposal Standing'] === Standings.Unreported ||
-      proposal.fields['Proposal Standing'] === Standings.Incomplete ||
-      proposal.fields['Proposal Standing'] === Standings.Dispute
+      isFunded(proposal.fields['Proposal State']) &&
+      (proposal.fields['Proposal Standing'] === Standings.Unreported ||
+        proposal.fields['Proposal Standing'] === Standings.Incomplete ||
+        proposal.fields['Proposal Standing'] === Standings.Dispute)
     ) {
       return ProjectStandingsStatus.Bad
     }
@@ -278,7 +292,7 @@ const getProjectsLatestProposal = (proposalStandings) => {
   for (const [key, value] of Object.entries(proposalStandings)) {
     latestProposals[key] = value[value.length - 1]
     if (getProjectStandingStatus(value) === ProjectStandingsStatus.Bad)
-      latestProposals[key].fields['Proposal State'] = State.Rejected
+      latestProposals[key].fields['Bad Status'] = true
   }
 
   return latestProposals
@@ -306,9 +320,10 @@ const updateCurrentRoundStandings = (
   for (const [key, value] of Object.entries(currentRoundProposals)) {
     const latestProposal = latestProposals[key]
     if (latestProposal !== undefined) {
-      if (value[0].fields['Proposal Standing'] !== Standings.NoOcean) {
+      if (latestProposal.fields['Bad Status'] === true) {
         value[0].fields['Proposal Standing'] =
           latestProposal.fields['Proposal Standing']
+        value[0].fields['Proposal State'] = State.Rejected
         value[0].fields['Outstanding Proposals'] =
           latestProposal.fields['Outstanding Proposals']
       }
