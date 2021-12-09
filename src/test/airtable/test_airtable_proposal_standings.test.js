@@ -323,10 +323,11 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing
     // Retrieve the last proposals from projectStandings
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals[projectName].id,
-      allProposals[allProposals.length - 1].id
-    )
+
+    let lastProjectId = allProposals
+      .filter((x) => x.get('Project Name') === projectName)
+      .slice(-1)[0].id
+    should.equal(latestProposals[projectName].id, lastProjectId)
   })
 
   it('Validate [currentProposalStanding] maps to head of indexed proposals', async function () {
@@ -344,10 +345,13 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals.test.id,
-      allProposals[allProposals.length - 1].id
-    )
+
+    for (let [projectName, value] of Object.entries(latestProposals)) {
+      let lastProjectId = allProposals
+        .filter((x) => x.get('Project Name') === projectName)
+        .slice(-1)[0].id
+      should.equal(value.id, lastProjectId)
+    }
 
     const currentProposalStandings = await processProposalStandings(
       currentProposals
@@ -378,10 +382,13 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals.test.id,
-      allProposals[allProposals.length - 1].id
-    )
+    for (let [projectName, value] of Object.entries(latestProposals)) {
+      console.log(projectName, value, latestProposals)
+      let lastProjectId = allProposals
+        .filter((x) => x.get('Project Name') === projectName)
+        .slice(-1)[0].id
+      should.equal(value.id, lastProjectId)
+    }
 
     const currentProposalStandings = await processProposalStandings(
       currentProposals
