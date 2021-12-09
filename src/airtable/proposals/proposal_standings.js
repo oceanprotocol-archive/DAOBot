@@ -341,5 +341,6 @@ module.exports = {
   processHistoricalStandings,
   getProjectsLatestProposal,
   updateCurrentRoundStandings,
-  projectHasCompletedProposals
+  projectHasCompletedProposals,
+  getProposalState
 }
