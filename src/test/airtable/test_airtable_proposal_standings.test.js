@@ -183,7 +183,7 @@ beforeEach(async function () {
     {
       id: 'proposal_7',
       fields: {
-        'Project Name': 'test_5',
+        'Project Name': 'project2',
         'Proposal URL': 'www.testurl.com',
         'Proposal State': State.Funded,
         'Proposal Standing': Standings.Unreported,
@@ -200,7 +200,7 @@ beforeEach(async function () {
     {
       id: 'proposal_8',
       fields: {
-        'Project Name': 'test_5',
+        'Project Name': 'project2',
         'Proposal URL': 'www.testurl_8.com',
         'Proposal State': State.Undefined,
         'Proposal Standing': Standings.Undefined,
@@ -320,7 +320,7 @@ describe('Process Project Standings', function () {
       latestProposalStandings
     )
 
-    expect(latestProposals['test_5'].fields['Proposal State']).to.equal(
+    expect(latestProposals['project2'].fields['Proposal State']).to.equal(
       State.Rejected
     )
   })
