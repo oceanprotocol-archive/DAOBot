@@ -6,6 +6,12 @@
     "labels": ["Type: OPS"]
   },
   {
+    "title": "R{{ROUND_NUMBER}} Townhalls setup",
+    "body": "- [ ] Create TownHall round {{ROUND_NUMBER}} events\n- [ ] Update TownHall [page](https://github.com/oceanprotocol/oceandao/wiki/OceanDAO-Town-Hall) with round {{ROUND_NUMBER}} events",
+    "assignees": ["idiom-bytes"],
+    "labels": ["Type: OPS"]
+  },
+  {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Review Schedule & Roadmap - Team sync",
     "body": "- [ ] Review schedule for R{{ROUND_NUMBER}}\n- [ ] Review and determine what new initiatives we are implementing for Round {{ROUND_NUMBER}}\n - [ ] Update internal roadmap",
     "assignees": ["idiom-bytes", "AnaLoznianu"],
@@ -49,7 +55,7 @@
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Port",
-    "body": "- [ ] Port goes live",
+    "body": "- [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live",
     "assignees": ["AnaLoznianu"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
