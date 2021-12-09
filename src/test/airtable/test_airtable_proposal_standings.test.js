@@ -179,6 +179,41 @@ beforeEach(async function () {
       get: function (key) {
         return this.fields[key]
       }
+    },
+    {
+      id: 'proposal_7',
+      fields: {
+        'Project Name': 'test_5',
+        'Proposal URL': 'www.testurl.com',
+        'Proposal State': State.Funded,
+        'Proposal Standing': Standings.Unreported,
+        'Deliverable Checklist': undefined,
+        'Last Deliverable Update': 'Apr 01, 2021',
+        'Refund Transaction': undefined,
+        'Disputed Status': undefined,
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_8',
+      fields: {
+        'Project Name': 'test_5',
+        'Proposal URL': 'www.testurl_8.com',
+        'Proposal State': State.Undefined,
+        'Proposal Standing': Standings.Undefined,
+        'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+        'Last Deliverable Update': 'Apr 01, 2021',
+        'Refund Transaction': undefined,
+        'Disputed Status': undefined,
+        'Deployment Ready': 'Yes',
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
     }
   ]
 })
