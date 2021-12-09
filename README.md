@@ -4,7 +4,7 @@ This bot pipes data from a few different sources, so we can efficiently report D
 - `npm install`
 - Create a `.env` file with the following envs:
 ```
-#The ID and Key used for connecting to Airtable
+#The ID and Key used for connecting to Airtable. BASEID points to a specific table.
 AIRTABLE_API_KEY=KEY_HERE
 AIRTABLE_BASEID=ID_HERE
 
@@ -17,16 +17,28 @@ INFURA_API_KEY=KEY_HERE
 #Used to connect the account to web3
 ETH_PRIVATE_KEY=KEY_HERE
 
-#Wallet addresses used for the tests. They are necessary in order to pass all the tests.
+#Used for the testing and they are necessary in order have all the tests passed.
 #The minimum number of OCEAN tokens needed is 500
 WALLET_ADDRESS_WITH_ENOUGH_OCEANS=ADDRESS_HERE
 WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS=ADDRESS_HERE
 
-#The parameters for connecting to Snapshot. If not proviede the test Snapshot would be used by defoult.
+#Used for connecting to Snapshot. If not proviede the test Snapshot would be used by defoult.
+#Snapshot-hub is a REST API for snapshot fronted
 SNAPSHOT_HUB_URL=https://hub.snapshot.page
+SNAPSHOT_URL=https://hub.snapshot.page
+SNAPSHOT_SPACE=https://hub.snapshot.page
 
 #Is used for getting the token price. For Ocean token price use 'ocean-protocol'
 CG_TOKEN_SLUG=SLUG_HERE
+
+#Used for controling what the Pino logger should log.
+#Setting the value to **'info'** would log everything except **trace** and **debug**
+LOG-LEVEL=LOG-LEVEL-HERE
+
+#Used for automatic generation of OPS Schedule issues for each Funding Round
+GITHUB_REPOSITORY=REPOSITORY_HERE
+GITHUB_ORGANISATION=ORGANIZATION_HERE
+GITHUB_TOKEN=YOUR_GITHUB_TOKEN_HERE
 ```
 
 
@@ -84,6 +96,8 @@ You can also specify where should DAOBot create the snapshot proposal ballots by
 2. Production
    - SNAPSHOT_SPACE: officialoceandao.eth => https://snapshot.org/#/officialoceandao.eth
    - SNAPSHOT_URL: snapshot.org
+
+For getting the voting information from Snapshot, Snapshot-hub it's use which is a REST API for the Snapshot frontend. It can be specified by setting the ```SNAPSHOT_HUB_URL``` env variable.
 
 
 ## ⏲️ CRON - Configure DAOBOT Crontab
