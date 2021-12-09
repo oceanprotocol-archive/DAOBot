@@ -169,15 +169,11 @@ describe('Snapshot GraphQL test', () => {
     }
 
     var votes = []
-    return fetch('https://hub.snapshot.org/graphql', options)
-      .then((resp) => resp.json())
-      .then((resp) => {
-        ;({ votes } = resp.data)
-        should.equal(votes.length, 24)
-      })
-      .catch((e) => {
-        Logger.error(e)
-      })
+    let resp = await fetch('https://hub.snapshot.org/graphql', options)
+    resp = await resp.json()
+    ;({ votes } = resp.data)
+    expect(votes.constructor).toBe(Array)
+    expect(votes.length > 80).toBe(true)
   })
 
   it('Validates scores from Single-Batch Voting', async () => {
