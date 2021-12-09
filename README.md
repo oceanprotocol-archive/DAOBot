@@ -18,6 +18,7 @@ INFURA_API_KEY=KEY_HERE
 ETH_PRIVATE_KEY=KEY_HERE
 
 #Wallet addresses used for the tests. They are necessary in order to pass all the tests.
+#The minimum number of OCEAN tokens needed is 500
 WALLET_ADDRESS_WITH_ENOUGH_OCEANS=ADDRESS_HERE
 WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS=ADDRESS_HERE
 
