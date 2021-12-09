@@ -27,10 +27,8 @@ beforeEach(async function () {
         'Voting Starts': 'July 8, 2021 23:59',
         'Voting Ends': 'July 12, 2021 23:59',
         'Earmark Percentage': 0.35,
-        'Max Grant': 32000,
         Earmarks: `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}}`,
         'Funding Available': 400000,
-        'Max Grant USD': 17600,
         'Funding Available USD': 275000
       },
       get: function (key) {
@@ -47,10 +45,8 @@ beforeEach(async function () {
         'Voting Starts': 'August 5, 2021 23:59',
         'Voting Ends': 'August 9, 2021 23:59',
         'Earmark Percentage': 0.35,
-        'Max Grant': 32000,
         Earmarked: 140000,
         'Funding Available': 400000,
-        'Max Grant USD': 17600,
         'Earmarked USD': 96250,
         'Funding Available USD': 275000
       },
@@ -68,10 +64,8 @@ beforeEach(async function () {
         'Voting Starts': 'September 9, 2021 23:59',
         'Voting Ends': 'September 13, 2021 23:59',
         'Earmark Percentage': 0.35,
-        'Max Grant': 32000,
         Earmarked: 140000,
         'Funding Available': 400000,
-        'Max Grant USD': 17600,
         'Earmarked USD': 96250,
         'Funding Available USD': 275000
       },
@@ -89,14 +83,12 @@ beforeEach(async function () {
         'Voting Starts': 'November 4, 2021 23:59',
         'Voting Ends': 'November 8, 2021 23:59',
         'Earmark Percentage': 0.35,
-        'Max Grant': 32000,
         Earmarked: 140000,
         Earmarks: `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":15000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":20000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":25000}}`,
         'Funding Available': 500000,
         'OCEAN Price': 1.06,
         'Funding Available USD': 530000,
         'Earmarked USD': 148400,
-        'Max Grant USD': 33920,
         'Basis Currency': 'OCEAN'
       },
       get: function (key) {
@@ -176,16 +168,13 @@ describe('Airtable test', () => {
     const oceanPrice = round11.get('OCEAN Price')
     const fundingAvailable = round11.get('Funding Available')
     const earmarks = JSON.parse(roundEarmark)
-    const maxGrant = round11.get('Max Grant')
 
     const fundingAvailableUSD = fundingAvailable * oceanPrice
-    const maxGrantUSD = maxGrant * oceanPrice
 
     expect(round11.get('Funding Available USD')).equals(fundingAvailableUSD)
     for (const earmark in earmarks) {
       should.equal(earmarks[earmark].OCEAN, earmarks[earmark].USD / tokenPrice)
     }
-    expect(round11.get('Max Grant USD')).equals(maxGrantUSD)
   })
 
   it('Validates there is only one record from Airtable based on today', async () => {
