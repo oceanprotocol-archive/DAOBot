@@ -169,7 +169,7 @@ beforeEach(async function () {
         'Project Name': 'test',
         'Proposal URL': 'www.testurl.com',
         'Proposal State': State.Funded,
-        'Proposal Standing': undefined,
+        'Proposal Standing': Standings.Unreported,
         'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
         'Last Deliverable Update': 'Apr 01, 2021',
         'Refund Transaction': undefined,
@@ -254,6 +254,13 @@ describe('Process Project Standings', function () {
         Standings.NoOcean
       ])
     })
+
+    // expect last elements Proposal Standing to be `Standings.Completed`
+    expect(
+      proposalStandings[projectName].find((x) => x.id === 'proposal_6').fields[
+        'Proposal Standing'
+      ]
+    ).to.equal(Standings.Completed)
   })
 
   it('If proposalStanding is Incomplete then remainder of projectStanding is Incomplete', async function () {
@@ -379,7 +386,7 @@ describe('Process Project Standings', function () {
       currentProposalStandings['New Existing Entrant'][0].fields[
         'Proposal State'
       ],
-      undefined
+      State.Accepted
     )
     should.equal(
       currentProposalStandings['New Entrant'][0].fields['Proposal Standing'],
@@ -387,7 +394,7 @@ describe('Process Project Standings', function () {
     )
     should.equal(
       currentProposalStandings['New Entrant'][0].fields['Proposal State'],
-      undefined
+      State.Accepted
     )
   })
 
@@ -608,7 +615,7 @@ describe('Process Project Standings', function () {
     await processHistoricalStandings(proposalStandings)
     const latestProposal = getProjectsLatestProposal(proposalStandings)
 
-    should.equal(latestProposal.test.fields['Proposal State'], State.Rejected)
+    should.equal(latestProposal.test.fields['Bad Status'], true)
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {

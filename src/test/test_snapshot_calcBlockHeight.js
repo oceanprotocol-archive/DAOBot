@@ -1,6 +1,7 @@
 // const snapshot = require('@snapshot-labs/snapshot.js')
 const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
 const { assert } = require('../functions/utils')
+const Logger = require('../utils/logger')
 
 const main = async () => {
   const blockNumber = 12787964
@@ -17,7 +18,7 @@ const main = async () => {
       calcTargetBlockHeight(blockNumber, targetTimestamp, avgBlockTime),
     'Estimated and calculated block heights do not match'
   )
-  console.log('Estimated block height: ', estBlockHeight)
+  Logger.log('Estimated block height: ', estBlockHeight)
 }
 
 main()

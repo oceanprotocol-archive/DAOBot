@@ -1,4 +1,5 @@
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -15,14 +16,14 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
   const allProposals = await getAllRoundProposals(curRoundNumber - 1)
   const proposalStandings = await processProposalStandings(allProposals)
-  console.log(
+  Logger.log(
     '\n======== Proposal Standings Found\n',
     JSON.stringify(proposalStandings)
   )
 
   // Step 2 - Resolve & Report standings
   await processHistoricalStandings(proposalStandings)
-  console.log(
+  Logger.log(
     '\n======== Reported Proposal Standings\n',
     JSON.stringify(proposalStandings)
   )
@@ -43,7 +44,8 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
     curRoundNumber
   )
   const currentProposalStandings = await processProposalStandings(
-    currentRoundProposals
+    currentRoundProposals,
+    allProposals
   )
   await updateCurrentRoundStandings(
     currentProposalStandings,
@@ -58,11 +60,12 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
   // drop all extra columns
   rows.forEach((x) => {
     if (x.fields['Proposal URL']) delete x.fields['Proposal URL']
+    if (x.fields['Bad Status']) delete x.fields['Bad Status']
   })
 
   // Finally, update all DB records
   await updateProposalRecords(rows)
-  console.log(
+  Logger.log(
     '\n[%s]\nUpdated [%s] rows to Airtable',
     new Date().toString(),
     Object.entries(rows).length

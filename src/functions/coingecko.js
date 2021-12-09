@@ -1,4 +1,5 @@
 const CoinGecko = require('coingecko-api')
+const Logger = require('../utils/logger')
 
 const cgClient = new CoinGecko()
 const CG_PARAMS = {
@@ -18,7 +19,7 @@ const getTokenPrice = async () => {
     )
     return result.data.market_data.current_price.usd
   } catch (err) {
-    console.log(err)
+    Logger.error(err)
   }
 }
 

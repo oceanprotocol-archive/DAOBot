@@ -1,5 +1,6 @@
 const snapshot = require('@snapshot-labs/snapshot.js')
 global.fetch = require('cross-fetch')
+const Logger = require('../utils/logger')
 
 const space = 'officialoceandao.eth'
 const strategies = [
@@ -34,5 +35,5 @@ const snapshotHeight = 11437846
 snapshot.utils
   .getScores(space, strategies, network, provider, voters, snapshotHeight)
   .then((scores) => {
-    console.log('Scores', scores)
+    Logger.log('Scores', scores)
   })
