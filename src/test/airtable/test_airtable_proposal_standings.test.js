@@ -294,7 +294,7 @@ describe('Process Project Standings', function () {
     allProposals.forEach((x) => {
       x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
     })
-    allProposals.find((x) => x.id == 'proposal_7').fields[
+    allProposals.find((x) => x.id === 'proposal_7').fields[
       'Deliverable Checklist'
     ] = undefined
 
@@ -320,7 +320,7 @@ describe('Process Project Standings', function () {
       latestProposalStandings
     )
 
-    expect(latestProposals['project2'].fields['Proposal State']).to.equal(
+    expect(latestProposals.project2.fields['Proposal State']).to.equal(
       State.Rejected
     )
   })
@@ -366,7 +366,7 @@ describe('Process Project Standings', function () {
     // Retrieve the last proposals from projectStandings
     const latestProposals = getProjectsLatestProposal(proposalStandings)
 
-    let lastProjectId = allProposals
+    const lastProjectId = allProposals
       .filter((x) => x.get('Project Name') === projectName)
       .slice(-1)[0].id
     should.equal(latestProposals[projectName].id, lastProjectId)
@@ -388,8 +388,8 @@ describe('Process Project Standings', function () {
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
 
-    for (let [projectName, value] of Object.entries(latestProposals)) {
-      let lastProjectId = allProposals
+    for (const [projectName, value] of Object.entries(latestProposals)) {
+      const lastProjectId = allProposals
         .filter((x) => x.get('Project Name') === projectName)
         .slice(-1)[0].id
       should.equal(value.id, lastProjectId)
@@ -424,8 +424,8 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    for (let [projectName, value] of Object.entries(latestProposals)) {
-      let lastProjectId = allProposals
+    for (const [projectName, value] of Object.entries(latestProposals)) {
+      const lastProjectId = allProposals
         .filter((x) => x.get('Project Name') === projectName)
         .slice(-1)[0].id
       should.equal(value.id, lastProjectId)
