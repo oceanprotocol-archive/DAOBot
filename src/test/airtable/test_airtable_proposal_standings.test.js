@@ -290,6 +290,41 @@ describe('Process Project Standings', function () {
     ).to.equal(Standings.Completed)
   })
 
+  it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
+    allProposals.forEach((x) => {
+      x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+    })
+    allProposals.find((x) => x.id == 'proposal_7').fields[
+      'Deliverable Checklist'
+    ] = undefined
+
+    // Process proposals and historical standings
+    const previousProposals = allProposals.slice(0, allProposals.length - 1)
+    const currentProposals = [allProposals[allProposals.length - 1]]
+
+    const proposalStandings = await processProposalStandings(previousProposals)
+    await processHistoricalStandings(proposalStandings)
+
+    const latestProposalStandings = await getProjectsLatestProposal(
+      proposalStandings
+    )
+
+    const currentProposalStandings = await processProposalStandings(
+      currentProposals,
+      previousProposals
+    )
+
+    const latestProposals = getProjectsLatestProposal(currentProposalStandings)
+    await updateCurrentRoundStandings(
+      currentProposalStandings,
+      latestProposalStandings
+    )
+
+    expect(latestProposals['test_5'].fields['Proposal State']).to.equal(
+      State.Rejected
+    )
+  })
+
   it('If proposalStanding is Incomplete then remainder of projectStanding is Incomplete', async function () {
     // Complete every proposal
     allProposals.forEach((x) => {
