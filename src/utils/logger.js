@@ -3,12 +3,12 @@ dotenv.config()
 const logger = require('pino')({
   level: process.env.LOG_LEVEL || 'info',
   transport: {
-    target: 'pino-pretty'
-  },
-  prettyPrint: {
-    colorize: true,
-    translateTime: 'SYS:standard',
-    ignore: 'hostname,pid'
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'SYS:standard',
+      ignore: 'hostname,pid'
+    }
   }
 })
 const _get = (type, ...args) => {
