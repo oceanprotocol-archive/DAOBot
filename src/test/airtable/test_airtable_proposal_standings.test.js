@@ -265,7 +265,7 @@ describe('Calculating Proposal Standings', function () {
 describe('Process Project Standings', function () {
   it('Should get the correct proposal state', async function () {
     // current state, has enough Oceans, expected state
-    let proposalStates = [
+    const proposalStates = [
       [State.Undefined, true, State.Accepted],
       [State.Undefined, false, State.Rejected],
       [State.Rejected, false, State.Rejected],
@@ -313,7 +313,7 @@ describe('Process Project Standings', function () {
     })
     allProposals.find((x) => x.id === 'proposal_7').fields[
       'Deliverable Checklist'
-    ] = undefined
+    ] = undefined // set proposal_7 to be incomplete
 
     // Process proposals and historical standings
     const previousProposals = allProposals.slice(0, allProposals.length - 1)
