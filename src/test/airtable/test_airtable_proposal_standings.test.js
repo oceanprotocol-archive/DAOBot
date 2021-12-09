@@ -390,7 +390,6 @@ describe('Process Project Standings', function () {
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
     for (let [projectName, value] of Object.entries(latestProposals)) {
-      console.log(projectName, value, latestProposals)
       let lastProjectId = allProposals
         .filter((x) => x.get('Project Name') === projectName)
         .slice(-1)[0].id
