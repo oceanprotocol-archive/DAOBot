@@ -65,24 +65,25 @@ This bot also connects with GSheets.
 
 
 ## 📄 Snapshot - Vote for proposals and get vote results
-Snapshot is used inside Ocean DAO to allow people to vote for the proposals in the voting period of each round.
-A new Snapshot instance is created for each round by the DAOBot using the following function
-In order for the DAOBot to create the right instance of Snapshot, for each round there should be specified the right parameters inside the Funding Round table from Airtable at the current round line
-The parameters used for creating the Snapshot instance are:
+Snapshot is used inside **Ocean DAO** to allow people to vote for the proposals in the voting period of each round.
+Only the proposals with the **Proposal State** "Accepted" will be selected for voting inside Snapshot
+New Snapshot proposal ballots are created for each round by the DAOBot before the **Voting Period** using the following functions depending on Ballot Type: ```buildBatchProposalPayload()```, ```buildGranularProposalPayload()```
+In order for the DAOBot to create the right proposal ballots for Snapshot, for each round there should be specified the right parameters inside the **Funding Round** table from **Airtable** at the current round line
+The parameters used for creating the Snapshot proposal ballots are:
 1. Vote Type
    - single-choice: each voter may select a single choice to give his total voting power to.
    - weighted: each voter may spread voting power across any number of choices.
 2. Ballot Type
-   - Batch: 
-   - Granular:
+   - Batch: a single snapshot instance with all the proposals
+   - Granular: one snapshot instance for each proposal 
 
-You can also specify where should DAOBot create the snapshot instance by setting the env variables.
+You can also specify where should DAOBot create the snapshot proposal ballots by setting the env variables.
 1. Test
-   - space: spring-dao => https://snapshot.org/#/spring-dao
-   - snapshot-url: snapshot.org
+   - SNAPSHOT_SPACE: spring-dao => https://snapshot.org/#/spring-dao
+   - SNAPSHOT_URL: snapshot.org
 2. Production
-   - space: officialoceandao.eth => https://snapshot.org/#/officialoceandao.eth
-   - snapshot-url: snapshot.org
+   - SNAPSHOT_SPACE: officialoceandao.eth => https://snapshot.org/#/officialoceandao.eth
+   - SNAPSHOT_URL: snapshot.org
 
 
 ## ⏲️ CRON - Configure DAOBOT Crontab
