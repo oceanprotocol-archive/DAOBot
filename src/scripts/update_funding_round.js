@@ -170,30 +170,23 @@ const main = async () => {
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
 
-      let maxGrant = 0
       let fundingAvailable = 0
 
-      let maxGrantUSD = 0
       let fundingAvailableUSD = 0
 
       switch (basisCurrency) {
         case 'USD': {
-          maxGrantUSD = curRound.get('Max Grant USD')
           fundingAvailableUSD = curRound.get('Funding Available USD')
 
-          maxGrant = maxGrantUSD / tokenPrice
           fundingAvailable = fundingAvailableUSD / tokenPrice
           break
         }
 
         case 'OCEAN': {
-          const maxGrantOCEAN = curRound.get('Max Grant')
           const fundingAvailableOCEAN = curRound.get('Funding Available')
 
-          maxGrant = maxGrantOCEAN
           fundingAvailable = fundingAvailableOCEAN
 
-          maxGrantUSD = maxGrantOCEAN * tokenPrice
           fundingAvailableUSD = fundingAvailableOCEAN * tokenPrice
           break
         }
@@ -209,12 +202,10 @@ const main = async () => {
             'Round State': RoundState.DueDiligence,
             Proposals: allProposals.length,
             'OCEAN Price': tokenPrice,
-            'Max Grant': maxGrant,
             Earmarks: JSON.stringify(
               completeEarstructuresValues(curRound, tokenPrice, basisCurrency)
             ),
             'Funding Available': fundingAvailable,
-            'Max Grant USD': maxGrantUSD,
             'Funding Available USD': fundingAvailableUSD
           }
         }

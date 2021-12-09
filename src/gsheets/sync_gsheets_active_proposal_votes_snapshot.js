@@ -94,7 +94,7 @@ const calculateProposalSummary = async (
         })
         .reduce((total, num) => {
           return total + num
-        })
+        }, 0)
     }
     const sumVotes = yesVotes + noVotes
 
