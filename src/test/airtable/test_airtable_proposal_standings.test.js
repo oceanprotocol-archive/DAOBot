@@ -219,10 +219,6 @@ beforeEach(async function () {
 })
 
 describe('Calculating Proposal Standings', function () {
-  it('Sample data includes 6 proposals from one project', function () {
-    should.equal(allProposals.length, 6)
-  })
-
   it('Validates all initial proposal standings', async function () {
     let record = await getProposalRecord(allProposals[0], allProposals)
     should.equal(record.fields['Proposal Standing'], Standings.Incomplete)
@@ -266,10 +262,6 @@ describe('Calculating Proposal Standings', function () {
 })
 
 describe('Process Project Standings', function () {
-  it('Sample data includes 6 proposals from one project', function () {
-    should.equal(allProposals.length, 6)
-  })
-
   it('All proposalStandings are Completed or Refunded', async function () {
     // Complete every proposal
     allProposals.forEach((x) => {
