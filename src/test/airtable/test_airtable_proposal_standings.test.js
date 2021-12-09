@@ -12,7 +12,8 @@ const {
   getProjectsLatestProposal,
   processProposalStandings,
   processHistoricalStandings,
-  updateCurrentRoundStandings
+  updateCurrentRoundStandings,
+  getProposalState
 } = require('../../airtable/proposals/proposal_standings')
 const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
@@ -262,6 +263,22 @@ describe('Calculating Proposal Standings', function () {
 })
 
 describe('Process Project Standings', function () {
+  it('Should get the correct proposal state', async function () {
+    // current state, has enough Oceans, expected state
+    let proposalStates = [
+      [State.Undefined, true, State.Accepted],
+      [State.Undefined, false, State.Rejected],
+      [State.Rejected, false, State.Rejected],
+      [State.Rejected, true, State.Accepted],
+      [State.DownVoted, true, State.DownVoted]
+    ]
+
+    for (const state of proposalStates) {
+      const result = getProposalState(state[0], state[1])
+      should.equal(result, state[2])
+    }
+  })
+
   it('All proposalStandings are Completed or Refunded', async function () {
     // Complete every proposal
     allProposals.forEach((x) => {
