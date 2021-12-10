@@ -228,7 +228,7 @@ const processHistoricalStandings = async (proposalStandings) => {
             value
           )
             ? Standings.NewProject
-            : Standings.Completed
+            : Standings.Unreported
         }
       }
 
