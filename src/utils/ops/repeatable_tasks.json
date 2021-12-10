@@ -66,6 +66,12 @@
     "labels": ["Type: OPS"]
   },
   {
+    "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Vote - Notion Voting Page",
+    "body": "- [ ] Integrate GSheet for Round {{ROUND_NUMBER}} in the Notion Voting Page",
+    "assignees": ["AnaLoznianu"],
+    "labels": ["Type: Dev", "Type: OPS"]
+  },
+  {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Submission Deadline - Port",
     "body": "- [ ] Close Port",
     "assignees": ["AnaLoznianu"],
