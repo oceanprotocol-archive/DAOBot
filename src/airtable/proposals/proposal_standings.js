@@ -150,9 +150,13 @@ const getAllRoundProposals = async (maxRound, minRound = 1) => {
 const getProposalRecord = async (proposal, allProposals) => {
   const proposalURL = proposal.get('Proposal URL')
   const areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
+  const ethTransactionExists =
+    proposal.get('ETH Transaction') !== null ||
+    proposal.get('ETH Transaction') !== ''
   const proposalState = getProposalState(
     proposal.get('Proposal State'),
-    areOceansEnough
+    areOceansEnough,
+    ethTransactionExists
   )
   const currentStanding = proposal.get('Proposal Standing')
   const deliverableChecklist = proposal.get('Deliverable Checklist') || []
