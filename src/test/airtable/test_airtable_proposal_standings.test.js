@@ -266,16 +266,20 @@ describe('Process Project Standings', function () {
   it('Should get the correct proposal state', async function () {
     // current state, has enough Oceans, expected state
     const proposalStates = [
-      [State.Undefined, true, State.Accepted],
-      [State.Undefined, false, State.Rejected],
-      [State.Rejected, false, State.Rejected],
-      [State.Rejected, true, State.Accepted],
-      [State.DownVoted, true, State.DownVoted]
+      [State.Undefined, true, false, State.Accepted],
+      [State.Undefined, false, false, State.Rejected],
+      [State.Rejected, false, false, State.Rejected],
+      [State.Rejected, true, false, State.Accepted],
+      [State.DownVoted, true, false, State.DownVoted],
+      [State.DownVoted, true, false, State.DownVoted],
+      [State.DownVoted, true, true, State.DownVoted],
+      [State.Accepted, true, true, State.Funded],
+      [State.Rejected, true, true, State.Funded]
     ]
 
     for (const state of proposalStates) {
-      const result = getProposalState(state[0], state[1])
-      should.equal(result, state[2])
+      const result = getProposalState(state[0], state[1], state[2])
+      should.equal(result, state[3])
     }
   })
 
