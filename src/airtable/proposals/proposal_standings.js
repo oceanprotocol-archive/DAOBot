@@ -72,7 +72,11 @@ const getProjectStanding = (
   return newStanding
 }
 
-const getProposalState = (proposalState, hasEnoughOceans) => {
+const getProposalState = (
+  proposalState,
+  hasEnoughOceans,
+  ethTransactionExists = false
+) => {
   // TODO find a better logic for this
   if (
     hasEnoughOceans &&
@@ -81,6 +85,10 @@ const getProposalState = (proposalState, hasEnoughOceans) => {
     proposalState = State.Accepted
   } else if (proposalState === State.Undefined) {
     proposalState = State.Rejected
+  }
+
+  if (proposalState === State.Accepted && ethTransactionExists) {
+    proposalState = State.Funded
   }
 
   return proposalState
@@ -142,9 +150,14 @@ const getAllRoundProposals = async (maxRound, minRound = 1) => {
 const getProposalRecord = async (proposal, allProposals) => {
   const proposalURL = proposal.get('Proposal URL')
   const areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
+  const ethTransactionExists =
+    proposal.get('ETH Transaction') !== undefined &&
+    proposal.get('ETH Transaction') !== null &&
+    proposal.get('ETH Transaction') !== ''
   const proposalState = getProposalState(
     proposal.get('Proposal State'),
-    areOceansEnough
+    areOceansEnough,
+    ethTransactionExists
   )
   const currentStanding = proposal.get('Proposal Standing')
   const deliverableChecklist = proposal.get('Deliverable Checklist') || []
