@@ -307,6 +307,34 @@ describe('Process Project Standings', function () {
     ).to.equal(Standings.Completed)
   })
 
+  it('Should set to in progress if deployment ready', async function () {
+    const proposalStandings = {
+      project: [
+        {
+          id: 'proposal_8',
+          fields: {
+            'Project Name': 'project2',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.Undefined,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Deployment Ready': 'Yes', // Deployment ready
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        }
+      ]
+    }
+
+    await processHistoricalStandings(proposalStandings)
+    expect(
+      proposalStandings['project'][0].fields['Proposal Standing']
+    ).to.equal(Standings.Progress)
+  })
+
   it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
     allProposals.forEach((x) => {
       x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
