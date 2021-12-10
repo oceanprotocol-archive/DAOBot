@@ -311,15 +311,60 @@ describe('Process Project Standings', function () {
     const proposalStandings = {
       project: [
         {
+          id: 'proposal_4',
+          fields: {
+            'Project Name': 'project',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Funded,
+            'Proposal Standing': Standings.Completed,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
           id: 'proposal_8',
           fields: {
-            'Project Name': 'project2',
+            'Project Name': 'project',
             'Proposal URL': 'www.testurl_8.com',
             'Proposal State': State.Undefined,
             'Proposal Standing': Standings.Undefined,
             'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
             'Last Deliverable Update': 'Apr 01, 2021',
             'Deployment Ready': 'Yes', // Deployment ready
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
+          id: 'proposal_1',
+          fields: {
+            'Project Name': 'project',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.NoOcean, // No Ocean
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
+          id: 'proposal_1',
+          fields: {
+            'Project Name': 'project_new',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.NoOcean, // No Ocean
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
             'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
           },
           get: function (key) {
@@ -332,7 +377,16 @@ describe('Process Project Standings', function () {
     await processHistoricalStandings(proposalStandings)
     expect(
       proposalStandings['project'][0].fields['Proposal Standing']
+    ).to.equal(Standings.Completed)
+    expect(
+      proposalStandings['project'][1].fields['Proposal Standing']
     ).to.equal(Standings.Progress)
+    expect(
+      proposalStandings['project'][2].fields['Proposal Standing']
+    ).to.equal(Standings.Unreported)
+    expect(
+      proposalStandings['project'][3].fields['Proposal Standing']
+    ).to.equal(Standings.NewProject)
   })
 
   it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
