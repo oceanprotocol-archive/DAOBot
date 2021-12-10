@@ -225,7 +225,7 @@ const processHistoricalStandings = async (proposalStandings) => {
           proposal.fields['Proposal State'] = State.Accepted
           proposal.fields['Proposal Standing'] = !projectHasCompletedProposals(
             proposal,
-            proposalStandings
+            value
           )
             ? Standings.NewProject
             : Standings.Completed
