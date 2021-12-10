@@ -598,7 +598,7 @@ describe('Process Project Standings', function () {
     )
     should.equal(
       proposalStandings.test[0].fields['Proposal State'],
-      State.Accepted
+      State.Funded
     )
   })
 
