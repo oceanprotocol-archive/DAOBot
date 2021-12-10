@@ -375,18 +375,18 @@ describe('Process Project Standings', function () {
     }
 
     await processHistoricalStandings(proposalStandings)
-    expect(
-      proposalStandings['project'][0].fields['Proposal Standing']
-    ).to.equal(Standings.Completed)
-    expect(
-      proposalStandings['project'][1].fields['Proposal Standing']
-    ).to.equal(Standings.Progress)
-    expect(
-      proposalStandings['project'][2].fields['Proposal Standing']
-    ).to.equal(Standings.Unreported)
-    expect(
-      proposalStandings['project'][3].fields['Proposal Standing']
-    ).to.equal(Standings.NewProject)
+    expect(proposalStandings.project[0].fields['Proposal Standing']).to.equal(
+      Standings.Completed
+    )
+    expect(proposalStandings.project[1].fields['Proposal Standing']).to.equal(
+      Standings.Progress
+    )
+    expect(proposalStandings.project[2].fields['Proposal Standing']).to.equal(
+      Standings.Unreported
+    )
+    expect(proposalStandings.project[3].fields['Proposal Standing']).to.equal(
+      Standings.NewProject
+    )
   })
 
   it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
