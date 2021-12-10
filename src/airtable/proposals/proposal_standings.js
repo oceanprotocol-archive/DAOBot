@@ -72,7 +72,11 @@ const getProjectStanding = (
   return newStanding
 }
 
-const getProposalState = (proposalState, hasEnoughOceans) => {
+const getProposalState = (
+  proposalState,
+  hasEnoughOceans,
+  ethTransactionExists = false
+) => {
   // TODO find a better logic for this
   if (
     hasEnoughOceans &&
@@ -81,6 +85,10 @@ const getProposalState = (proposalState, hasEnoughOceans) => {
     proposalState = State.Accepted
   } else if (proposalState === State.Undefined) {
     proposalState = State.Rejected
+  }
+
+  if (proposalState == State.Accepted && ethTransactionExists) {
+    proposalState = State.Funded
   }
 
   return proposalState
