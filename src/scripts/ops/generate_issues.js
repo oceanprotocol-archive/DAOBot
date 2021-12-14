@@ -1,6 +1,7 @@
 const moment = require('moment')
 const fetch = require('node-fetch')
 const roundRawIssues = require('../../utils/ops/repeatable_tasks.json')
+const Logger = require('../../utils/logger')
 const {
   getRoundsSelectQuery,
   updateRoundRecord
@@ -65,7 +66,7 @@ async function generateRoundGithubIssues(
   roundVotingEndDate
 ) {
   if (token === undefined) {
-    console.log(`Github token missing`)
+    Logger.error(`Github token missing`)
     return
   }
   try {
@@ -92,18 +93,18 @@ async function generateRoundGithubIssues(
           var obj = JSON.parse(jsonString)
 
           if (obj.id != null) {
-            console.log(`Issue created at ${obj.url}`)
+            Logger.log(`Issue created at ${obj.url}`)
           } else {
-            console.log(`Something went wrong. Response: ${jsonString}`)
+            Logger.error(`Something went wrong. Response: ${jsonString}`)
           }
         })
     })
   } catch (error) {
-    console.log(
+    Logger.error(
       'There has been a problem with your fetch operation: ' + error.message
     )
   }
-  console.log('-----====== Generated OPS schedule issues =======-----')
+  Logger.log('-----====== Generated OPS schedule issues =======-----')
 }
 
 function loadRoundIssues(
