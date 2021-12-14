@@ -41,6 +41,16 @@ const dumpWiningProposalsByEarmarksToGSheet = async(earmarkedResults, gsheetRows
     }else if(earmarkedResults[earmarkResult].length===0){
       let earmarkGSheetResults = []
       earmarkGSheetResults.push([`${earmarkResult} Winners`])
+      earmarkGSheetResults.push([
+        'Project Name',
+        'Yes Votes',
+        'No Votes',
+        'Pct Yes',
+        '>50% Yes?',
+        'USD Requested',
+        'OCEAN Requested',
+        'OCEAN Granted'
+      ])
       earmarkGSheetResults.push([''])
       gsheetRows = gsheetRows.concat(earmarkGSheetResults)
     }
@@ -93,9 +103,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   // Step 3 - Dump all results to a flattened list
   const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
 
-  const earmarkedResults = await dumpResultsToGSheet(
-    finalResults.earmarkedResults.winningProposals
-  )
   const generalResults = await dumpResultsToGSheet(
     finalResults.generalResults.winningProposals
   )
