@@ -28,18 +28,21 @@ const clearFundedRecords = (proposals) => {
   })
 }
 
-const dumpWiningProposalsByEarmarksToGSheet = async(earmarkedResults, gsheetRows) => {
-  for(const earmarkResult in earmarkedResults){
+const dumpWiningProposalsByEarmarksToGSheet = async (
+  earmarkedResults,
+  gsheetRows
+) => {
+  for (const earmarkResult in earmarkedResults) {
     let earmarkGSheetResults
-    if(earmarkedResults[earmarkResult].winningProposals){
+    if (earmarkedResults[earmarkResult].winningProposals) {
       earmarkGSheetResults = await dumpResultsToGSheet(
         earmarkedResults[earmarkResult].winningProposals
       )
       earmarkGSheetResults.splice(0, 0, [`${earmarkResult} Winners`])
       earmarkGSheetResults.push([''])
       gsheetRows = gsheetRows.concat(earmarkGSheetResults)
-    }else if(earmarkedResults[earmarkResult].length===0){
-      let earmarkGSheetResults = []
+    } else if (earmarkedResults[earmarkResult].length === 0) {
+      earmarkGSheetResults = []
       earmarkGSheetResults.push([`${earmarkResult} Winners`])
       earmarkGSheetResults.push([
         'Project Name',
@@ -103,9 +106,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   // Step 3 - Dump all results to a flattened list
   const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
 
-  const generalResults = await dumpResultsToGSheet(
-    finalResults.generalResults.winningProposals
-  )
   const partiallyFundedResults = await dumpResultsToGSheet(
     finalResults.partiallyFunded
   )
@@ -126,16 +126,16 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let gsheetRows = []
 
   // Flatten results onto gsheetRows
-  gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(finalResults.earmarkedResults, gsheetRows)
-  generalResults.splice(0, 0, ['General Winners'])
-  generalResults.push([''])
+  gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
+    finalResults.earmarkedResults,
+    gsheetRows
+  )
   partiallyFundedResults.splice(0, 0, ['Partially Funded'])
   partiallyFundedResults.push([''])
   notFundedResults.splice(0, 0, ['Proposals that could not be funded'])
   notFundedResults.push([''])
   downvotedResults.splice(0, 0, ['Downvoted Proposals'])
   downvotedResults.push([''])
-  gsheetRows = gsheetRows.concat(generalResults)
   gsheetRows = gsheetRows.concat(partiallyFundedResults)
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
