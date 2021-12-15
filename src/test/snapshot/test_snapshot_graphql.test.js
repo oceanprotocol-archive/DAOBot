@@ -16,10 +16,6 @@ const {
   getVoterScores
 } = require('../../snapshot/snapshot_utils')
 
-beforeEach(() => {
-  jest.setTimeout(8000)
-})
-
 afterAll(() => {
   jest.clearAllTimers()
 })
@@ -177,7 +173,6 @@ describe('Snapshot GraphQL test', () => {
   })
 
   it('Validates scores from Single-Batch Voting', async () => {
-    jest.setTimeout(10000)
     const strategy = getVoteCountStrategy(1)
 
     let votes = []

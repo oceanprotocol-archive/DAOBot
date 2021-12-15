@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/gsheets/index.js",
   "jest": {
-    "testTimeout": 15000
+    "testTimeout": 30000
   },
   "scripts": {
     "start": "node src/gsheets/index.js",
