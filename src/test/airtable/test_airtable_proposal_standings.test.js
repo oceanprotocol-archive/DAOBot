@@ -12,7 +12,8 @@ const {
   getProjectsLatestProposal,
   processProposalStandings,
   processHistoricalStandings,
-  updateCurrentRoundStandings
+  updateCurrentRoundStandings,
+  getProposalState
 } = require('../../airtable/proposals/proposal_standings')
 const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
@@ -179,15 +180,46 @@ beforeEach(async function () {
       get: function (key) {
         return this.fields[key]
       }
+    },
+    {
+      id: 'proposal_7',
+      fields: {
+        'Project Name': 'project2',
+        'Proposal URL': 'www.testurl.com',
+        'Proposal State': State.Funded,
+        'Proposal Standing': Standings.Unreported,
+        'Deliverable Checklist': undefined,
+        'Last Deliverable Update': 'Apr 01, 2021',
+        'Refund Transaction': undefined,
+        'Disputed Status': undefined,
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_8',
+      fields: {
+        'Project Name': 'project2',
+        'Proposal URL': 'www.testurl_8.com',
+        'Proposal State': State.Undefined,
+        'Proposal Standing': Standings.Undefined,
+        'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+        'Last Deliverable Update': 'Apr 01, 2021',
+        'Refund Transaction': undefined,
+        'Disputed Status': undefined,
+        'Deployment Ready': 'Yes',
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
     }
   ]
 })
 
 describe('Calculating Proposal Standings', function () {
-  it('Sample data includes 6 proposals from one project', function () {
-    should.equal(allProposals.length, 6)
-  })
-
   it('Validates all initial proposal standings', async function () {
     let record = await getProposalRecord(allProposals[0], allProposals)
     should.equal(record.fields['Proposal Standing'], Standings.Incomplete)
@@ -231,8 +263,24 @@ describe('Calculating Proposal Standings', function () {
 })
 
 describe('Process Project Standings', function () {
-  it('Sample data includes 6 proposals from one project', function () {
-    should.equal(allProposals.length, 6)
+  it('Should get the correct proposal state', async function () {
+    // current state, has enough Oceans, expected state
+    const proposalStates = [
+      [State.Undefined, true, false, State.Accepted],
+      [State.Undefined, false, false, State.Rejected],
+      [State.Rejected, false, false, State.Rejected],
+      [State.Rejected, true, false, State.Accepted],
+      [State.DownVoted, true, false, State.DownVoted],
+      [State.DownVoted, true, false, State.DownVoted],
+      [State.DownVoted, true, true, State.DownVoted],
+      [State.Accepted, true, true, State.Funded],
+      [State.Rejected, true, true, State.Funded]
+    ]
+
+    for (const state of proposalStates) {
+      const result = getProposalState(state[0], state[1], state[2])
+      should.equal(result, state[3])
+    }
   })
 
   it('All proposalStandings are Completed or Refunded', async function () {
@@ -261,6 +309,123 @@ describe('Process Project Standings', function () {
         'Proposal Standing'
       ]
     ).to.equal(Standings.Completed)
+  })
+
+  it('Should set to in progress if deployment ready', async function () {
+    const proposalStandings = {
+      project: [
+        {
+          id: 'proposal_4',
+          fields: {
+            'Project Name': 'project',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Funded,
+            'Proposal Standing': Standings.Completed,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
+          id: 'proposal_8',
+          fields: {
+            'Project Name': 'project',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.Undefined,
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Deployment Ready': 'Yes', // Deployment ready
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
+          id: 'proposal_1',
+          fields: {
+            'Project Name': 'project',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.NoOcean, // No Ocean
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        },
+        {
+          id: 'proposal_1',
+          fields: {
+            'Project Name': 'project_new',
+            'Proposal URL': 'www.testurl_8.com',
+            'Proposal State': State.Undefined,
+            'Proposal Standing': Standings.NoOcean, // No Ocean
+            'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+            'Last Deliverable Update': 'Apr 01, 2021',
+            'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+          },
+          get: function (key) {
+            return this.fields[key]
+          }
+        }
+      ]
+    }
+
+    await processHistoricalStandings(proposalStandings)
+    expect(proposalStandings.project[0].fields['Proposal Standing']).to.equal(
+      Standings.Completed
+    )
+    expect(proposalStandings.project[1].fields['Proposal Standing']).to.equal(
+      Standings.Progress
+    )
+    expect(proposalStandings.project[2].fields['Proposal Standing']).to.equal(
+      Standings.Unreported
+    )
+    expect(proposalStandings.project[3].fields['Proposal Standing']).to.equal(
+      Standings.NewProject
+    )
+  })
+
+  it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
+    allProposals.forEach((x) => {
+      x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+    })
+    allProposals.find((x) => x.id === 'proposal_7').fields[
+      'Deliverable Checklist'
+    ] = undefined // set proposal_7 to be incomplete
+
+    // Process proposals and historical standings
+    const previousProposals = allProposals.slice(0, allProposals.length - 1)
+    const currentProposals = [allProposals[allProposals.length - 1]]
+
+    const proposalStandings = await processProposalStandings(previousProposals)
+    await processHistoricalStandings(proposalStandings)
+
+    const latestProposalStandings = await getProjectsLatestProposal(
+      proposalStandings
+    )
+
+    const currentProposalStandings = await processProposalStandings(
+      currentProposals,
+      previousProposals
+    )
+
+    const latestProposals = getProjectsLatestProposal(currentProposalStandings)
+    await updateCurrentRoundStandings(
+      currentProposalStandings,
+      latestProposalStandings
+    )
+
+    expect(latestProposals.project2.fields['Proposal State']).to.equal(
+      State.Rejected
+    )
   })
 
   it('If proposalStanding is Incomplete then remainder of projectStanding is Incomplete', async function () {
@@ -303,10 +468,11 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing
     // Retrieve the last proposals from projectStandings
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals[projectName].id,
-      allProposals[allProposals.length - 1].id
-    )
+
+    const lastProjectId = allProposals
+      .filter((x) => x.get('Project Name') === projectName)
+      .slice(-1)[0].id
+    should.equal(latestProposals[projectName].id, lastProjectId)
   })
 
   it('Validate [currentProposalStanding] maps to head of indexed proposals', async function () {
@@ -324,10 +490,13 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals.test.id,
-      allProposals[allProposals.length - 1].id
-    )
+
+    for (const [projectName, value] of Object.entries(latestProposals)) {
+      const lastProjectId = allProposals
+        .filter((x) => x.get('Project Name') === projectName)
+        .slice(-1)[0].id
+      should.equal(value.id, lastProjectId)
+    }
 
     const currentProposalStandings = await processProposalStandings(
       currentProposals
@@ -358,10 +527,12 @@ describe('Process Project Standings', function () {
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
-    should.equal(
-      latestProposals.test.id,
-      allProposals[allProposals.length - 1].id
-    )
+    for (const [projectName, value] of Object.entries(latestProposals)) {
+      const lastProjectId = allProposals
+        .filter((x) => x.get('Project Name') === projectName)
+        .slice(-1)[0].id
+      should.equal(value.id, lastProjectId)
+    }
 
     const currentProposalStandings = await processProposalStandings(
       currentProposals
