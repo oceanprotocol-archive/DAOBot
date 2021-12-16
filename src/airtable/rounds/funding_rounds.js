@@ -161,7 +161,9 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   const earmarksJson = JSON.parse(fundingRound.get('Earmarks'))
     ? JSON.parse(fundingRound.get('Earmarks'))
     : {}
+  const fundsLeftAction = fundingRound.get('Funds Left')  
   const earmarkedWinnerIds = []
+  let currentUsdEarmarked = 0
   const earmarkedResults = {}
   let fundsLeft = 0
   const allWinningProposals = []
@@ -171,7 +173,16 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
     const earmarkProposals = proposals.filter(
       (proposal) => proposal.get('Earmarks') === earmark
     )
-    const currentUsdEarmarked = earmarksJson[earmark].USD
+    if(fundsLeftAction === 'Recycle' && earmark === 'General'){
+      let test = proposals[0].get('Earmarks')
+      let earmarkedProposalNotFunded = proposals.filter((p) => earmarkedWinnerIds.lastIndexOf(p.id) === -1 && p.get('Earmarks') !== earmark)
+      earmarkProposals.concat(earmarkedProposalNotFunded)
+      currentUsdEarmarked = earmarksJson[earmark].USD + fundsLeft
+      fundsLeft = 0
+    }else{
+      currentUsdEarmarked = earmarksJson[earmark].USD
+    }
+
     if (earmarkProposals.length === 0) {
       earmarkedResults[earmark] = []
       usdEarmarked += currentUsdEarmarked
@@ -183,12 +194,12 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       currentUsdEarmarked,
       oceanPrice
     )
-    usdEarmarked += currentUsdEarmarked
     earmarkedResults[earmark] = winningProposals
     winningProposals.winningProposals.forEach((proposal) => {
       allWinningProposals.push(proposal)
     })
     fundsLeft += winningProposals.fundsLeft
+    usdEarmarked += currentUsdEarmarked - fundsLeft
     winningProposals.winningProposals
       .map((x) => x.id)
       .forEach((proposalId) => {
@@ -212,22 +223,9 @@ const calculateFinalResults = (proposals, fundingRound) => {
     fundingRound,
     oceanPrice
   )
-  const { usdEarmarked } = earmarkedResults
 
-  const general = proposals.filter(
+  const remainder = proposals.filter(
     (p) => earmarkedResults.winnerIds.lastIndexOf(p.id) === -1
-  )
-
-  const usdGeneral = fundingRound.get('Funding Available USD') - usdEarmarked
-  const generalResults = calculateWinningProposalsForEarmark(
-    general,
-    usdGeneral,
-    oceanPrice
-  )
-  const generalWinnerIds = generalResults.winningProposals.map((x) => x.id)
-
-  const remainder = general.filter(
-    (p) => generalWinnerIds.lastIndexOf(p.id) === -1
   )
   const partiallyFunded = remainder.filter((p) => p.get('USD Granted') > 0)
   const notFunded = remainder.filter(
