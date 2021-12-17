@@ -31,7 +31,7 @@
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Site",
-    "body": "**Update [site](oceanprotocol.com/dao) with**:\n - [ ] Proposals submissions deadline: {{ROUND_PROPOSALS_END_DATE}}\n- [ ] Round {{ROUND_NUMBER}} funding available: {{ROUND_FUNDING_AVAILABLE}} OCEAN\n- [ ] Voting period : {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}",
+    "body": "**Update [site](oceanprotocol.com/dao) with**:\n - [ ] Proposals submissions deadline: {{ROUND_PROPOSALS_END_DATE}}\n- [ ] Round {{ROUND_NUMBER}} funding available\n- [ ] Voting period : {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}",
     "assignees": ["AnaLoznianu"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
