@@ -44,9 +44,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   airtableRows = airtableRows.concat(
     finalResults.earmarkedResults.winningProposals
   )
-  airtableRows = airtableRows.concat(
-    finalResults.generalResults.winningProposals
-  )
   airtableRows = airtableRows.concat(finalResults.partiallyFunded)
   airtableRows = airtableRows.concat(finalResults.notFunded)
 
@@ -75,9 +72,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   const earmarkedResults = await dumpResultsToGSheet(
     finalResults.earmarkedResults.winningProposals
   )
-  const generalResults = await dumpResultsToGSheet(
-    finalResults.generalResults.winningProposals
-  )
   const partiallyFundedResults = await dumpResultsToGSheet(
     finalResults.partiallyFunded
   )
@@ -85,7 +79,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   // Finally, write to gsheets
   const oAuth = await initOAuthToken()
-
+  const fundsLeftRule = curRound.get('Funds Left')  
   const sheetName = 'Round' + curRoundNumber + 'FinalResults'
 
   // Get the sheet, otherwise create it
@@ -100,8 +94,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   // Flatten results onto gsheetRows
   earmarkedResults.splice(0, 0, ['Earmarked Winners'])
   earmarkedResults.push([''])
-  generalResults.splice(0, 0, ['General Winners'])
-  generalResults.push([''])
   partiallyFundedResults.splice(0, 0, ['Partially Funded'])
   partiallyFundedResults.push([''])
   notFundedResults.splice(0, 0, ['Proposals that could not be funded'])
@@ -109,38 +101,23 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   downvotedResults.splice(0, 0, ['Downvoted Proposals'])
   downvotedResults.push([''])
   gsheetRows = gsheetRows.concat(earmarkedResults)
-  gsheetRows = gsheetRows.concat(generalResults)
   gsheetRows = gsheetRows.concat(partiallyFundedResults)
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
 
   const oceanUSD = curRound.get('OCEAN Price')
   // 2x Rows => Header & Summed results
+  const foundsLeftRuleString = fundsLeftRule === 'Burn' ? 'Burned' : 'Recycled'
   const burnedFunds = [
-    ['Earmarked USD Burned', '', 'General USD Burned', '', 'Total USD Burned'],
+    [`Total USD ${foundsLeftRuleString}`],
     [
-      finalResults.earmarkedResults.fundsLeft,
-      '',
-      finalResults.generalResults.fundsLeft,
-      '',
-      finalResults.earmarkedResults.fundsLeft +
-        finalResults.generalResults.fundsLeft
+      finalResults.earmarkedResults.fundsLeft
     ],
     [
-      'Earmarked OCEAN Burned',
-      '',
-      'General OCEAN Burned',
-      '',
-      'Total OCEAN Burned'
+      `Total OCEAN ${foundsLeftRuleString}`
     ],
     [
       finalResults.earmarkedResults.fundsLeft / oceanUSD,
-      '',
-      finalResults.generalResults.fundsLeft / oceanUSD,
-      '',
-      (finalResults.earmarkedResults.fundsLeft +
-        finalResults.generalResults.fundsLeft) /
-        oceanUSD
     ]
   ]
   gsheetRows = gsheetRows.concat(burnedFunds)
@@ -159,7 +136,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   return (
     finalResults.earmarkedResults.winningProposals.length +
-    finalResults.generalResults.winningProposals.length +
     finalResults.partiallyFunded.length
   )
 }
@@ -174,8 +150,7 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   const oceanPrice = curRound.get('OCEAN Price')
 
   const burntFunds =
-    (finalResults.earmarkedResults.fundsLeft +
-      finalResults.generalResults.fundsLeft) /
+    finalResults.earmarkedResults.fundsLeft /
     oceanPrice
   return burntFunds
 }

@@ -170,13 +170,13 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   let usdEarmarked = 0
 
   for (const earmark in earmarksJson) {
-    const earmarkProposals = proposals.filter(
+    let earmarkProposals = proposals.filter(
       (proposal) => proposal.get('Earmarks') === earmark
     )
     if(fundsLeftAction === 'Recycle' && earmark === 'General'){
       let test = proposals[0].get('Earmarks')
       let earmarkedProposalNotFunded = proposals.filter((p) => earmarkedWinnerIds.lastIndexOf(p.id) === -1 && p.get('Earmarks') !== earmark)
-      earmarkProposals.concat(earmarkedProposalNotFunded)
+      earmarkProposals = earmarkProposals.concat(earmarkedProposalNotFunded)
       currentUsdEarmarked = earmarksJson[earmark].USD + fundsLeft
       fundsLeft = 0
     }else{
@@ -241,7 +241,6 @@ const calculateFinalResults = (proposals, fundingRound) => {
   return {
     earmarkedResults: earmarkedResults,
     partiallyFunded: partiallyFunded,
-    generalResults: generalResults,
     notFunded: notFunded
   }
 }
