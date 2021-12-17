@@ -238,10 +238,10 @@ const processHistoricalStandings = async (proposalStandings) => {
           proposal.fields['Proposal State'] = State.Accepted
           proposal.fields['Proposal Standing'] = !projectHasCompletedProposals(
             proposal,
-            proposalStandings
+            value
           )
             ? Standings.NewProject
-            : Standings.Completed
+            : Standings.Unreported
         }
       }
 
@@ -251,7 +251,10 @@ const processHistoricalStandings = async (proposalStandings) => {
         lastStanding !== Standings.Incomplete &&
         lastStanding !== Standings.Dispute
       ) {
-        if (proposal.fields['Deployment Ready'] === 'Yes')
+        if (
+          proposal.fields['Deployment Ready'] === 'Yes' &&
+          proposal.fields['Proposal Standing'] !== Standings.Completed
+        )
           proposal.fields['Proposal Standing'] = Standings.Progress
         if (proposal.fields['Proposal Standing'] === Standings.Incomplete)
           lastStanding = Standings.Incomplete
@@ -354,5 +357,6 @@ module.exports = {
   processHistoricalStandings,
   getProjectsLatestProposal,
   updateCurrentRoundStandings,
-  projectHasCompletedProposals
+  projectHasCompletedProposals,
+  getProposalState
 }

@@ -14,10 +14,6 @@ const {
   deleteAll
 } = require('../../airtable/project_summary.js')
 
-beforeEach(() => {
-  jest.setTimeout(8000)
-})
-
 afterAll(() => {
   jest.clearAllTimers()
 })
