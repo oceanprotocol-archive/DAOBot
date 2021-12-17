@@ -28,6 +28,36 @@ const clearFundedRecords = (proposals) => {
   })
 }
 
+const dumpWiningProposalsByEarmarksToGSheet = async (
+  earmarkedResults,
+  gsheetRows
+) => {
+  for (const earmarkResult in earmarkedResults) {
+    let earmarkGSheetResults = []
+    if (earmarkedResults[earmarkResult].winningProposals) {
+      earmarkGSheetResults = await dumpResultsToGSheet(
+        earmarkedResults[earmarkResult].winningProposals
+      )
+      earmarkGSheetResults.splice(0, 0, [`${earmarkResult} Winners`])
+    } else if (earmarkedResults[earmarkResult].length === 0) {
+      earmarkGSheetResults.push([`${earmarkResult} Winners`])
+      earmarkGSheetResults.push([
+        'Project Name',
+        'Yes Votes',
+        'No Votes',
+        'Pct Yes',
+        '>50% Yes?',
+        'USD Requested',
+        'OCEAN Requested',
+        'OCEAN Granted'
+      ])
+    }
+    earmarkGSheetResults.push([''])
+    gsheetRows = gsheetRows.concat(earmarkGSheetResults)
+  }
+  return gsheetRows
+}
+
 const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   // Step 1 - Identify all winning and downvoted proposals
   const activeProposals = await getProposalsSelectQuery(
@@ -72,12 +102,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   // Step 3 - Dump all results to a flattened list
   const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
-  const earmarkedResults = await dumpResultsToGSheet(
-    finalResults.earmarkedResults.winningProposals
-  )
-  const generalResults = await dumpResultsToGSheet(
-    finalResults.generalResults.winningProposals
-  )
+
   const partiallyFundedResults = await dumpResultsToGSheet(
     finalResults.partiallyFunded
   )
@@ -98,18 +123,16 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let gsheetRows = []
 
   // Flatten results onto gsheetRows
-  earmarkedResults.splice(0, 0, ['Earmarked Winners'])
-  earmarkedResults.push([''])
-  generalResults.splice(0, 0, ['General Winners'])
-  generalResults.push([''])
+  gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
+    finalResults.earmarkedResults,
+    gsheetRows
+  )
   partiallyFundedResults.splice(0, 0, ['Partially Funded'])
   partiallyFundedResults.push([''])
   notFundedResults.splice(0, 0, ['Proposals that could not be funded'])
   notFundedResults.push([''])
   downvotedResults.splice(0, 0, ['Downvoted Proposals'])
   downvotedResults.push([''])
-  gsheetRows = gsheetRows.concat(earmarkedResults)
-  gsheetRows = gsheetRows.concat(generalResults)
   gsheetRows = gsheetRows.concat(partiallyFundedResults)
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
