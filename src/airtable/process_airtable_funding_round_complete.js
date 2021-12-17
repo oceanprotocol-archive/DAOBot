@@ -33,16 +33,13 @@ const dumpWiningProposalsByEarmarksToGSheet = async (
   gsheetRows
 ) => {
   for (const earmarkResult in earmarkedResults) {
-    let earmarkGSheetResults
+    let earmarkGSheetResults = []
     if (earmarkedResults[earmarkResult].winningProposals) {
       earmarkGSheetResults = await dumpResultsToGSheet(
         earmarkedResults[earmarkResult].winningProposals
       )
       earmarkGSheetResults.splice(0, 0, [`${earmarkResult} Winners`])
-      earmarkGSheetResults.push([''])
-      gsheetRows = gsheetRows.concat(earmarkGSheetResults)
     } else if (earmarkedResults[earmarkResult].length === 0) {
-      earmarkGSheetResults = []
       earmarkGSheetResults.push([`${earmarkResult} Winners`])
       earmarkGSheetResults.push([
         'Project Name',
@@ -54,9 +51,9 @@ const dumpWiningProposalsByEarmarksToGSheet = async (
         'OCEAN Requested',
         'OCEAN Granted'
       ])
-      earmarkGSheetResults.push([''])
-      gsheetRows = gsheetRows.concat(earmarkGSheetResults)
     }
+    earmarkGSheetResults.push([''])
+    gsheetRows = gsheetRows.concat(earmarkGSheetResults)
   }
   return gsheetRows
 }
