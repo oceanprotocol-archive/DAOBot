@@ -123,10 +123,8 @@ const calculateRoundSummary = async (
   if (curRoundBallotType === BallotType.Granular) {
     votes = Object.entries(voterScores[proposals[0].get('ipfsHash')])
   } else if (curRoundBallotType === BallotType.Batch) {
-    proposals.map((p) => {
-      const ipfsHash = p.get('ipfsHash')
+    const ipfsHash = proposals[0].get('ipfsHash')
       votes = votes.concat(Object.entries(voterScores[ipfsHash]))
-    })
   }
 
   // map votes to each wallet
