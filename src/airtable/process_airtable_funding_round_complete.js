@@ -156,8 +156,8 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   //Total USD&OCEAN burned/recycled
   usdResultsTexts.push(`Total USD ${foundsLeftRuleString}`)
   oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
-  usdResultsValues.push(finalResults.earmarkedResults.fundsLeft)
-  oceanResultsValues.push(finalResults.earmarkedResults.fundsLeft / oceanUSD)
+  usdResultsValues.push(finalResults.earmarkedResults.fundsRecycled)
+  oceanResultsValues.push(finalResults.earmarkedResults.fundsRecycled / oceanUSD)
 
   //Total USD&OCEAN granted
   usdResultsTexts.push(`Total USD Granted`)

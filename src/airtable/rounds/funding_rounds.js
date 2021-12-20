@@ -131,10 +131,10 @@ const calculateWinningProposalsForEarmark = (
 
       const grantCarry = p.get('USD Granted') || 0
       let usdGranted =
-        fundsLeft - (usdRequested - grantCarry) > 0
+          fundsLeft - Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice > 0
           ? usdRequested - grantCarry
           : fundsLeft
-      const oceanGranted = Math.ceil((usdGranted + grantCarry) / oceanPrice)
+      const oceanGranted = usdGranted === fundsLeft ? Math.floor((usdGranted + grantCarry) / oceanPrice) : Math.ceil((usdGranted + grantCarry) / oceanPrice)
       usdGranted = oceanGranted * oceanPrice
 
       p.fields['OCEAN Requested'] = oceanRequested
@@ -142,7 +142,7 @@ const calculateWinningProposalsForEarmark = (
       p.fields['USD Granted'] = usdGranted + grantCarry
       p.fields['OCEAN Granted'] = oceanGranted
       p.fields['Proposal State'] = 'Granted'
-      fundsLeft -= usdGranted
+      fundsLeft = fundsLeft - usdGranted < 0 ? fundsLeft : fundsLeft - usdGranted
 
       // If we reached the total, then it won via this grant pot
       if (usdRequested <= usdGranted + grantCarry) winningProposals.push(p)
@@ -166,6 +166,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   let currentUsdEarmarked = 0
   const earmarkedResults = {}
   let fundsLeft = 0
+  let fundsRecycled = 0
   const allWinningProposals = []
   let earmarks = []
   let usdEarmarked = 0
@@ -189,9 +190,10 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
     }
 
     if (earmarkProposals.length === 0) {
-      earmarkedResults[earmark] = []
       usdEarmarked += currentUsdEarmarked
       fundsLeft += earmarksJson[earmark].USD
+      fundsRecycled += earmarksJson[earmark].USD
+      earmarkedResults[earmark] = {'winningProposals': [], 'fundsLeft': earmarksJson[earmark].USD}
       continue
     }
     const winningProposals = calculateWinningProposalsForEarmark(
@@ -204,6 +206,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       allWinningProposals.push(proposal)
     })
     fundsLeft += winningProposals.fundsLeft
+    fundsRecycled += winningProposals.fundsLeft
     usdEarmarked += currentUsdEarmarked - fundsLeft
     winningProposals.winningProposals
       .map((x) => x.id)
@@ -217,6 +220,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   earmarkedResults.earmarks = earmarks 
   earmarkedResults.winningProposals = allWinningProposals
   earmarkedResults.fundsLeft = fundsLeft
+  earmarkedResults.fundsRecycled = fundsRecycled
   return earmarkedResults
 }
 
