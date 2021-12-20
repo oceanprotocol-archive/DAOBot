@@ -167,9 +167,11 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   const earmarkedResults = {}
   let fundsLeft = 0
   const allWinningProposals = []
+  let earmarks = []
   let usdEarmarked = 0
 
   for (const earmark in earmarksJson) {
+    earmarks.push(earmark)
     let earmarkProposals = proposals.filter(
       (proposal) => proposal.get('Earmarks') === earmark
     )
@@ -212,6 +214,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
 
   earmarkedResults.winnerIds = earmarkedWinnerIds
   earmarkedResults.usdEarmarked = usdEarmarked
+  earmarkedResults.earmarks = earmarks 
   earmarkedResults.winningProposals = allWinningProposals
   earmarkedResults.fundsLeft = fundsLeft
   return earmarkedResults

@@ -51,6 +51,8 @@ const dumpWiningProposalsByEarmarksToGSheet = async (
         'OCEAN Requested',
         'OCEAN Granted'
       ])
+    }else{
+      continue
     }
     earmarkGSheetResults.push([''])
     gsheetRows = gsheetRows.concat(earmarkGSheetResults)
@@ -68,6 +70,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   const downvotedProposals = getDownvotedProposals(activeProposals)
   const winningProposals = getWinningProposals(activeProposals, curRoundNumber)
   const finalResults = calculateFinalResults(winningProposals, curRound)
+  const oceanPrice = curRound.get('OCEAN Price')
 
   let airtableRows = []
   airtableRows = airtableRows.concat(downvotedProposals)
@@ -118,7 +121,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   }
 
   let gsheetRows = []
-
   // Flatten results onto gsheetRows
   gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
     finalResults.earmarkedResults,
@@ -134,22 +136,40 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
 
-  const oceanUSD = curRound.get('OCEAN Price')
   // 2x Rows => Header & Summed results
+  gsheetRows.push([''])
+  gsheetRows.push(['Summed round results'])
+  const oceanUSD = curRound.get('OCEAN Price')
   const foundsLeftRuleString = fundsLeftRule === 'Burn' ? 'Burned' : 'Recycled'
-  const burnedFunds = [
-    [`Total USD ${foundsLeftRuleString}`],
-    [
-      finalResults.earmarkedResults.fundsLeft
-    ],
-    [
-      `Total OCEAN ${foundsLeftRuleString}`
-    ],
-    [
-      finalResults.earmarkedResults.fundsLeft / oceanUSD,
-    ]
-  ]
-  gsheetRows = gsheetRows.concat(burnedFunds)
+  const usdResultsTexts = []
+  const oceanResultsTexts = []
+  const usdResultsValues = []
+  const oceanResultsValues = []
+  finalResults.earmarkedResults.earmarks.forEach((earmark) => {
+    usdResultsTexts.push(`${earmark} USD ${foundsLeftRuleString}`)
+    oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
+    const usdFundsLeft = finalResults.earmarkedResults[earmark].fundsLeft
+    usdResultsValues.push(finalResults.earmarkedResults[earmark].fundsLeft)
+    oceanResultsValues.push(usdFundsLeft/oceanPrice)
+  })
+
+  //Total USD&OCEAN burned/recycled
+  usdResultsTexts.push(`Total USD ${foundsLeftRuleString}`)
+  oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
+  usdResultsValues.push(finalResults.earmarkedResults.fundsLeft)
+  oceanResultsValues.push(finalResults.earmarkedResults.fundsLeft / oceanUSD)
+
+  //Total USD&OCEAN granted
+  usdResultsTexts.push(`Total USD Granted`)
+  oceanResultsTexts.push(`Total OCEAN Granted`)
+  usdResultsValues.push(finalResults.earmarkedResults.usdEarmarked)
+  oceanResultsValues.push(finalResults.earmarkedResults.usdEarmarked / oceanUSD)
+
+  gsheetRows.push(usdResultsTexts)
+  gsheetRows.push(usdResultsValues)
+  gsheetRows.push(oceanResultsTexts)
+  gsheetRows.push(oceanResultsValues)
+  gsheetRows.push([])
 
   await updateValues(
     oAuth,
