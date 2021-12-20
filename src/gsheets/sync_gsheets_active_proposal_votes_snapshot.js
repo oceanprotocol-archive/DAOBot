@@ -124,7 +124,7 @@ const calculateRoundSummary = async (
     votes = Object.entries(voterScores[proposals[0].get('ipfsHash')])
   } else if (curRoundBallotType === BallotType.Batch) {
     const ipfsHash = proposals[0].get('ipfsHash')
-      votes = votes.concat(Object.entries(voterScores[ipfsHash]))
+    votes = votes.concat(Object.entries(voterScores[ipfsHash]))
   }
 
   // map votes to each wallet
@@ -178,19 +178,18 @@ const calculateRoundSummary = async (
         let sumNoVotes = 0
 
         let allWalletVotesCount = 0
-        for (const [, votesCount] of Object.entries(walletChoices))
-          allWalletVotesCount += votesCount
+        allWalletVotesCount += Object.entries(walletChoices).length
 
         for (const [index, votesCount] of Object.entries(walletChoices)) {
           const proposalIndex = parseInt(index)
 
           if (votesCount > 0 && allWalletVotesCount > 0 && walletBalance > 0) {
             if (proposalsYesIndexes.includes(proposalIndex)) {
-              numYesVotes += votesCount
-              sumYesVotes += (walletBalance / allWalletVotesCount) * votesCount
+              numYesVotes += 1
+              sumYesVotes += (walletBalance / allWalletVotesCount) * 1
             } else if (proposalsNoIndexes.includes(proposalIndex)) {
-              numNoVotes += votesCount
-              sumNoVotes += (walletBalance / allWalletVotesCount) * votesCount
+              numNoVotes += 1
+              sumNoVotes += (walletBalance / allWalletVotesCount) * 1
             }
           }
         }
