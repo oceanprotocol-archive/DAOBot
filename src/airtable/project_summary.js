@@ -169,9 +169,9 @@ const summarize = (proposals) => {
     if (!project) {
       project = {
         'Project Name': proposal['Project Name'],
-        'Voted Yes': proposal['Voted Yes'],
-        'Voted No': proposal['Voted No'],
-        'OCEAN Granted': proposal['OCEAN Granted'],
+        'Voted Yes': proposal['Voted Yes'] ?? 0,
+        'Voted No': proposal['Voted No'] ?? 0,
+        'OCEAN Granted': proposal['OCEAN Granted'] ?? 0,
         'Times Proposed': 1,
         'Times Granted': proposal['OCEAN Granted'] > 0 ? 1 : 0,
         'Project Standing': {
@@ -185,9 +185,9 @@ const summarize = (proposals) => {
       }
       project['Project Standing'][proposal['Proposal Standing']] += 1
     } else {
-      project['Voted Yes'] += proposal['Voted Yes']
-      project['Voted No'] += proposal['Voted No']
-      project['OCEAN Granted'] += proposal['OCEAN Granted']
+      project['Voted Yes'] += proposal['Voted Yes'] ?? 0
+      project['Voted No'] += proposal['Voted No'] ?? 0
+      project['OCEAN Granted'] += proposal['OCEAN Granted'] ?? 0
       project['Times Granted'] += proposal['OCEAN Granted'] > 0 ? 1 : 0
 
       project['Times Proposed'] += 1
