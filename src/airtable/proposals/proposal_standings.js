@@ -87,7 +87,10 @@ const getProposalState = (
     proposalState = State.Rejected
   }
 
-  if (proposalState === State.Accepted && ethTransactionExists) {
+  if (
+    (proposalState === State.Accepted || proposalState === State.Granted) &&
+    ethTransactionExists
+  ) {
     proposalState = State.Funded
   }
 
