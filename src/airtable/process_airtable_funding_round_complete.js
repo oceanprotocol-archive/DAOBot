@@ -117,7 +117,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let sheet = await getValues(oAuth, sheetName, 'A1:B3')
   if (sheet === undefined) {
     sheet = await addSheet(oAuth, sheetName, curRoundNumber)
-    console.log('Created new sheet [%s].', sheetName)
+    Logger.log('Created new sheet [%s].', sheetName)
   }
 
   let gsheetRows = []

@@ -9,10 +9,6 @@ const {
 } = require('../../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../../snapshot/snapshot_utils')
 
-beforeEach(() => {
-  jest.setTimeout(20000)
-})
-
 afterAll(() => {
   jest.clearAllTimers()
 })

@@ -300,10 +300,9 @@ const dumpRoundSummaryToGSheets = async (
   // Get the sheet, otherwise create it
   const sheetName = `Round ${curRoundNumber} Results`
   var sheet = await getValues(oAuth, sheetName, 'A1:B3')
-  console.log(sheet)
   if (sheet === undefined) {
     await addSheet(oAuth, sheetName, curRoundNumber)
-    await console.log('Created new sheet [%s] at index 0.', sheetName)
+    await Logger.log('Created new sheet [%s] at index 0.', sheetName)
   }
 
   // Dump flattened data from proposalSummary to sheet
