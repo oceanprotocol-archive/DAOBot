@@ -51,7 +51,7 @@ const dumpWiningProposalsByEarmarksToGSheet = async (
         'OCEAN Requested',
         'OCEAN Granted'
       ])
-    }else{
+    } else {
       continue
     }
     earmarkGSheetResults.push([''])
@@ -110,7 +110,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   // Finally, write to gsheets
   const oAuth = await initOAuthToken()
-  const fundsLeftRule = curRound.get('Funds Left')  
+  const fundsLeftRule = curRound.get('Funds Left')
   const sheetName = 'Round' + curRoundNumber + 'FinalResults'
 
   // Get the sheet, otherwise create it
@@ -150,16 +150,18 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
     oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
     const usdFundsLeft = finalResults.earmarkedResults[earmark].fundsLeft
     usdResultsValues.push(finalResults.earmarkedResults[earmark].fundsLeft)
-    oceanResultsValues.push(usdFundsLeft/oceanPrice)
+    oceanResultsValues.push(usdFundsLeft / oceanPrice)
   })
 
-  //Total USD&OCEAN burned/recycled
+  // Total USD&OCEAN burned/recycled
   usdResultsTexts.push(`Total USD ${foundsLeftRuleString}`)
   oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
   usdResultsValues.push(finalResults.earmarkedResults.fundsRecycled)
-  oceanResultsValues.push(finalResults.earmarkedResults.fundsRecycled / oceanUSD)
+  oceanResultsValues.push(
+    finalResults.earmarkedResults.fundsRecycled / oceanUSD
+  )
 
-  //Total USD&OCEAN granted
+  // Total USD&OCEAN granted
   usdResultsTexts.push(`Total USD Granted`)
   oceanResultsTexts.push(`Total OCEAN Granted`)
   usdResultsValues.push(finalResults.earmarkedResults.usdEarmarked)
@@ -198,9 +200,7 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   const finalResults = calculateFinalResults(winningProposals, curRound)
   const oceanPrice = curRound.get('OCEAN Price')
 
-  const burntFunds =
-    finalResults.earmarkedResults.fundsLeft /
-    oceanPrice
+  const burntFunds = finalResults.earmarkedResults.fundsLeft / oceanPrice
   return burntFunds
 }
 

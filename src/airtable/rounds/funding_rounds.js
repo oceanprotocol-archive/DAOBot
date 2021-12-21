@@ -12,7 +12,7 @@ const RoundState = {
 
 const Earmarks = {
   NEW_OUTREACH: 'New Outreach',
-  NEW_GENERAL: 'New General',
+  NEW_ENTRANTS: 'New Entrants',
   CORE_TECH: 'Core Tech',
   GENERAL: 'General'
 }
@@ -131,10 +131,15 @@ const calculateWinningProposalsForEarmark = (
 
       const grantCarry = p.get('USD Granted') || 0
       let usdGranted =
-          fundsLeft - Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice > 0
+        fundsLeft -
+          Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice >
+        0
           ? usdRequested - grantCarry
           : fundsLeft
-      const oceanGranted = usdGranted === fundsLeft ? Math.floor((usdGranted + grantCarry) / oceanPrice) : Math.ceil((usdGranted + grantCarry) / oceanPrice)
+      const oceanGranted =
+        usdGranted === fundsLeft
+          ? Math.floor((usdGranted + grantCarry) / oceanPrice)
+          : Math.ceil((usdGranted + grantCarry) / oceanPrice)
       usdGranted = oceanGranted * oceanPrice
 
       p.fields['OCEAN Requested'] = oceanRequested
@@ -142,7 +147,8 @@ const calculateWinningProposalsForEarmark = (
       p.fields['USD Granted'] = usdGranted + grantCarry
       p.fields['OCEAN Granted'] = oceanGranted
       p.fields['Proposal State'] = 'Granted'
-      fundsLeft = fundsLeft - usdGranted < 0 ? fundsLeft : fundsLeft - usdGranted
+      fundsLeft =
+        fundsLeft - usdGranted < 0 ? fundsLeft : fundsLeft - usdGranted
 
       // If we reached the total, then it won via this grant pot
       if (usdRequested <= usdGranted + grantCarry) winningProposals.push(p)
@@ -161,14 +167,14 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   const earmarksJson = JSON.parse(fundingRound.get('Earmarks'))
     ? JSON.parse(fundingRound.get('Earmarks'))
     : {}
-  const fundsLeftAction = fundingRound.get('Funds Left')  
+  const fundsLeftAction = fundingRound.get('Funds Left')
   const earmarkedWinnerIds = []
   let currentUsdEarmarked = 0
   const earmarkedResults = {}
   let fundsLeft = 0
   let fundsRecycled = 0
   const allWinningProposals = []
-  let earmarks = []
+  const earmarks = []
   let usdEarmarked = 0
 
   for (const earmark in earmarksJson) {
@@ -176,16 +182,20 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
     let earmarkProposals = proposals.filter(
       (proposal) => proposal.get('Earmarks') === earmark
     )
-    if(earmark === 'General'){
-      let earmarkedProposalNotFunded = proposals.filter((p) => earmarkedWinnerIds.lastIndexOf(p.id) === -1 && p.get('Earmarks') !== earmark)
+    if (earmark === 'General') {
+      const earmarkedProposalNotFunded = proposals.filter(
+        (p) =>
+          earmarkedWinnerIds.lastIndexOf(p.id) === -1 &&
+          p.get('Earmarks') !== earmark
+      )
       earmarkProposals = earmarkProposals.concat(earmarkedProposalNotFunded)
-      if(fundsLeftAction === 'Recycle'){
+      if (fundsLeftAction === 'Recycle') {
         currentUsdEarmarked = earmarksJson[earmark].USD + fundsLeft
         fundsLeft = 0
-      }else{
+      } else {
         currentUsdEarmarked = earmarksJson[earmark].USD
       }
-    }else{
+    } else {
       currentUsdEarmarked = earmarksJson[earmark].USD
     }
 
@@ -193,7 +203,10 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       usdEarmarked += currentUsdEarmarked
       fundsLeft += earmarksJson[earmark].USD
       fundsRecycled += earmarksJson[earmark].USD
-      earmarkedResults[earmark] = {'winningProposals': [], 'fundsLeft': earmarksJson[earmark].USD}
+      earmarkedResults[earmark] = {
+        winningProposals: [],
+        fundsLeft: earmarksJson[earmark].USD
+      }
       continue
     }
     const winningProposals = calculateWinningProposalsForEarmark(
@@ -217,7 +230,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
 
   earmarkedResults.winnerIds = earmarkedWinnerIds
   earmarkedResults.usdEarmarked = usdEarmarked
-  earmarkedResults.earmarks = earmarks 
+  earmarkedResults.earmarks = earmarks
   earmarkedResults.winningProposals = allWinningProposals
   earmarkedResults.fundsLeft = fundsLeft
   earmarkedResults.fundsRecycled = fundsRecycled
