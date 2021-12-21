@@ -29,6 +29,8 @@ let roundSummary = {}
 // 2. Creates sheet if doesn't exist
 // 3. Flatten proposals into an array of values
 // 4. Dumps flat scores & header from snapshot
+
+/*
 const dumpFromSnapshotRawToGSheet = async (
   curRoundNumber,
   ipfsHash,
@@ -40,8 +42,8 @@ const dumpFromSnapshotRawToGSheet = async (
   // Get the sheet, otherwise create it
   var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
   if (proposal === undefined) {
-    await addSheet(oAuth, ipfsHash, { indexOffset: curRoundNumber })
-    Logger.log(
+    await addSheet(oAuth, ipfsHash, curRoundNumber)
+    console.log(
       'Created new sheet [%s] at index [%s].',
       ipfsHash,
       curRoundNumber
@@ -57,11 +59,25 @@ const dumpFromSnapshotRawToGSheet = async (
       Logger.error(err)
     }
   })
-
+  // Flatten votes from this proposal
+  var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
+    try {
+      const vote = v[1]
+      return [
+        vote.address,
+        JSON.stringify(vote.choice),
+        vote.created,
+        vote.balance
+      ]
+    } catch (err) {
+      console.log(err)
+    }
+  })
   // Dump flattened data from snapshot to sheet
-  flatObj.splice(0, 0, ['address', 'balace'])
-  await updateValues(oAuth, ipfsHash, 'A1:C' + flatObj.length, flatObj)
+  flatObj.splice(0, 0, ['address', 'choice', 'created', 'balace'])
+  await updateValues(oAuth, ipfsHash, 'A1:E' + flatObj.length, flatObj)
 }
+*/
 
 // For each proposal, calculate their summary
 const calculateProposalSummary = async (
@@ -113,8 +129,7 @@ const calculateProposalSummary = async (
 const calculateRoundSummary = async (
   curRoundBallotType,
   proposals,
-  voterScores,
-  proposalScores
+  voterScores
 ) => {
   // push all votes, from all proposals into a single object
   let votes = []
@@ -286,8 +301,8 @@ const dumpRoundSummaryToGSheets = async (
   const sheetName = `Round ${curRoundNumber} Results`
   var sheet = await getValues(oAuth, sheetName, 'A1:B3')
   if (sheet === undefined) {
-    await addSheet(oAuth, sheetName)
-    Logger.log('Created new sheet [%s] at index 0.', sheetName)
+    await addSheet(oAuth, sheetName, curRoundNumber)
+    await Logger.log('Created new sheet [%s] at index 0.', sheetName)
   }
 
   // Dump flattened data from proposalSummary to sheet
@@ -318,7 +333,7 @@ const dumpRoundSummaryToGSheets = async (
 }
 
 // DRY
-const getActiveProposalVotes = async (curRoundNumber) => {
+const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   const proposalVotes = {}
   const voterScores = {}
   const proposalScores = {}
@@ -332,7 +347,6 @@ const getActiveProposalVotes = async (curRoundNumber) => {
       try {
         const ipfsHash = proposal.get('ipfsHash')
         const strategy = getVoteCountStrategy(proposal.get('Round'))
-
         await getProposalVotesGQL(ipfsHash).then((result) => {
           proposalVotes[ipfsHash] = result.data.votes
         })
@@ -352,7 +366,10 @@ const getActiveProposalVotes = async (curRoundNumber) => {
           proposalVotes[ipfsHash],
           scores
         )
-        proposalScores[ipfsHash] = reduceProposalScores(voterScores[ipfsHash])
+        proposalScores[ipfsHash] = reduceProposalScores(
+          curRoundBallotType,
+          voterScores[ipfsHash]
+        )
       } catch (err) {
         Logger.error(err)
       }
@@ -367,14 +384,20 @@ const syncGSheetsActiveProposalVotes = async (
   curRoundBallotType
 ) => {
   // Retrieve all active proposals from Airtable
-  const results = await getActiveProposalVotes(curRoundNumber)
+  const results = await getActiveProposalVotes(
+    curRoundNumber,
+    curRoundBallotType
+  )
   const voterScores = results[0]
   const proposalScores = results[1]
 
   // Output the raw snapshot raw data into gsheets
+  /*
   Object.entries(voterScores).map(async (p) => {
+    await timer(3000)
     await dumpFromSnapshotRawToGSheet(curRoundNumber, p[0], voterScores)
   })
+  */
 
   // Output the round summary
   proposalSummary = await calculateProposalSummary(
@@ -385,8 +408,7 @@ const syncGSheetsActiveProposalVotes = async (
   roundSummary = await calculateRoundSummary(
     curRoundBallotType,
     activeProposals,
-    voterScores,
-    proposalScores
+    voterScores
   )
   await dumpRoundSummaryToGSheets(curRoundNumber, proposalSummary, roundSummary)
 
