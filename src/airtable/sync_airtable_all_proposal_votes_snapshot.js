@@ -27,6 +27,7 @@ var proposalVoteSummary = {}
 
 const getAllProposalVotes = async () => {
   const curRound = await getCurrentRound()
+  const curRoundBallotType = curRound.get('Ballot Type')
   const curRoundNumber = curRound.get('Round')
 
   for (var roundNum = 1; roundNum < curRoundNumber; roundNum++) {
@@ -60,7 +61,10 @@ const getAllProposalVotes = async () => {
             proposalVotes[ipfsHash],
             voterScores
           )
-          proposalScores[ipfsHash] = reduceProposalScores(reducedVoterScores)
+          proposalScores[ipfsHash] = reduceProposalScores(
+            curRoundBallotType,
+            reducedVoterScores
+          )
         } catch (err) {
           Logger.error(err)
         }

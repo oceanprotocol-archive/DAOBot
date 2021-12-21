@@ -98,7 +98,7 @@ const getWinningProposals = (proposals, curFundingRound) => {
 
 const getDownvotedProposals = (proposals) => {
   const downvotedProposals = proposals.filter(
-    (p) => p.get('Voted Yes') < p.get('Voted No')
+    (p) => p.get('Voted Yes') <= p.get('Voted No')
   )
   downvotedProposals.map((p) => {
     p.fields['OCEAN Requested'] = 0

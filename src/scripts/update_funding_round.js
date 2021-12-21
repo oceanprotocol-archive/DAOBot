@@ -111,7 +111,10 @@ const main = async () => {
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
-      await syncAirtableActiveProposalVotes(lastRoundNumber)
+      await syncAirtableActiveProposalVotes(
+        lastRoundNumber,
+        lastRoundBallotType
+      )
       await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
 
       // Complete round calculations
@@ -266,7 +269,7 @@ const main = async () => {
       Logger.log('Update vote count.')
 
       // Update votes
-      await syncAirtableActiveProposalVotes(curRoundNumber)
+      await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
       await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
     }
   }
