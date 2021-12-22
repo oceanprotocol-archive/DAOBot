@@ -35,7 +35,7 @@ beforeEach(async function () {
 
   allProposals = [
     {
-      id: 'proposal_5',
+      id: 'proposal_1',
       fields: {
         'Project Name': 'Pretty Pear',
         'USD Requested': 30000,
@@ -47,19 +47,19 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_1',
+      id: 'proposal_2',
       fields: {
         'Project Name': 'Oblong Apple',
         'USD Requested': 20000,
         'Voted Yes': 1000,
-        'Voted No': 0
+        'Voted No': 1000
       },
       get: function (key) {
         return this.fields[key]
       }
     },
     {
-      id: 'proposal_4',
+      id: 'proposal_3',
       fields: {
         'Project Name': 'Funky Fig',
         'USD Requested': 1000,
@@ -71,7 +71,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_8',
+      id: 'proposal_4',
       fields: {
         'Project Name': 'Warped Watermelon',
         'USD Requested': 1000,
@@ -83,7 +83,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_2',
+      id: 'proposal_5',
       fields: {
         'Project Name': 'Swift Tangerine',
         'USD Requested': 1000,
@@ -95,7 +95,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_7',
+      id: 'proposal_6',
       fields: {
         'Project Name': 'Grudging Grape',
         'USD Requested': 1000,
@@ -107,7 +107,7 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_3',
+      id: 'proposal_7',
       fields: {
         'Project Name': 'Bittersweet Lemon',
         'USD Requested': 1000,
@@ -119,11 +119,23 @@ beforeEach(async function () {
       }
     },
     {
-      id: 'proposal_6',
+      id: 'proposal_8',
       fields: {
         'Project Name': 'Averse Avocado',
         'USD Requested': 1000,
         'Voted Yes': 500,
+        'Voted No': 0
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_9',
+      fields: {
+        'Project Name': 'Pinkie Cherry',
+        'USD Requested': 1000,
+        'Voted Yes': 0,
         'Voted No': 0
       },
       get: function (key) {
@@ -172,22 +184,22 @@ describe('Calculating Winners', function () {
     }
   })
 
-  it('Sample data includes 3 proposals', function () {
-    should.equal(allProposals.length, 8)
+  it('Sample data includes 9 proposals', function () {
+    should.equal(allProposals.length, 9)
   })
 
   it('Retrieves all winning proposals sorted by vote count', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
 
-    should.equal(winningProposals.length, 7)
-    should.equal(winningProposals[0].id, 'proposal_1')
-    should.equal(winningProposals[6].id, 'proposal_8')
+    should.equal(winningProposals.length, 6)
+    should.equal(winningProposals[0].id, 'proposal_7')
+    should.equal(winningProposals[5].id, 'proposal_4')
   })
 
   it('Retrieves all losing proposals sorted by vote count', function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
 
-    should.equal(downvotedProposals.length, 1)
+    should.equal(downvotedProposals.length, 3)
     should.equal(downvotedProposals[0].id, 'proposal_2')
   })
 
@@ -243,7 +255,7 @@ describe('Calculating Winners', function () {
 
   it('Validates all Final Result parameters are correct.', function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
-    should.equal(downvotedProposals.length, 1)
+    should.equal(downvotedProposals.length, 3)
 
     fundingRound.fields['Funding Available USD'] = 115000
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
@@ -255,7 +267,7 @@ describe('Calculating Winners', function () {
     Logger.log(finalResults)
 
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.earmarkedResults.winningProposals.length, 2)
+    should.equal(finalResults.earmarkedResults.winningProposals.length, 1)
     should.equal(finalResults.generalResults.winningProposals.length, 3)
     should.equal(finalResults.partiallyFunded.length, 1)
     should.equal(finalResults.notFunded.length, 1)
@@ -310,20 +322,20 @@ describe('Calculating Winners', function () {
 
     should.equal(
       earmarkedUSDGranted + generalUSDGranted + partialUSDGranted,
-      55000
+      35000
     )
   })
 
   it('Validates gsheet output is correct.', async function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
-    should.equal(downvotedProposals.length, 1)
+    const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
+    should.equal(downvotedProposals.length, 3)
 
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[1].fields.Earmarks = Earmarks.NEW_OUTREACH
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
     const earmarkedResults = await dumpResultsToGSheet(
       finalResults.earmarkedResults.winningProposals
     )
@@ -334,10 +346,9 @@ describe('Calculating Winners', function () {
       finalResults.partiallyFunded
     )
     const notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
-
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(downvotedResults.length, 2)
-    should.equal(earmarkedResults.length, 3)
+    should.equal(earmarkedResults.length, 2)
+    should.equal(downvotedResults.length, 4)
     should.equal(generalResults.length, 6)
     should.equal(partiallyFundedResults.length, 1)
     should.equal(notFundedResults.length, 1)

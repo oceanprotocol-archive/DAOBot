@@ -187,6 +187,7 @@ const getVotesQuery = (ifpshash) => `query Votes {
   ) {
     voter
     choice
+    created
   }
 }`
 
@@ -251,32 +252,38 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
     return {
       address: newVoter,
       choice: voter[1].choice,
+      created: voter[1].created,
       balance: strategyScore
     }
   })
 }
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
-const reduceProposalScores = (voterScores) => {
-  const scores = {}
+const reduceProposalScores = (ballotType, voterScores) => {
+  const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
     const voterAllChoices = cur[1].choice
     const voterTotalBalance = cur[1].balance
 
-    let voterVotesCount = 0
-    for (const [, vote] of Object.entries(voterAllChoices)) {
-      voterVotesCount += vote
-    }
+    if (ballotType === BallotType.Granular) {
+      if (scores[voterAllChoices] === undefined) scores[voterAllChoices] = 0
+      scores[voterAllChoices] += voterTotalBalance
+    } else {
+      let voterVotesCount = 0
+      for (const [, vote] of Object.entries(voterAllChoices)) {
+        voterVotesCount += vote
+      }
 
-    for (const [proposalIndex, proposalVotes] of Object.entries(
-      voterAllChoices
-    )) {
-      if (scores[proposalIndex] === undefined) scores[proposalIndex] = 0
-      scores[proposalIndex] +=
-        voterVotesCount > 0 && voterTotalBalance > 0 && proposalVotes > 0
-          ? (voterTotalBalance / voterVotesCount) * proposalVotes
-          : 0
+      for (const [proposalIndex, proposalVotes] of Object.entries(
+        voterAllChoices
+      )) {
+        if (scores[proposalIndex] === undefined) scores[proposalIndex] = 0
+        scores[proposalIndex] +=
+          voterVotesCount > 0 && voterTotalBalance > 0 && proposalVotes > 0
+            ? (voterTotalBalance / voterVotesCount) * proposalVotes
+            : 0
+      }
     }
   }, {})
 
