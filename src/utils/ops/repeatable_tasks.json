@@ -3,7 +3,13 @@
     "title": "R{{ROUND_NUMBER}} [Params-Roadmap WG] Prepare Round - Define round parameters ",
     "body": "- [ ] Funding Amount\n - [ ] Funding Cap\n- [ ] Earmarks\n- [ ] Add new round parameters to the [Airtable Funding Rounds Table](https://airtable.com/appVer8ccYGnqSm2H/tbliawPTKlmd1lVA5/viwcabfq70TWi2BVz?blocks=hide)",
     "assignees": ["idiom-bytes"],
-    "labels": ["Type: OPS"]
+    "labels": ["Type: OPS", "Parameters-Roadmap WG"]
+  },
+  {
+    "title": "R{{ROUND_NUMBER}} [Params-Roadmap WG] Prepare Round - Add new round line inside airtable ",
+    "body": "- Add the new round inside airtable and fill in the following fields\n - [ ] Round number\n - [ ] Vote Type\n - [ ] Ballot type\n - [ ] Start date\n - [ ] Proposal Due By\n - [ ] Voting Starts\n - [ ] Voting Ends\n - [ ] Funding Deadline\n - [ ] Basis Currency",
+    "assignees": ["idiom-bytes"],
+    "labels": ["Type: OPS", "Parameters-Roadmap WG"]
   },
   {
     "title": "R{{ROUND_NUMBER}} Townhalls setup",
