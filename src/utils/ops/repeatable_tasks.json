@@ -55,13 +55,13 @@
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Port",
-    "body": "- [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live",
+    "body": "How to open port [video](https://drive.google.com/file/d/1RNa0Sd9tQsN7UqOaMkuELyWIs-ZL8ksu/view?usp=sharing)\n - [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live",
     "assignees": ["AnaLoznianu"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} Proposals Submissions - Live-OPS",
-    "body": "- [ ] Review Port for new proposals\n- [ ] Add proposals to Airtable\n- [ ] Make sure every project provided all required informations and it's properly registered\n - [ ] Check up on projects that do not have sufficient OCEAN.\n- [ ] Provide proposal summaries to MarCom for tweets.",
+    "body": "How to do the live-ops [video](https://drive.google.com/file/d/1dtv3eb6MGU5gwrQpz7nAuRLvaqTqn_T-/view?usp=sharing)\n - [ ] Review Port for new proposals\n- [ ] Add proposals to Airtable\n- [ ] Make sure every project provided all required informations and it's properly registered\n - [ ] Check up on projects that do not have sufficient OCEAN.\n- [ ] Provide proposal summaries to MarCom for tweets.",
     "assignees": ["AnaLoznianu"],
     "labels": ["Type: OPS"]
   },
