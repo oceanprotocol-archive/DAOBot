@@ -72,6 +72,12 @@
     "labels": ["Type: OPS"]
   },
   {
+    "title": "R{{ROUND_NUMBER}} Proposals Updates - Live-OPS",
+    "body": "- [ ] Review port for proposal updates\n - [ ] Update proposals deliverable checklist inside airtable",
+    "assignees": ["AnaLoznianu"],
+    "labels": ["Type: OPS"]
+  },
+  {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Vote - Notion Voting Page",
     "body": "- [ ] Integrate GSheet for Round {{ROUND_NUMBER}} in the Notion Voting Page",
     "assignees": ["AnaLoznianu"],
