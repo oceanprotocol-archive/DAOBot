@@ -232,21 +232,7 @@ const processHistoricalStandings = async (proposalStandings) => {
     let outstandingURL = ''
     let lastStanding
     for (const proposal of value) {
-      const areOceansEnough = await hasEnoughOceans(
-        proposal.fields['Wallet Address']
-      )
       proposal.fields['Outstanding Proposals'] = ''
-      if (proposal.fields['Proposal Standing'] === Standings.NoOcean) {
-        if (areOceansEnough) {
-          proposal.fields['Proposal State'] = State.Accepted
-          proposal.fields['Proposal Standing'] = !projectHasCompletedProposals(
-            proposal,
-            value
-          )
-            ? Standings.NewProject
-            : Standings.Unreported
-        }
-      }
 
       // DISPUTES: If a proposal is under dispute, the project standing becomes poor
       // INCOMPLETION: If a proposal is incomplete/timedout, the project standing becomes poor
