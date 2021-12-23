@@ -42,12 +42,6 @@
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
-    "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Wiki",
-    "body": "- [ ] Update [wiki](https://github.com/oceanprotocol/oceandao/wiki) with round details\n - Add round parameters\n - Port: {{ROUND_PORT_LINK}}\n- Funding tiers\n- [Important Links](https://github.com/oceanprotocol/oceandao/wiki#important-links) with round notion pages and the calendar",
-    "assignees": ["AnaLoznianu"],
-    "labels": ["Type: Dev", "Type: OPS"]
-  },
-  {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Google Schedule",
     "body": "**Add round events in the [cean Ecosystem Calendar](https://oceandao.notion.site/Ocean-Ecosystem-Calendar-4cefa1944a314128afd2ae0ea1a04eb6)**\n- [ ] OceanDAO - GR{{ROUND_NUMBER}}\n - Period: {{ROUND_PROPOSALS_START_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n - Description: Link to [port round]({{ROUND_PORT_LINK}})\n - [ ] R{{ROUND_NUMBER}} Last Week to Submit\n- Period: {{ROUND_PROPOSALS_LAST_WEEK_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n- Description: Get your proposal submissions in place!  https://oceanprotocol.com/dao\n- [ ] R{{ROUND_NUMBER}} Due Dilligence\n- Period: {{ROUND_PROPOSALS_END_DATE}} - {{ROUND_VOTING_START_DATE}}\n- [ ] R{{ROUND_NUMBER}} Voting Period\n- Period: {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}\n- Description: Cast your vote - link to the voting notion page.\n- [ ] R{{ROUND_NUMBER}} Last Day to Vote\n - Period: {{ROUND_VOTING_LAST_DAY_DATE}} - {{ROUND_VOTING_END_DATE}}\n - Description: Last day to get your votes in place!",
     "assignees": ["AnaLoznianu"],
@@ -60,8 +54,8 @@
     "labels": ["Type: OPS", "Type: MarCom"]
   },
   {
-    "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Port",
-    "body": "How to open port [video](https://drive.google.com/file/d/1RNa0Sd9tQsN7UqOaMkuELyWIs-ZL8ksu/view?usp=sharing)\n - [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live",
+    "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Port & Wiki",
+    "body": "How to open port [video](https://drive.google.com/file/d/1RNa0Sd9tQsN7UqOaMkuELyWIs-ZL8ksu/view?usp=sharing)\n - [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live\n- [ ] Update [wiki](https://github.com/oceanprotocol/oceandao/wiki) with round details\n - Add round parameters\n - Port: {{ROUND_PORT_LINK}}\n- Funding tiers\n- [Important Links](https://github.com/oceanprotocol/oceandao/wiki#important-links) with round notion pages and the calendar",
     "assignees": ["AnaLoznianu"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
