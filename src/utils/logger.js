@@ -5,8 +5,12 @@ const hooks = {
   logMethod(args, method) {
     if (args.length > 1) {
       for (let i = 1; i < args.length; i++) {
-        if (typeof args[i] === 'object')
-          args[i] = JSON.stringify(args[i], null, 2)
+        try {
+          if (typeof args[i] === 'object')
+            args[i] = JSON.stringify(args[i], null, 2)
+        } catch (e) {
+          console.error(e)
+        }
         args[0] += ' %j'
       }
     }
