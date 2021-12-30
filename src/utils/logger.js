@@ -14,25 +14,25 @@ const logger = require('pino')({
 const _get = (type, ...args) => {
   switch (type) {
     case 'log':
-      logger.info(...args)
+      logger.info(args.join(', '))
       break
     case 'error':
-      logger.error(...args)
+      logger.error(args.join(', '))
       break
     case 'warn':
-      logger.warn(...args)
+      logger.warn(args.join(', '))
       break
     case 'debug':
-      logger.debug(...args)
+      logger.debug(args.join(', '))
       break
     case 'trace':
-      logger.trace(...args)
+      logger.trace(args.join(', '))
       break
     case 'info':
-      logger.info(...args)
+      logger.info(args.join(', '))
       break
     default:
-      logger.info(...args)
+      logger.info(args.join(', '))
       break
   }
 }
