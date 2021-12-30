@@ -51,6 +51,8 @@ const dumpWiningProposalsByEarmarksToGSheet = async (
         'OCEAN Requested',
         'OCEAN Granted'
       ])
+    } else {
+      continue
     }
     earmarkGSheetResults.push([''])
     gsheetRows = gsheetRows.concat(earmarkGSheetResults)
@@ -68,14 +70,12 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   const downvotedProposals = getDownvotedProposals(activeProposals)
   const winningProposals = getWinningProposals(activeProposals, curRoundNumber)
   const finalResults = calculateFinalResults(winningProposals, curRound)
+  const oceanPrice = curRound.get('OCEAN Price')
 
   let airtableRows = []
   airtableRows = airtableRows.concat(downvotedProposals)
   airtableRows = airtableRows.concat(
     finalResults.earmarkedResults.winningProposals
-  )
-  airtableRows = airtableRows.concat(
-    finalResults.generalResults.winningProposals
   )
   airtableRows = airtableRows.concat(finalResults.partiallyFunded)
   airtableRows = airtableRows.concat(finalResults.notFunded)
@@ -110,7 +110,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   // Finally, write to gsheets
   const oAuth = await initOAuthToken()
-
+  const fundsLeftRule = curRound.get('Funds Left')
   const sheetName = 'Round' + curRoundNumber + 'FinalResults'
 
   // Get the sheet, otherwise create it
@@ -121,7 +121,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   }
 
   let gsheetRows = []
-
   // Flatten results onto gsheetRows
   gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
     finalResults.earmarkedResults,
@@ -137,36 +136,42 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   gsheetRows = gsheetRows.concat(notFundedResults)
   gsheetRows = gsheetRows.concat(downvotedResults)
 
-  const oceanUSD = curRound.get('OCEAN Price')
   // 2x Rows => Header & Summed results
-  const burnedFunds = [
-    ['Earmarked USD Burned', '', 'General USD Burned', '', 'Total USD Burned'],
-    [
-      finalResults.earmarkedResults.fundsLeft,
-      '',
-      finalResults.generalResults.fundsLeft,
-      '',
-      finalResults.earmarkedResults.fundsLeft +
-        finalResults.generalResults.fundsLeft
-    ],
-    [
-      'Earmarked OCEAN Burned',
-      '',
-      'General OCEAN Burned',
-      '',
-      'Total OCEAN Burned'
-    ],
-    [
-      finalResults.earmarkedResults.fundsLeft / oceanUSD,
-      '',
-      finalResults.generalResults.fundsLeft / oceanUSD,
-      '',
-      (finalResults.earmarkedResults.fundsLeft +
-        finalResults.generalResults.fundsLeft) /
-        oceanUSD
-    ]
-  ]
-  gsheetRows = gsheetRows.concat(burnedFunds)
+  gsheetRows.push([''])
+  gsheetRows.push(['Summed round results'])
+  const oceanUSD = curRound.get('OCEAN Price')
+  const foundsLeftRuleString = fundsLeftRule === 'Burn' ? 'Burned' : 'Recycled'
+  const usdResultsTexts = []
+  const oceanResultsTexts = []
+  const usdResultsValues = []
+  const oceanResultsValues = []
+  finalResults.earmarkedResults.earmarks.forEach((earmark) => {
+    usdResultsTexts.push(`${earmark} USD ${foundsLeftRuleString}`)
+    oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
+    const usdFundsLeft = finalResults.earmarkedResults[earmark].fundsLeft
+    usdResultsValues.push(finalResults.earmarkedResults[earmark].fundsLeft)
+    oceanResultsValues.push(usdFundsLeft / oceanPrice)
+  })
+
+  // Total USD&OCEAN burned/recycled
+  usdResultsTexts.push(`Total USD ${foundsLeftRuleString}`)
+  oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
+  usdResultsValues.push(finalResults.earmarkedResults.fundsRecycled)
+  oceanResultsValues.push(
+    finalResults.earmarkedResults.fundsRecycled / oceanUSD
+  )
+
+  // Total USD&OCEAN granted
+  usdResultsTexts.push(`Total USD Granted`)
+  oceanResultsTexts.push(`Total OCEAN Granted`)
+  usdResultsValues.push(finalResults.earmarkedResults.usdEarmarked)
+  oceanResultsValues.push(finalResults.earmarkedResults.usdEarmarked / oceanUSD)
+
+  gsheetRows.push(usdResultsTexts)
+  gsheetRows.push(usdResultsValues)
+  gsheetRows.push(oceanResultsTexts)
+  gsheetRows.push(oceanResultsValues)
+  gsheetRows.push([])
 
   await updateValues(
     oAuth,
@@ -182,7 +187,6 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
 
   return (
     finalResults.earmarkedResults.winningProposals.length +
-    finalResults.generalResults.winningProposals.length +
     finalResults.partiallyFunded.length
   )
 }
@@ -196,10 +200,7 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   const finalResults = calculateFinalResults(winningProposals, curRound)
   const oceanPrice = curRound.get('OCEAN Price')
 
-  const burntFunds =
-    (finalResults.earmarkedResults.fundsLeft +
-      finalResults.generalResults.fundsLeft) /
-    oceanPrice
+  const burntFunds = finalResults.earmarkedResults.fundsLeft / oceanPrice
   return burntFunds
 }
 
