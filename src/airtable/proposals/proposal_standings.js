@@ -294,7 +294,13 @@ const processHistoricalStandings = async (proposalStandings) => {
 
 const getProjectStandingStatus = (proposalStandings) => {
   for (const proposal of proposalStandings) {
+    const proposalCreated = new Date(proposal.fields['Created Date'])
+    // check if 3 months passed since proposal was created
+    const threeMonthsPassed =
+      Date.now() - proposalCreated.getTime() > 90 * 24 * 60 * 60 * 1000
+
     if (
+      threeMonthsPassed &&
       isFunded(proposal.fields['Proposal State']) &&
       (proposal.fields['Proposal Standing'] === Standings.Unreported ||
         proposal.fields['Proposal Standing'] === Standings.Incomplete ||
