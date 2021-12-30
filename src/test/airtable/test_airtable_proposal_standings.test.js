@@ -393,13 +393,50 @@ describe('Process Project Standings', function () {
     )
   })
 
-  it('Should set the latest project rejected if any of the previous ones has a bad standing', async function () {
+  it("Should NOT set the latest project rejected if any of the previous ones has a bad standing and three months HAVEN'T passed", async function () {
     allProposals.forEach((x) => {
       x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
     })
     allProposals.find((x) => x.id === 'proposal_7').fields[
       'Deliverable Checklist'
     ] = undefined // set proposal_7 to be incomplete
+
+    // Process proposals and historical standings
+    const previousProposals = allProposals.slice(0, allProposals.length - 1)
+    const currentProposals = [allProposals[allProposals.length - 1]]
+
+    const proposalStandings = await processProposalStandings(previousProposals)
+    await processHistoricalStandings(proposalStandings)
+
+    const latestProposalStandings = await getProjectsLatestProposal(
+      proposalStandings
+    )
+
+    const currentProposalStandings = await processProposalStandings(
+      currentProposals,
+      previousProposals
+    )
+
+    const latestProposals = getProjectsLatestProposal(currentProposalStandings)
+    await updateCurrentRoundStandings(
+      currentProposalStandings,
+      latestProposalStandings
+    )
+
+    expect(latestProposals.project2.fields['Proposal State']).to.equal(
+      State.Accepted
+    )
+  })
+
+  it('Should set the latest project rejected if any of the previous ones has a bad standing and three months have passed', async function () {
+    allProposals.forEach((x) => {
+      x.fields['Deliverable Checklist'] = '[x] D1\n[x] D2\n[x] D3'
+    })
+    allProposals.find((x) => x.id === 'proposal_7').fields[
+      'Deliverable Checklist'
+    ] = undefined // set proposal_7 to be incomplete
+    allProposals.find((x) => x.id === 'proposal_7').fields['Created Date'] =
+      '2021-05-30T12:38:33.607Z' // set proposal_7 date
 
     // Process proposals and historical standings
     const previousProposals = allProposals.slice(0, allProposals.length - 1)
@@ -489,6 +526,10 @@ describe('Process Project Standings', function () {
 
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
+    proposalStandings.test.map(
+      (x) => (x.fields['Created Date'] = '2021-05-30T12:38:33.607Z')
+    )
+
     const latestProposals = getProjectsLatestProposal(proposalStandings)
 
     for (const [projectName, value] of Object.entries(latestProposals)) {
@@ -497,7 +538,6 @@ describe('Process Project Standings', function () {
         .slice(-1)[0].id
       should.equal(value.id, lastProjectId)
     }
-
     const currentProposalStandings = await processProposalStandings(
       currentProposals
     )
@@ -523,7 +563,9 @@ describe('Process Project Standings', function () {
     // Process all proposals
     const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
-
+    proposalStandings.test.map(
+      (x) => (x.fields['Created Date'] = '2021-05-30T12:38:33.607Z')
+    )
     // Step 3 - Report the latest (top of stack) proposal standing from each project
     // latestProposal should equal head of each project
     const latestProposals = getProjectsLatestProposal(proposalStandings)
@@ -784,9 +826,6 @@ describe('Process Project Standings', function () {
     // Process all proposals
     const proposalStandings = await processProposalStandings(allProposals)
     await processHistoricalStandings(proposalStandings)
-    const latestProposal = getProjectsLatestProposal(proposalStandings)
-
-    should.equal(latestProposal.test.fields['Bad Status'], true)
   })
 
   it('Validate "No Ocean" property of "Proposal Standings" does not propagate to next round', async function () {
