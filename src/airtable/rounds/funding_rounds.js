@@ -115,6 +115,12 @@ const calculateWinningProposalsForEarmark = (
   oceanPrice
 ) => {
   const winningProposals = []
+  proposals.sort((a, b) =>
+    a.get('Voted Yes') - a.get('Voted No') <
+    b.get('Voted Yes') - b.get('Voted No')
+      ? 1
+      : -1
+  ) // Sort by Y/N ranking - highest to lowest
   let fundsLeft = fundsAvailableUSD
   for (const p of proposals) {
     if (fundsLeft > 0) {
