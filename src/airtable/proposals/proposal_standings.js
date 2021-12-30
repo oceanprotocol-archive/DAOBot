@@ -197,7 +197,8 @@ const getProposalRecord = async (proposal, allProposals) => {
       'Proposal State': proposalState,
       'Proposal Standing': newStanding,
       'Disputed Status': disputed,
-      'Outstanding Proposals': undefined
+      'Outstanding Proposals': undefined,
+      'Created Date': proposal.get('Created Date')
     }
   }
 }
