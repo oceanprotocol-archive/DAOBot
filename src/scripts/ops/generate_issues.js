@@ -127,7 +127,6 @@ function loadRoundIssues(
 function fillIssueWithRoundParameters(
   issue,
   roundNumber,
-  roundFundingAvailable,
   roundProposalStartDate,
   roundProposalEndDate,
   roundVotingStartDate,
