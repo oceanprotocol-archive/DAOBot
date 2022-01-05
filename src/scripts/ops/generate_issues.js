@@ -23,7 +23,6 @@ async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
   if (nextRound !== undefined && nextRound.length > 0) {
     ;[nextRound] = nextRound
     const nextRoundNumber = nextRound.get('Round')
-    const nextRoundFundingAvailable = nextRound.get('Funding Available')
     const nextRoundStartDate = nextRound.get('Start Date')
     const nextRoundProposalsDueBy = moment(nextRound.get('Proposals Due By'))
       .utc()
@@ -33,7 +32,6 @@ async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
     const opsGenerated = nextRound.get('OPS')
     if (
       nextRoundNumber !== undefined &&
-      nextRoundFundingAvailable !== undefined &&
       nextRoundStartDate !== undefined &&
       nextRoundProposalsDueBy !== undefined &&
       nextRoundVoteStart !== undefined &&
@@ -43,7 +41,6 @@ async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
       // Generate the OPS schedule issues on github
       await generateRoundGithubIssues(
         nextRoundNumber,
-        nextRoundFundingAvailable,
         nextRoundStartDate,
         nextRoundProposalsDueBy,
         nextRoundVoteStart,
@@ -59,7 +56,6 @@ async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
 
 async function generateRoundGithubIssues(
   roundNumber,
-  roundFundingAvailable,
   roundProposalStartDate,
   roundProposalEndDate,
   roundVotingStartDate,
@@ -72,7 +68,6 @@ async function generateRoundGithubIssues(
   try {
     const issues = loadRoundIssues(
       roundNumber,
-      roundFundingAvailable,
       roundProposalStartDate,
       roundProposalEndDate,
       roundVotingStartDate,
@@ -109,7 +104,6 @@ async function generateRoundGithubIssues(
 
 function loadRoundIssues(
   roundNumber,
-  roundFundingAvailable,
   roundProposalStartDate,
   roundProposalEndDate,
   roundVotingStartDate,
@@ -120,7 +114,6 @@ function loadRoundIssues(
     const pIssue = fillIssueWithRoundParameters(
       issue,
       roundNumber,
-      roundFundingAvailable,
       roundProposalStartDate,
       roundProposalEndDate,
       roundVotingStartDate,
@@ -134,7 +127,6 @@ function loadRoundIssues(
 function fillIssueWithRoundParameters(
   issue,
   roundNumber,
-  roundFundingAvailable,
   roundProposalStartDate,
   roundProposalEndDate,
   roundVotingStartDate,
@@ -147,7 +139,6 @@ function fillIssueWithRoundParameters(
 
   const patterns = {
     '{{ROUND_NUMBER}}': roundNumber.toString(),
-    '{{ROUND_FUNDING_AVAILABLE}}': roundFundingAvailable.toString(),
     '{{ROUND_PORT_LINK}}': portRoundLink,
     '{{ROUND_PROPOSALS_START_DATE}}': roundProposalStartDate,
     '{{ROUND_PROPOSALS_END_DATE}}': roundProposalEndDate,
