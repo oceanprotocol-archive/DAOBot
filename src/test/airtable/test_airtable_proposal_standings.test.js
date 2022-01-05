@@ -386,10 +386,10 @@ describe('Process Project Standings', function () {
       Standings.Progress
     )
     expect(proposalStandings.project[2].fields['Proposal Standing']).to.equal(
-      Standings.Unreported
+      Standings.NoOcean
     )
     expect(proposalStandings.project[3].fields['Proposal Standing']).to.equal(
-      Standings.NewProject
+      Standings.NoOcean
     )
   })
 

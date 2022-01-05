@@ -1,6 +1,24 @@
 const dotenv = require('dotenv')
 dotenv.config()
-const logger = require('pino')({
+const pino = require('pino')
+const hooks = {
+  logMethod(args, method) {
+    if (args.length > 1) {
+      for (let i = 1; i < args.length; i++) {
+        try {
+          if (typeof args[i] === 'object')
+            args[i] = JSON.stringify(args[i], null, 2)
+        } catch (e) {
+          console.error(e)
+        }
+        args[0] += ' %j'
+      }
+    }
+    method.apply(this, args)
+  }
+}
+const logger = pino({
+  hooks,
   level: process.env.LOG_LEVEL || 'info',
   transport: {
     target: 'pino-pretty',

@@ -34,6 +34,7 @@ const hasEnoughOceans = async (wallet_address) => {
   try {
     balance = await getWalletBalance(wallet_address)
   } catch (error) {
+    Logger.error(error)
     return false
   }
   return balance >= MIN_OCEAN_REQUIRED
