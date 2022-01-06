@@ -169,11 +169,13 @@ const summarize = (proposals) => {
     if (!project) {
       project = {
         'Project Name': proposal['Project Name'],
-        'Voted Yes': proposal['Voted Yes'] ?? 0,
-        'Voted No': proposal['Voted No'] ?? 0,
-        'OCEAN Granted': proposal['OCEAN Granted'] ?? 0,
-        'Times Proposed': 1,
-        'Times Granted': proposal['OCEAN Granted'] > 0 ? 1 : 0,
+        'Voted Yes': 0,
+        'Voted No': 0,
+        'Grants Proposed': 0,
+        'Grants Received': 0,
+        'Total Ocean Granted': 0,
+        'Total USD Granted': 0,
+        'Grants Completed': 0,
         'Project Standing': {
           Completed: 0,
           'Funds Returned': 0,
@@ -183,16 +185,21 @@ const summarize = (proposals) => {
           'In Dispute': 0
         }
       }
-      project['Project Standing'][proposal['Proposal Standing']] += 1
-    } else {
-      project['Voted Yes'] += proposal['Voted Yes'] ?? 0
-      project['Voted No'] += proposal['Voted No'] ?? 0
-      project['OCEAN Granted'] += proposal['OCEAN Granted'] ?? 0
-      project['Times Granted'] += proposal['OCEAN Granted'] > 0 ? 1 : 0
-
-      project['Times Proposed'] += 1
-      project['Project Standing'][proposal['Proposal Standing']] += 1
     }
+
+    project['Project Standing'][proposal['Proposal Standing']] += 1
+    project['Voted Yes'] += proposal['Voted Yes'] ?? 0
+    project['Voted No'] += proposal['Voted No'] ?? 0
+
+    project['Total Ocean Granted'] += proposal['OCEAN Granted'] ?? 0
+    project['Total USD Granted'] += proposal['USD Granted'] ?? 0
+
+    project['Grants Received'] += proposal['OCEAN Granted'] > 0 ? 1 : 0
+    project['Grants Completed'] +=
+      proposal['Proposal Standing'] === Standings.Completed ? 1 : 0
+
+    project['Grants Proposed'] += 1
+    project['Project Standing'][proposal['Proposal Standing']] += 1
     projects[proposalUUID] = project
   }
 
