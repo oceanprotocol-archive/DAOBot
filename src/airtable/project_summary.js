@@ -173,9 +173,9 @@ const summarize = (proposals) => {
         'Voted No': 0,
         'Grants Proposed': 0,
         'Grants Received': 0,
+        'Grants Completed': 0,
         'Total Ocean Granted': 0,
         'Total USD Granted': 0,
-        'Grants Completed': 0,
         'Project Standing': {
           Completed: 0,
           'Funds Returned': 0,
