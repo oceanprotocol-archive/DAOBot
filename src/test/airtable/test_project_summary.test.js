@@ -28,8 +28,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
-        'Times Proposed': 2,
-        'Times Granted': 2
+        'Grants Proposed': 2,
+        'Grants Received': 2
       }
     }
     const [id] = await populate([record])
@@ -45,8 +45,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
-        'Times Proposed': 2,
-        'Times Granted': 2
+        'Grants Proposed': 2,
+        'Grants Received': 2
       }
     }
     const [id] = await populate([record])
@@ -66,8 +66,8 @@ describe('Creating project summaries', () => {
           'Voted Yes': 3,
           'Voted No': 0,
           'OCEAN Granted': 3,
-          'Times Proposed': 2,
-          'Times Granted': 2
+          'Grants Proposed': 2,
+          'Grants Received': 2
         }
       },
       {
@@ -78,8 +78,8 @@ describe('Creating project summaries', () => {
           'Voted Yes': 0,
           'Voted No': 1,
           'OCEAN Granted': 0,
-          'Times Proposed': 1,
-          'Times Granted': 0
+          'Grants Proposed': 1,
+          'Grants Received': 0
         }
       }
     ]
@@ -156,8 +156,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
-        'Times Proposed': 2,
-        'Times Granted': 2
+        'Grants Proposed': 2,
+        'Grants Received': 2
       }
     }
     const [id] = await populate([record])
@@ -189,8 +189,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
-        'Times Proposed': 2,
-        'Times Granted': 2,
+        'Grants Proposed': 2,
+        'Grants Received': 2,
         'Project Standing': {
           Completed: 2,
           'Funds Returned': 0,
@@ -205,8 +205,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 0,
         'Voted No': 1,
         'OCEAN Granted': 0,
-        'Times Proposed': 1,
-        'Times Granted': 0,
+        'Grants Proposed': 1,
+        'Grants Received': 0,
         'Project Standing': {
           Completed: 0,
           'Funds Returned': 0,
@@ -226,8 +226,8 @@ describe('Creating project summaries', () => {
           'Voted Yes': 3,
           'Voted No': 0,
           'OCEAN Granted': 3,
-          'Times Proposed': 2,
-          'Times Granted': 2
+          'Grants Proposed': 2,
+          'Grants Received': 2
         }
       },
       {
@@ -238,8 +238,8 @@ describe('Creating project summaries', () => {
           'Voted Yes': 0,
           'Voted No': 1,
           'OCEAN Granted': 0,
-          'Times Proposed': 1,
-          'Times Granted': 0
+          'Grants Proposed': 1,
+          'Grants Received': 0
         }
       }
     ])
@@ -283,8 +283,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 3,
         'Voted No': 0,
         'OCEAN Granted': 3,
-        'Times Proposed': 2,
-        'Times Granted': 2,
+        'Grants Proposed': 2,
+        'Grants Received': 2,
         'Project Standing': {
           Completed: 2,
           'Funds Returned': 0,
@@ -299,8 +299,8 @@ describe('Creating project summaries', () => {
         'Voted Yes': 0,
         'Voted No': 1,
         'OCEAN Granted': 0,
-        'Times Proposed': 1,
-        'Times Granted': 0,
+        'Grants Proposed': 1,
+        'Grants Received': 0,
         'Project Standing': {
           Completed: 0,
           'Funds Returned': 0,
