@@ -3,7 +3,7 @@ require('dotenv').config()
 const process = require('process')
 const Airtable = require('airtable')
 const { v4: uuidv4 } = require('uuid')
-
+const { Standings } = require('./proposals/proposal_standings')
 const { AIRTABLE_API_KEY, AIRTABLE_BASEID } = process.env
 const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASEID)
 
