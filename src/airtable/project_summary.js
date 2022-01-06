@@ -130,15 +130,13 @@ const updatedRecordById = async (recordId, dataObject) => {
   }
 }
 
-const levels = {
-  // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r11-update-funding-levels
-  'Round 11': (project) => {
-    const completed = project['Project Standing'].Completed
-    if (completed === 0) return 'New Project'
-    if (completed === 1) return 'Existing Project'
-    if (completed >= 2 && completed < 5) return 'Experienced Project'
-    if (completed >= 5) return 'Veteran Project'
-  }
+const levels = (completed) => {
+  // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r12-update-funding-tiers
+  if (completed === 0) return { level: 'New Project', ceiling: 3000 }
+  if (completed === 1) return { level: 'Existing Project', ceiling: 10000 }
+  if (completed >= 2 && completed < 5)
+    return { level: 'Experienced Project', ceiling: 20000 }
+  if (completed >= 5) return { level: 'Veteran Project', ceiling: 35000 }
 }
 
 const toAirtableList = (projects) => {
@@ -146,7 +144,9 @@ const toAirtableList = (projects) => {
 
   for (const [key, value] of Object.entries(projects)) {
     value.ProjectId = key
-    value['Project Level'] = levels['Round 11'](value)
+    const { level, ceiling } = levels(value['Project Standing'].Completed)
+    value['Project Level'] = level
+    value['Max Funding'] = ceiling
     delete value['Project Standing']
 
     airtableList.push({
