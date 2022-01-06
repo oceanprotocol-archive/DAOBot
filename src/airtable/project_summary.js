@@ -3,7 +3,7 @@ require('dotenv').config()
 const process = require('process')
 const Airtable = require('airtable')
 const { v4: uuidv4 } = require('uuid')
-
+const { Standings } = require('./proposals/proposal_standings')
 const { AIRTABLE_API_KEY, AIRTABLE_BASEID } = process.env
 const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASEID)
 
@@ -130,15 +130,13 @@ const updatedRecordById = async (recordId, dataObject) => {
   }
 }
 
-const levels = {
-  // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r11-update-funding-levels
-  'Round 11': (project) => {
-    const completed = project['Project Standing'].Completed
-    if (completed === 0) return 'New Project'
-    if (completed === 1) return 'Existing Project'
-    if (completed >= 2 && completed < 5) return 'Experienced Project'
-    if (completed >= 5) return 'Veteran Project'
-  }
+const levels = (completed) => {
+  // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r12-update-funding-tiers
+  if (completed === 0) return { level: 'New Project', ceiling: 3000 }
+  if (completed === 1) return { level: 'Existing Project', ceiling: 10000 }
+  if (completed >= 2 && completed < 5)
+    return { level: 'Experienced Project', ceiling: 20000 }
+  if (completed >= 5) return { level: 'Veteran Project', ceiling: 35000 }
 }
 
 const toAirtableList = (projects) => {
@@ -146,7 +144,9 @@ const toAirtableList = (projects) => {
 
   for (const [key, value] of Object.entries(projects)) {
     value.ProjectId = key
-    value['Project Level'] = levels['Round 11'](value)
+    const { level, ceiling } = levels(value['Project Standing'].Completed)
+    value['Project Level'] = level
+    value['Max Funding'] = ceiling
     delete value['Project Standing']
 
     airtableList.push({
@@ -169,11 +169,13 @@ const summarize = (proposals) => {
     if (!project) {
       project = {
         'Project Name': proposal['Project Name'],
-        'Voted Yes': proposal['Voted Yes'] ?? 0,
-        'Voted No': proposal['Voted No'] ?? 0,
-        'OCEAN Granted': proposal['OCEAN Granted'] ?? 0,
-        'Times Proposed': 1,
-        'Times Granted': proposal['OCEAN Granted'] > 0 ? 1 : 0,
+        'Voted Yes': 0,
+        'Voted No': 0,
+        'Grants Proposed': 0,
+        'Grants Received': 0,
+        'Grants Completed': 0,
+        'Total Ocean Granted': 0,
+        'Total USD Granted': 0,
         'Project Standing': {
           Completed: 0,
           'Funds Returned': 0,
@@ -183,16 +185,20 @@ const summarize = (proposals) => {
           'In Dispute': 0
         }
       }
-      project['Project Standing'][proposal['Proposal Standing']] += 1
-    } else {
-      project['Voted Yes'] += proposal['Voted Yes'] ?? 0
-      project['Voted No'] += proposal['Voted No'] ?? 0
-      project['OCEAN Granted'] += proposal['OCEAN Granted'] ?? 0
-      project['Times Granted'] += proposal['OCEAN Granted'] > 0 ? 1 : 0
-
-      project['Times Proposed'] += 1
-      project['Project Standing'][proposal['Proposal Standing']] += 1
     }
+
+    project['Voted Yes'] += proposal['Voted Yes'] ?? 0
+    project['Voted No'] += proposal['Voted No'] ?? 0
+
+    project['Total Ocean Granted'] += proposal['OCEAN Granted'] ?? 0
+    project['Total USD Granted'] += proposal['USD Granted'] ?? 0
+
+    project['Grants Received'] += proposal['OCEAN Granted'] > 0 ? 1 : 0
+    project['Grants Completed'] +=
+      proposal['Proposal Standing'] === Standings.Completed ? 1 : 0
+
+    project['Grants Proposed'] += 1
+    project['Project Standing'][proposal['Proposal Standing']] += 1
     projects[proposalUUID] = project
   }
 
