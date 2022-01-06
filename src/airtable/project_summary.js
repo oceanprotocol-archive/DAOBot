@@ -187,7 +187,6 @@ const summarize = (proposals) => {
       }
     }
 
-    project['Project Standing'][proposal['Proposal Standing']] += 1
     project['Voted Yes'] += proposal['Voted Yes'] ?? 0
     project['Voted No'] += proposal['Voted No'] ?? 0
 
