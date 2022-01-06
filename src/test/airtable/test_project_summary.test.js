@@ -17,39 +17,44 @@ const {
 afterAll(() => {
   jest.clearAllTimers()
 })
-
+const records = [
+  {
+    fields: {
+      ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
+      'Project Name': 'FantasyFinance',
+      'Project Level': 'Experienced Project',
+      'Voted Yes': 3,
+      'Voted No': 0,
+      'Total Ocean Granted': 0,
+      'Total USD Granted': 0,
+      'Grants Proposed': 2,
+      'Grants Received': 2,
+      'Grants Completed': 1
+    }
+  },
+  {
+    fields: {
+      ProjectId: '7c17baed-327d-44ad-b09b-7fc5314aa143',
+      'Project Name': 'LoserFinance',
+      'Project Level': 'New Project',
+      'Voted Yes': 3,
+      'Voted No': 0,
+      'Total Ocean Granted': 0,
+      'Total USD Granted': 0,
+      'Grants Proposed': 2,
+      'Grants Received': 2,
+      'Grants Completed': 1
+    }
+  }
+]
 describe('Creating project summaries', () => {
   it('should populate a table', async () => {
-    const record = {
-      fields: {
-        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
-        'Project Name': 'FantasyFinance',
-        'Project Level': 'Experienced Project',
-        'Voted Yes': 3,
-        'Voted No': 0,
-        'OCEAN Granted': 3,
-        'Grants Proposed': 2,
-        'Grants Received': 2
-      }
-    }
-    const [id] = await populate([record])
+    const [id] = await populate([records[0]])
     assert(id.startsWith('rec'))
   })
 
   it('should delete records from a table', async () => {
-    const record = {
-      fields: {
-        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
-        'Project Name': 'FantasyFinance',
-        'Project Level': 'Experienced Project',
-        'Voted Yes': 3,
-        'Voted No': 0,
-        'OCEAN Granted': 3,
-        'Grants Proposed': 2,
-        'Grants Received': 2
-      }
-    }
-    const [id] = await populate([record])
+    const [id] = await populate([records[0]])
     assert(id.startsWith('rec'))
 
     const [removedId] = await remove([id])
@@ -57,32 +62,6 @@ describe('Creating project summaries', () => {
   })
 
   it('should delete ALL records from a table', async () => {
-    const records = [
-      {
-        fields: {
-          ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
-          'Project Name': 'FantasyFinance',
-          'Project Level': 'Experienced Project',
-          'Voted Yes': 3,
-          'Voted No': 0,
-          'OCEAN Granted': 3,
-          'Grants Proposed': 2,
-          'Grants Received': 2
-        }
-      },
-      {
-        fields: {
-          ProjectId: '7c17baed-327d-44ad-b09b-7fc5314aa143',
-          'Project Name': 'LoserFinance',
-          'Project Level': 'New Project',
-          'Voted Yes': 0,
-          'Voted No': 1,
-          'OCEAN Granted': 0,
-          'Grants Proposed': 1,
-          'Grants Received': 0
-        }
-      }
-    ]
     const [id] = await populate(records)
     assert(id.startsWith('rec'))
 
@@ -92,54 +71,12 @@ describe('Creating project summaries', () => {
   })
 
   it('should summarize levels given the project standings', () => {
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 0
-        }
-      }),
-      'New Project'
-    )
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 1
-        }
-      }),
-      'Existing Project'
-    )
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 2
-        }
-      }),
-      'Experienced Project'
-    )
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 4
-        }
-      }),
-      'Experienced Project'
-    )
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 5
-        }
-      }),
-      'Veteran Project'
-    )
-    assert.deepEqual(
-      levels['Round 11']({
-        'Project Standing': {
-          Completed: 1337
-        }
-      }),
-      'Veteran Project'
-    )
+    assert.deepEqual(levels(0).level, 'New Project')
+    assert.deepEqual(levels(1).level, 'Existing Project')
+    assert.deepEqual(levels(2).level, 'Experienced Project')
+    assert.deepEqual(levels(4).level, 'Experienced Project')
+    assert.deepEqual(levels(5).level, 'Veteran Project')
+    assert.deepEqual(levels(42).level, 'Veteran Project')
   })
 
   it('should chunk any array to a max size of 10', () => {
@@ -148,18 +85,7 @@ describe('Creating project summaries', () => {
   })
 
   it("should return all projects in the 'Project Summary' table", async () => {
-    const record = {
-      fields: {
-        ProjectId: '78d91b81-768c-4fef-81c8-07baf3bd72e9',
-        'Project Name': 'FantasyFinance',
-        'Project Level': 'Experienced Project',
-        'Voted Yes': 3,
-        'Voted No': 0,
-        'OCEAN Granted': 3,
-        'Grants Proposed': 2,
-        'Grants Received': 2
-      }
-    }
+    const record = records[0]
     const [id] = await populate([record])
     assert(id.startsWith('rec'))
 
@@ -227,7 +153,8 @@ describe('Creating project summaries', () => {
           'Voted No': 0,
           'OCEAN Granted': 3,
           'Grants Proposed': 2,
-          'Grants Received': 2
+          'Grants Received': 2,
+          'Max Funding': 20000
         }
       },
       {
@@ -239,7 +166,8 @@ describe('Creating project summaries', () => {
           'Voted No': 1,
           'OCEAN Granted': 0,
           'Grants Proposed': 1,
-          'Grants Received': 0
+          'Grants Received': 0,
+          'Max Funding': 3000
         }
       }
     ])
@@ -252,6 +180,7 @@ describe('Creating project summaries', () => {
         'Proposal Standing': 'Completed',
         RecordId: 'recJrtD0e7KQH19RG',
         'OCEAN Granted': 1,
+        'USD Granted': 1,
         'Voted Yes': 1,
         'Voted No': 0,
         UUID: '78d91b81-768c-4fef-81c8-07baf3bd72e9'
@@ -261,6 +190,7 @@ describe('Creating project summaries', () => {
         'Proposal Standing': 'Completed',
         RecordId: 'recJrtD0e7KQH19RG',
         'OCEAN Granted': 2,
+        'USD Granted': 2,
         'Voted Yes': 2,
         'Voted No': 0,
         UUID: '78d91b81-768c-4fef-81c8-07baf3bd72e9'
@@ -280,9 +210,11 @@ describe('Creating project summaries', () => {
     expect(summary).to.eql({
       '78d91b81-768c-4fef-81c8-07baf3bd72e9': {
         'Project Name': 'FantasyFinance',
+        'Grants Completed': 2,
         'Voted Yes': 3,
         'Voted No': 0,
-        'OCEAN Granted': 3,
+        'Total Ocean Granted': 3,
+        'Total USD Granted': 3,
         'Grants Proposed': 2,
         'Grants Received': 2,
         'Project Standing': {
@@ -298,7 +230,9 @@ describe('Creating project summaries', () => {
         'Project Name': 'LoserFinance',
         'Voted Yes': 0,
         'Voted No': 1,
-        'OCEAN Granted': 0,
+        'Total Ocean Granted': 0,
+        'Total USD Granted': 0,
+        'Grants Completed': 0,
         'Grants Proposed': 1,
         'Grants Received': 0,
         'Project Standing': {
