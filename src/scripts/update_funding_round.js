@@ -86,6 +86,8 @@ const main = async () => {
     curRoundVoteEnd = curRound.get('Voting Ends')
     curRoundVoteType = curRound.get('Vote Type')
     curRoundBallotType = curRound.get('Ballot Type')
+
+    // TODO-RA: This function will take longer and longer to process
     await processAirtableProposalStandings(curRoundNumber) // process proposal standings
     await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
   }
