@@ -33,7 +33,7 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes
+  syncGSheetsActiveProposalVotes, createRoundResultsGSheet
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
@@ -174,6 +174,8 @@ const main = async () => {
       )
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
+
+      await createRoundResultsGSheet(curRoundNumber)
 
       let fundingAvailable = 0
 

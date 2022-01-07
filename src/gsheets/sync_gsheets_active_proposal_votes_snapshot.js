@@ -288,6 +288,49 @@ const calculateRoundSummary = async (
   ]
 }
 
+const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
+  const oAuth = await initOAuthToken()
+  let proposalSummary = []
+  console.log('herre')
+
+  activeProposals = await getProposalsSelectQuery(
+    `AND({Round} = "${curRoundNumber}", AND(NOT({Proposal State} = "Withdrawn"), NOT({Proposal State} = "Rejected"), "true"), "true")`
+  )
+
+  // DRY
+  // Get the sheet, otherwise create it
+  const sheetName = `Round ${curRoundNumber} Results`
+  var sheet = await getValues(oAuth, sheetName, 'A1:B3')
+  if (sheet === undefined) {
+    await addSheet(oAuth, sheetName)
+    await Logger.log('Created new sheet [%s] at index 0.', sheetName)
+  }
+
+  activeProposals.forEach((p) => {
+    proposalSummary.push([
+      '',
+      p.get('Project Name'),
+      0,
+      0,
+      0,
+      0
+    ])
+    }
+  )
+
+  // Dump flattened data from proposalSummary to sheet
+  let flatObj = proposalSummary
+  flatObj.splice(0, 0, [
+    'ipfsHash',
+    'Project Name',
+    'Yes',
+    'No',
+    'Num Voters',
+    'Sum Votes'
+  ])
+  await updateValues(oAuth, sheetName, 'A1:F' + flatObj.length, flatObj)
+}
+
 // ProposalSummary + RoundSummary -> Google Sheet
 const dumpRoundSummaryToGSheets = async (
   curRoundNumber,
@@ -415,4 +458,4 @@ const syncGSheetsActiveProposalVotes = async (
   Logger.log('Updated GSheets')
 }
 
-module.exports = { syncGSheetsActiveProposalVotes }
+module.exports = { syncGSheetsActiveProposalVotes, createRoundResultsGSheet }
