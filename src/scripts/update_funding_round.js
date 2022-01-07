@@ -33,7 +33,8 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes, createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes,
+  createRoundResultsGSheet
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')

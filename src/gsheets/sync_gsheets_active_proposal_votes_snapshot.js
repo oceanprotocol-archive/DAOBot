@@ -290,7 +290,7 @@ const calculateRoundSummary = async (
 
 const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
   const oAuth = await initOAuthToken()
-  let proposalSummary = []
+  const proposalSummary = []
   console.log('herre')
 
   activeProposals = await getProposalsSelectQuery(
@@ -307,20 +307,11 @@ const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
   }
 
   activeProposals.forEach((p) => {
-    proposalSummary.push([
-      '',
-      p.get('Project Name'),
-      0,
-      0,
-      0,
-      0
-    ])
-    }
-  )
+    proposalSummary.push(['', p.get('Project Name'), 0, 0, 0, 0])
+  })
 
   // Dump flattened data from proposalSummary to sheet
-  let flatObj = proposalSummary
-  flatObj.splice(0, 0, [
+  proposalSummary.splice(0, 0, [
     'ipfsHash',
     'Project Name',
     'Yes',
@@ -328,7 +319,12 @@ const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
     'Num Voters',
     'Sum Votes'
   ])
-  await updateValues(oAuth, sheetName, 'A1:F' + flatObj.length, flatObj)
+  await updateValues(
+    oAuth,
+    sheetName,
+    'A1:F' + proposalSummary.length,
+    proposalSummary
+  )
 }
 
 // ProposalSummary + RoundSummary -> Google Sheet
