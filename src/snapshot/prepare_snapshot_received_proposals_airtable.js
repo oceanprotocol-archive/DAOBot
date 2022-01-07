@@ -20,6 +20,10 @@ const Logger = require('../utils/logger')
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
 const avgBlockTime = 13.4
 
+// TODO-RA: This function broke for R13.
+// Proposals were not successfully configured (Voting Starts, Voting Ends, Snapshot Block)
+// Proposals should be getting validated & updated properly in this function.
+// Proposals are being set to "Accepted" ahead of time, and are not being found.
 const prepareProposalsForSnapshot = async (curRound) => {
   const curRoundNumber = curRound.get('Round')
 
@@ -32,6 +36,8 @@ const prepareProposalsForSnapshot = async (curRound) => {
   const startDate = new Date(voteStartTime)
   const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
 
+  // TODO-RA: Proposals are being set to "Accepted" ahead of time, and are not being found.
+  // Changed to this for R13 to work => `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Accepted"), "true")`
   const proposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`
   )
@@ -49,10 +55,14 @@ const prepareProposalsForSnapshot = async (curRound) => {
       try {
         const wallet_0x = proposal.get('Wallet Address')
         const proposalStanding = proposal.get('Proposal Standing')
+
+        // Please update enums as required
         const goodStanding =
           proposalStanding === Standings.Completed ||
           proposalStanding === Standings.Refunded ||
-          proposalStanding === Standings.Undefined
+          proposalStanding === Standings.Undefined ||
+          proposalStanding === Standings.Unreported ||
+          proposalStanding === Standings.NewProject
 
         if (hasEnoughOceans(wallet_0x) && goodStanding === true) {
           recordsPayload.push({
