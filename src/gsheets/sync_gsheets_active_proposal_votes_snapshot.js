@@ -301,7 +301,7 @@ const dumpRoundSummaryToGSheets = async (
   const sheetName = `Round ${curRoundNumber} Results`
   var sheet = await getValues(oAuth, sheetName, 'A1:B3')
   if (sheet === undefined) {
-    await addSheet(oAuth, sheetName, curRoundNumber)
+    await addSheet(oAuth, sheetName)
     await Logger.log('Created new sheet [%s] at index 0.', sheetName)
   }
 
@@ -339,7 +339,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   const proposalScores = {}
 
   activeProposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", AND(NOT({Proposal State} = "Withdrawn"), NOT({Proposal State} = "Rejected"), "true"), "true")`
   )
 
   await Promise.all(
