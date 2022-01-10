@@ -25,7 +25,7 @@ describe('GSheets Sync functionality', function () {
 
 // Tests Skip. Use them to verify that Round Results sheet is created in the dued diligent period.
 describe('GSheets Round Results creation functionality', function () {
-  it('Checks that Round Results sheet is created before voting period starts', async function () {
+  it.skip('Checks that Round Results sheet is created before voting period starts', async function () {
     const curRoundNumber = 12
     await createRoundResultsGSheet(curRoundNumber)
   })
