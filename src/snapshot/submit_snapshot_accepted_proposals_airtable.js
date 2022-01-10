@@ -11,6 +11,7 @@ const {
   buildBatchProposalPayload,
   local_broadcast_proposal
 } = require('./snapshot_utils')
+const { sleep } = require('../functions/utils')
 const { web3 } = require('../functions/web3')
 
 const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here'
