@@ -288,7 +288,7 @@ const calculateRoundSummary = async (
   ]
 }
 
-const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
+const createRoundResultsGSheet = async (curRoundNumber) => {
   const oAuth = await initOAuthToken()
   const proposalSummary = []
 
