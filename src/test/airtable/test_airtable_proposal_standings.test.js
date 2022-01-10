@@ -5,6 +5,9 @@ dotenv.config()
 const should = require('chai').should()
 const { expect } = require('chai')
 const {
+  validateProposal
+} = require('../../airtable/proposals/proposal_standings')
+const {
   State,
   Standings,
   Disputed,
@@ -19,6 +22,7 @@ const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
   WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
 } = require('../config')
+const { levels } = require('../../airtable/project_summary')
 
 var currentProposals
 var allProposals = []
@@ -375,6 +379,122 @@ describe('Process Project Standings', function () {
         'Proposal Standing'
       ]
     ).to.equal(Standings.Completed)
+  })
+
+  describe('Proposal validation', () => {
+    let proposal = {}
+    const level = levels(1)
+    beforeEach(() => {
+      proposal = {
+        id: 'proposal_8',
+        fields: {
+          'Project Name': 'project2',
+          'Proposal URL': 'www.testurl_8.com',
+          'Proposal State': State.Undefined,
+          'Proposal Standing': Standings.Undefined,
+          'Deliverable Checklist': '[x] D1\n[x] D2\n[x] D3',
+          'Last Deliverable Update': 'Apr 01, 2021',
+          'Refund Transaction': undefined,
+          'Disputed Status': undefined,
+          'Deployment Ready': 'Yes',
+          'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+          'One Liner': 'adasd',
+          'Grant Deliverables': 'asdasd',
+          'Project Lead Full Name': 'John Doe',
+          'Country of Recipient': 'country',
+          'Project Email Address': 'valid@email.yes',
+          'USD Requested': 0
+        },
+        get: function (key) {
+          return this.fields[key]
+        }
+      }
+    })
+    it('Should check if the email address is empty or invalid', () => {
+      proposal.fields['Project Email Address'] = undefined
+      expect(validateProposal(proposal, level)).to.equal(
+        'Missing Email Address'
+      )
+
+      proposal.fields['Project Email Address'] = ''
+      expect(validateProposal(proposal, level)).to.equal(
+        'Missing Email Address'
+      )
+
+      proposal.fields['Project Email Address'] = 'asdasc#$$%@@gmail.com'
+      expect(validateProposal(proposal, level)).to.equal(
+        'Invalid Email Address'
+      )
+
+      proposal.fields['Project Email Address'] = 'asdas@gmail.com'
+      expect(validateProposal(proposal, level)).to.equal(true)
+    })
+    it('Should check if the One Liner is empty', () => {
+      proposal.fields['One Liner'] = undefined
+      expect(validateProposal(proposal, level)).to.equal('Missing One Liner')
+    })
+    it('Should check if the Proposal URL is empty', () => {
+      proposal.fields['Proposal URL'] = undefined
+      expect(validateProposal(proposal, level)).to.equal('Missing Proposal URL')
+    })
+    it('Should check if the Grant Deliverables is empty', () => {
+      proposal.fields['Grant Deliverables'] = undefined
+      expect(validateProposal(proposal, level)).to.equal(
+        'Missing Grant Deliverables'
+      )
+    })
+    it('Should check if the Project Lead Full Name is empty', () => {
+      proposal.fields['Project Lead Full Name'] = undefined
+      expect(validateProposal(proposal, level)).to.equal(
+        'Missing Project Lead Full Name'
+      )
+    })
+    it('Should check if the Country of Recipient is empty', () => {
+      proposal.fields['Country of Recipient'] = undefined
+      expect(validateProposal(proposal, level)).to.equal(
+        'Missing Country of Recipient'
+      )
+    })
+
+    it('Should check the amount of USD requested is valid', () => {
+      proposal.fields['USD Requested'] = 100
+      expect(validateProposal(proposal, levels(0))).to.equal(true) // new project
+
+      proposal.fields['USD Requested'] = 3000
+      expect(validateProposal(proposal, levels(0))).to.equal(true) // new project
+
+      proposal.fields['USD Requested'] = 3001
+      expect(validateProposal(proposal, levels(0))).to.equal(
+        'Invalid USD Requested'
+      ) // new project
+
+      proposal.fields['USD Requested'] = 10000
+      expect(validateProposal(proposal, levels(1))).to.equal(true) // 1 project completed
+      proposal.fields['USD Requested'] = 10001
+      expect(validateProposal(proposal, levels(1))).to.equal(
+        'Invalid USD Requested'
+      ) // 1 project completed
+
+      proposal.fields['USD Requested'] = 20000
+      expect(validateProposal(proposal, levels(2))).to.equal(true) // 2 projects completed
+      proposal.fields['USD Requested'] = 20001
+      expect(validateProposal(proposal, levels(2))).to.equal(
+        'Invalid USD Requested'
+      ) // 2 projects completed
+
+      proposal.fields['USD Requested'] = 35000
+      expect(validateProposal(proposal, levels(5))).to.equal(true) // 5 projects completed
+      proposal.fields['USD Requested'] = 35001
+      expect(validateProposal(proposal, levels(5))).to.equal(
+        'Invalid USD Requested'
+      ) // 5 projects completed
+    })
+
+    it('Should set the proposal state to rejected if the proposal is invalid', async () => {
+      proposal.fields['USD Requested'] = 35000
+      const record = await getProposalRecord(proposal, [])
+      expect(record.fields['Proposal State']).to.equal(State.Rejected)
+    })
   })
 
   it('Should set to in progress if deployment ready', async function () {
