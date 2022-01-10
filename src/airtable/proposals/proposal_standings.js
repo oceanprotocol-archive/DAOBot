@@ -170,9 +170,9 @@ const validateProposal = (proposal, level) => {
   if (isn(proposal.get('Country of Recipient')))
     return 'Missing Country of Recipient'
 
-  if (isn(proposal.get('Project Email Address'))) return 'Missing Login Email'
+  if (isn(proposal.get('Project Email Address'))) return 'Missing Email Address'
   if (verifyEmail(proposal.get('Project Email Address')) === false)
-    return 'Invalid Login Email'
+    return 'Invalid Email Address'
 
   return true
 }
