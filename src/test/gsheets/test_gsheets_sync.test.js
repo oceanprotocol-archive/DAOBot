@@ -5,7 +5,8 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  syncGSheetsActiveProposalVotes, createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes,
+  createRoundResultsGSheet
 } = require('../../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../../snapshot/snapshot_utils')
 
