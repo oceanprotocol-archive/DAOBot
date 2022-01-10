@@ -36,7 +36,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'May 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -53,7 +59,13 @@ beforeEach(async function () {
         'Last Deliverable Update': undefined,
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -70,7 +82,13 @@ beforeEach(async function () {
         'Last Deliverable Update': undefined,
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -90,7 +108,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Jan 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -107,7 +131,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Feb 01, 2021',
         'Refund Transaction': '0xRefundTx',
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -124,7 +154,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Mar 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -141,7 +177,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Mar 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -158,7 +200,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Jan 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -175,7 +223,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Apr 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -192,7 +246,13 @@ beforeEach(async function () {
         'Last Deliverable Update': 'Apr 01, 2021',
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -210,7 +270,13 @@ beforeEach(async function () {
         'Refund Transaction': undefined,
         'Disputed Status': undefined,
         'Deployment Ready': 'Yes',
-        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS
+        'Wallet Address': WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
+        'One Liner': 'adasd',
+        'Grant Deliverables': 'asdasd',
+        'Project Lead Full Name': 'John Doe',
+        'Country of Recipient': 'country',
+        'Project Email Address': 'valid@email.yes',
+        'USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
