@@ -11,52 +11,12 @@ const {
   buildBatchProposalPayload,
   local_broadcast_proposal
 } = require('./snapshot_utils')
-const { assert, sleep } = require('../functions/utils')
 const { web3 } = require('../functions/web3')
 
 const pk = process.env.ETH_PRIVATE_KEY || 'your_key_here'
 const account = web3.eth.accounts.privateKeyToAccount(pk)
 web3.eth.accounts.wallet.add(account)
 web3.eth.defaultAccount = account.address
-
-const validateAccceptedProposal = (proposal) => {
-  assert(
-    proposal.get('One Liner') !== undefined,
-    '[%s][%s]: Invalid <One Liner>',
-    proposal.id,
-    proposal.get('Name')
-  )
-  assert(
-    proposal.get('Proposal URL') !== undefined,
-    '[%s][%s]: Invalid <Proposal URL>',
-    proposal.id,
-    proposal.get('Name')
-  )
-  assert(
-    proposal.get('Grant Deliverables') !== undefined,
-    '[%s][%s]: Invalid <Grant Deliverables>',
-    proposal.id,
-    proposal.get('Name')
-  )
-  assert(
-    proposal.get('Voting Starts') !== undefined,
-    '[%s][%s]: Invalid <Voting Starts>',
-    proposal.id,
-    proposal.get('Name')
-  )
-  assert(
-    proposal.get('Voting Ends') !== undefined,
-    '[%s][%s]: Invalid <Voting Ends>',
-    proposal.id,
-    proposal.get('Name')
-  )
-  assert(
-    proposal.get('Snapshot Block') !== undefined,
-    '[%s][%s]: Invalid <Snapshot Block>',
-    proposal.id,
-    proposal.get('Name')
-  )
-}
 
 // All required fields should have already been validated by the online Form
 // Build payload for proposal, and submit it
@@ -72,8 +32,6 @@ const submitProposalsToSnaphotGranular = async (roundNumber, voteType) => {
     // We probably want to throttle the deployment to snapshot w/ a sleep
     const submittedProposals = []
     for (const proposal of acceptedProposals) {
-      validateAccceptedProposal(proposal)
-
       const payload = buildGranularProposalPayload(
         proposal,
         roundNumber,
@@ -131,7 +89,6 @@ const submitProposalsToSnaphotBatch = async (roundNumber, voteType) => {
     let index = 1
 
     for (const proposal of acceptedProposals) {
-      validateAccceptedProposal(proposal)
       proposalIndex[proposal.get('Project Name')] = [index, index + 1]
       proposalArr.push(proposal.get('Project Name') + '_Yes')
       proposalArr.push(proposal.get('Project Name') + '_No')
