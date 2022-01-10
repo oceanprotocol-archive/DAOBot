@@ -291,7 +291,6 @@ const calculateRoundSummary = async (
 const createRoundResultsGSheet = async (curRoundNumber, curRoundBallotType) => {
   const oAuth = await initOAuthToken()
   const proposalSummary = []
-  console.log('herre')
 
   activeProposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", AND(NOT({Proposal State} = "Withdrawn"), NOT({Proposal State} = "Rejected"), "true"), "true")`
