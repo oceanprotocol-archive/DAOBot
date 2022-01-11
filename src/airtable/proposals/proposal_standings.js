@@ -162,9 +162,6 @@ const validateProposal = (proposal, level) => {
   if (isn(proposal.get('Proposal URL'))) return 'Missing Proposal URL'
   if (isn(proposal.get('Grant Deliverables')))
     return 'Missing Grant Deliverables'
-  // if (isn(proposal.get('Voting Starts'))) return 'Missing Voting Starts'
-  // if (isn(proposal.get('Voting Ends'))) return 'Missing Voting Ends'
-  // if (isn(proposal.get('Snapshot Block'))) return 'Missing Snapshot Block'
   if (isn(proposal.get('Project Lead Full Name')))
     return 'Missing Project Lead Full Name'
   if (isn(proposal.get('Country of Recipient')))
