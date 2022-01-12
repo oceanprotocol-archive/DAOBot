@@ -133,7 +133,15 @@ const main = async () => {
         lastRoundNumber,
         lastRoundBallotType
       )
-      await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
+
+      try {
+        await syncGSheetsActiveProposalVotes(
+          lastRoundNumber,
+          lastRoundBallotType
+        )
+      } catch (err) {
+        Logger.error(`Error syncing GSheets Active Proposal Votes: ${err}`)
+      }
 
       // Complete round calculations
       const proposalsFunded = await processFundingRoundComplete(
