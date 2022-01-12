@@ -110,6 +110,22 @@ const main = async () => {
   if (curRoundState === undefined) {
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
+      const oceanPrice = await getTokenPrice() // get the latest Ocean price
+      const earmarkStructure = await completeEarstructuresValues(
+        lastRound,
+        oceanPrice,
+        lastRound.get('Basis Currency')
+      ) // calculate the earmark values based on the updated Ocean price
+      const roundUpdateData = {
+        // create the data to update the round record
+        id: lastRound.id,
+        fields: {
+          'OCEAN Price': oceanPrice,
+          Earmarks: JSON.stringify(earmarkStructure)
+        }
+      }
+      await updateRoundRecord(roundUpdateData) // update the round record
+
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
