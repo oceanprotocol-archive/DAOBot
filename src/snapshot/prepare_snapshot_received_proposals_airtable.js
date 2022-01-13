@@ -39,7 +39,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
   // TODO-RA: Proposals are being set to "Accepted" ahead of time, and are not being found.
   // Changed to this for R13 to work => `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Accepted"), "true")`
   const proposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
   )
   const estimatedBlockHeight = calcTargetBlockHeight(
     currentBlockHeight,
