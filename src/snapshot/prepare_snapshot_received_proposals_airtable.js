@@ -53,12 +53,11 @@ const prepareProposalsForSnapshot = async (curRound) => {
     proposals.map(async (proposal) => {
       getProposalRecord(proposal, proposals)
       try {
-        const wallet_0x = proposal.get('Wallet Address')
         const proposalState = proposal.get('Proposal State')
 
         const goodStanding = proposalState === State.Accepted // DAOBot will set the proposal to "Accepted"
 
-        if (hasEnoughOceans(wallet_0x) && goodStanding === true) {
+        if (goodStanding === true) {
           recordsPayload.push({
             id: proposal.id,
             fields: {
