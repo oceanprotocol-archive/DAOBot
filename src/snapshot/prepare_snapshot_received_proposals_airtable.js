@@ -2,8 +2,8 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  Standings,
-  getProposalRecord
+  getProposalRecord,
+  State
 } = require('../airtable/proposals/proposal_standings')
 const {
   getProposalsSelectQuery,
@@ -54,15 +54,9 @@ const prepareProposalsForSnapshot = async (curRound) => {
       getProposalRecord(proposal, proposals)
       try {
         const wallet_0x = proposal.get('Wallet Address')
-        const proposalStanding = proposal.get('Proposal Standing')
+        const proposalState = proposal.get('Proposal State')
 
-        // Please update enums as required
-        const goodStanding =
-          proposalStanding === Standings.Completed ||
-          proposalStanding === Standings.Refunded ||
-          proposalStanding === Standings.Undefined ||
-          proposalStanding === Standings.Unreported ||
-          proposalStanding === Standings.NewProject
+        const goodStanding = proposalState === State.Accepted // DAOBot will set the proposal to "Accepted"
 
         if (hasEnoughOceans(wallet_0x) && goodStanding === true) {
           recordsPayload.push({
