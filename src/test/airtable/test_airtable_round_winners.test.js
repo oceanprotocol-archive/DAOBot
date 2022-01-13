@@ -265,12 +265,10 @@ describe('Calculating Winners', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    Logger.log(finalResults)
-
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.earmarkedResults.winningProposals.length, 4)
+    should.equal(finalResults.earmarkedResults.winningProposals.length, 5)
     should.equal(finalResults.partiallyFunded.length, 1)
-    should.equal(finalResults.notFunded.length, 1)
+    should.equal(finalResults.notFunded.length, 0)
 
     should.equal(
       finalResults.earmarkedResults.winningProposals.length +
@@ -291,10 +289,7 @@ describe('Calculating Winners', function () {
       finalResults.partiallyFunded[0].fields['Proposal State'],
       'Granted'
     )
-    should.equal(
-      finalResults.notFunded[0].fields['Proposal State'],
-      'Not Granted'
-    )
+
     should.equal(downvotedProposals[0].fields['Proposal State'], 'Down Voted')
 
     // Validate USD amount adds up
@@ -310,7 +305,7 @@ describe('Calculating Winners', function () {
 
     Logger.log(earmarkedUSDGranted, partialUSDGranted)
 
-    should.equal(earmarkedUSDGranted + partialUSDGranted, 35000)
+    should.equal(earmarkedUSDGranted + partialUSDGranted, 36000)
   })
 
   it('Validates gsheet output is correct.', async function () {
@@ -424,6 +419,7 @@ describe('Calculating Winners', function () {
   })
 
   it('Check if funds left from earmaks are burned if burn switch selected', async function () {
+    fundingRound.fields['OCEAN Price'] = 0.2
     const oceanPrice = fundingRound.get('OCEAN Price')
     fundingRound.fields['Basis Token'] = 'OCEAN'
     fundingRound.fields['Funds Left'] = 'Burn'
@@ -436,6 +432,7 @@ describe('Calculating Winners', function () {
       basisToken
     )
     fundingRound.fields.Earmarks = JSON.stringify(newEarmarks)
+
     // set earmarks for proposals and add USD Granted
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[0].fields['USD Requested'] = 2000
