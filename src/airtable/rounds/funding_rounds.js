@@ -135,26 +135,26 @@ const calculateWinningProposalsForEarmark = (
         oceanRequested = Math.ceil(usdRequested / oceanPrice)
       }
 
-      const grantCarry = p.get('USD Granted') || 0
-      let usdGranted =
-        fundsLeft -
-          Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice >
-        0
-          ? usdRequested - grantCarry
-          : fundsLeft
-      const oceanGranted =
-        usdGranted === fundsLeft
-          ? Math.floor((usdGranted + grantCarry) / oceanPrice)
-          : Math.ceil((usdGranted + grantCarry) / oceanPrice)
-      usdGranted = oceanGranted * oceanPrice
+      const grantCarry = p.get('USD Granted') || 0 // USD granted from previous earmaks
+      const usdRequestedLeft =
+        Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice
+
+      const canFullGrant = fundsLeft - usdRequestedLeft > 0 // Whether we can grant the full amount
+
+      const usdGranted = canFullGrant ? usdRequestedLeft : fundsLeft
+      const totalUsdGranted = usdGranted + grantCarry
+
+      const oceanGranted = !canFullGrant
+        ? Math.floor(totalUsdGranted / oceanPrice)
+        : Math.ceil(totalUsdGranted / oceanPrice)
 
       p.fields['OCEAN Requested'] = oceanRequested
       p.fields['USD Requested'] = usdRequested
-      p.fields['USD Granted'] = usdGranted + grantCarry
+      p.fields['USD Granted'] = oceanGranted * oceanPrice
       p.fields['OCEAN Granted'] = oceanGranted
       p.fields['Proposal State'] = 'Granted'
       fundsLeft =
-        fundsLeft - usdGranted < 0 ? fundsLeft : fundsLeft - usdGranted
+        fundsLeft - usdGranted <= 0 ? fundsLeft : fundsLeft - usdGranted
 
       // If we reached the total, then it won via this grant pot
       if (usdRequested <= usdGranted + grantCarry) winningProposals.push(p)
