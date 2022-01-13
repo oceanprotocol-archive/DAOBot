@@ -51,38 +51,16 @@ const prepareProposalsForSnapshot = async (curRound) => {
 
   await Promise.all(
     proposals.map(async (proposal) => {
-      getProposalRecord(proposal, proposals)
-      try {
-        const proposalState = proposal.get('Proposal State')
-
-        const goodStanding = proposalState === State.Accepted // DAOBot will set the proposal to "Accepted"
-
-        if (goodStanding === true) {
-          recordsPayload.push({
-            id: proposal.id,
-            fields: {
-              'Proposal State': 'Accepted',
-              'Voting Starts': voteStartTime,
-              'Voting Ends': voteEndTime,
-              'Snapshot Block': Number(estimatedBlockHeight),
-              'Deployment Ready': 'Yes'
-            }
-          })
-        } else {
-          recordsPayload.push({
-            id: proposal.id,
-            fields: {
-              'Proposal State': 'Rejected',
-              'Voting Starts': null,
-              'Voting Ends': null,
-              'Snapshot Block': null,
-              'Deployment Ready': 'No'
-            }
-          })
+      recordsPayload.push({
+        id: proposal.id,
+        fields: {
+          'Proposal State': 'Accepted',
+          'Voting Starts': voteStartTime,
+          'Voting Ends': voteEndTime,
+          'Snapshot Block': Number(estimatedBlockHeight),
+          'Deployment Ready': 'Yes'
         }
-      } catch (err) {
-        Logger.error(err)
-      }
+      })
     })
   )
 
