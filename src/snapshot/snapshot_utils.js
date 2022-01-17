@@ -20,11 +20,11 @@ const networks = [
   },
   {
     address: OCEAN_Polygon_0x,
-    provider: process.env.POLYGON_RPC_URL ?? `https://polygon-rpc.com`
+    provider: process.env.POLYGON_RPC_URL || `https://polygon-rpc.com`
   },
   {
     address: OCEAN_BSC_0x,
-    provider: process.env.BSC_RPC_URL ?? `https://bsc-dataseed.binance.org/`
+    provider: process.env.BSC_RPC_URL || `https://bsc-dataseed.binance.org/`
   }
 ]
 
