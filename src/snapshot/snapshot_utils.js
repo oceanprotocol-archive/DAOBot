@@ -35,10 +35,11 @@ const getWalletBalance = async (wallet0x) => {
   const balances = []
 
   for (const network of networks) {
+    const provider = new ethers.providers.JsonRpcProvider(network.provider)
     const contract = new ethers.Contract(
       network.address,
       OCEAN_ERC20_ABI.abi,
-      new ethers.providers.JsonRpcProvider(network.provider)
+      provider
     )
     const balance = await contract.balanceOf(wallet0x)
     balances.push(parseInt(ethers.utils.formatEther(balance)))
