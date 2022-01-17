@@ -3,7 +3,6 @@ const { bufferToHex } = require('ethereumjs-util')
 const { version } = require('@snapshot-labs/snapshot.js/src/constants.json')
 const fetch = require('cross-fetch')
 const snapshot = require('@snapshot-labs/snapshot.js')
-const { web3 } = require('../functions/web3')
 const { ethers } = require('ethers')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
 const network = '1'
@@ -31,7 +30,6 @@ const networks = [
 
 const OCEAN_ERC20_ABI = require('../utils/oceanERC20ABI.json')
 const MIN_OCEAN_REQUIRED = 500.0
-const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI.abi, OCEAN_ERC20_0x)
 
 const getWalletBalance = async (wallet0x) => {
   const balances = []
