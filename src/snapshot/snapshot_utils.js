@@ -4,7 +4,7 @@ const { version } = require('@snapshot-labs/snapshot.js/src/constants.json')
 const fetch = require('cross-fetch')
 const snapshot = require('@snapshot-labs/snapshot.js')
 const { web3 } = require('../functions/web3')
-
+const { ethers } = require('ethers')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
 const network = '1'
 const provider = snapshot.utils.getProvider(network)
@@ -34,15 +34,19 @@ const MIN_OCEAN_REQUIRED = 500.0
 const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI.abi, OCEAN_ERC20_0x)
 
 const getWalletBalance = async (wallet0x) => {
-  let balance = 0
+  const balances = []
 
-  if (wallet0x) {
-    balance = await oceanContract.methods.balanceOf(wallet0x).call()
-    // Adjust for 18 decimals
-    balance /= 10 ** 18
+  for (const network of networks) {
+    const contract = new ethers.Contract(
+      network.address,
+      OCEAN_ERC20_ABI,
+      new ethers.providers.JsonRpcProvider(network.provider)
+    )
+    const balance = await contract.balanceOf(wallet0x)
+    balances.push(parseInt(ethers.utils.formatEther(balance)))
   }
 
-  return balance
+  return Math.max(...balances)
 }
 
 const hasEnoughOceans = async (wallet_address) => {
