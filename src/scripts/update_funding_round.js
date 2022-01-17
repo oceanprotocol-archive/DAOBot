@@ -117,14 +117,11 @@ const main = async () => {
         lastRound.get('Basis Currency')
       ) // calculate the earmark values based on the updated Ocean price
       const roundUpdateData = {
-        // create the data to update the round record
-        id: lastRound.id,
-        fields: {
-          'OCEAN Price': oceanPrice,
-          Earmarks: JSON.stringify(earmarkStructure)
-        }
+        'OCEAN Price': oceanPrice,
+        Earmarks: JSON.stringify(earmarkStructure)
       }
-      await updateRoundRecord(roundUpdateData) // update the round record
+
+      await lastRound.updateFields(roundUpdateData) // update the round record
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
