@@ -9,9 +9,26 @@ const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
 const network = '1'
 const provider = snapshot.utils.getProvider(network)
 const Logger = require('../utils/logger')
-
+const INFURA_API_KEY = process.env.INFURA_API_KEY || 'your_key_here'
 // Consts
 const OCEAN_ERC20_0x = '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
+const OCEAN_Polygon_0x = '0x282d8efCe846A88B159800bd4130ad77443Fa1A1'
+const OCEAN_BSC_0x = '0xdce07662ca8ebc241316a15b611c89711414dd1a'
+const networks = [
+  {
+    address: OCEAN_ERC20_0x,
+    provider: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`
+  },
+  {
+    address: OCEAN_Polygon_0x,
+    provider: process.env.POLYGON_RPC_URL ?? `https://polygon-rpc.com`
+  },
+  {
+    address: OCEAN_BSC_0x,
+    provider: process.env.BSC_RPC_URL ?? `https://bsc-dataseed.binance.org/`
+  }
+]
+
 const OCEAN_ERC20_ABI = require('../utils/oceanERC20ABI.json')
 const MIN_OCEAN_REQUIRED = 500.0
 const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI.abi, OCEAN_ERC20_0x)
