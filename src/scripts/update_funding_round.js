@@ -118,7 +118,8 @@ const main = async () => {
       ) // calculate the earmark values based on the updated Ocean price
       const roundUpdateData = {
         'OCEAN Price': oceanPrice,
-        Earmarks: JSON.stringify(earmarkStructure)
+        Earmarks: JSON.stringify(earmarkStructure),
+        'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
       }
 
       await lastRound.updateFields(roundUpdateData) // update the round record
