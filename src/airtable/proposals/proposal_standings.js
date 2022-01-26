@@ -174,7 +174,7 @@ const validateProposal = (proposal, level) => {
   return true
 }
 
-const getProposalRecord = async (proposal, allProposals) => {
+const getProposalRecord = async (proposal, allProposals, curRoundNumber) => {
   const completedProposals = allProposals.filter(
     (x) =>
       x.get('Proposal Standing') === Standings.Completed &&
@@ -182,7 +182,21 @@ const getProposalRecord = async (proposal, allProposals) => {
   ).length
   const level = levels(completedProposals)
   const proposalURL = proposal.get('Proposal URL')
-  const areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
+
+  let lastOceanBalanceCheckDate = proposal.get('Last Balance Check')
+  let areOceansEnough = proposal.get('Proposal Standing') !== 'No Ocean'
+  if (
+    !(curRoundNumber !== undefined && curRoundNumber !== proposal.get('Round'))
+  ) {
+    if (
+      !lastOceanBalanceCheckDate ||
+      new Date(lastOceanBalanceCheckDate) + 1000 * 60 * 15 < new Date() // undefined or 15 minutes has passed
+    ) {
+      areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address')) // get Ocean balance
+      lastOceanBalanceCheckDate = new Date() // update last Ocean balance check date
+    }
+  }
+
   const ethTransactionExists =
     proposal.get('ETH Transaction') !== undefined &&
     proposal.get('ETH Transaction') !== null &&
@@ -231,7 +245,8 @@ const getProposalRecord = async (proposal, allProposals) => {
       'Proposal Standing': newStanding,
       'Disputed Status': disputed,
       'Outstanding Proposals': undefined,
-      'Reason Rejected': validProposal === true ? undefined : validProposal
+      'Reason Rejected': validProposal === true ? undefined : validProposal,
+      'Last Balance Check': lastOceanBalanceCheckDate
     }
   }
 }
@@ -239,7 +254,8 @@ const getProposalRecord = async (proposal, allProposals) => {
 // Returns all Proposal Standings, indexed by Project Name
 const processProposalStandings = async (
   allProposals,
-  previousProposals = []
+  previousProposals = [],
+  curRoundNumber
 ) => {
   const proposalStandings = {}
   for (const proposal of allProposals) {
@@ -247,7 +263,8 @@ const processProposalStandings = async (
       const projectName = proposal.get('Project Name')
       const record = await getProposalRecord(
         proposal,
-        allProposals.concat(previousProposals)
+        allProposals.concat(previousProposals),
+        curRoundNumber
       )
       // Finally, track project standings
       if (proposalStandings[projectName] === undefined)
