@@ -64,7 +64,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
           proposalStanding === Standings.Unreported ||
           proposalStanding === Standings.NewProject
 
-        if (hasEnoughOceans(wallet_0x) && goodStanding === true) {
+        if ((await hasEnoughOceans(wallet_0x)) && goodStanding === true) {
           recordsPayload.push({
             id: proposal.id,
             fields: {
