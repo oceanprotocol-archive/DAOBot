@@ -158,6 +158,7 @@ const validateProposal = (proposal, level) => {
   if (proposal.get('USD Requested') > level.ceiling)
     return 'Invalid USD Requested'
 
+  if (isn(proposal.get('Wallet Address'))) return 'Missing Wallet Address'
   if (isn(proposal.get('One Liner'))) return 'Missing One Liner'
   if (isn(proposal.get('Proposal URL'))) return 'Missing Proposal URL'
   if (isn(proposal.get('Grant Deliverables')))
