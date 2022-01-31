@@ -2,17 +2,14 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  Standings,
-  getProposalRecord
+  getProposalRecord,
+  State
 } = require('../airtable/proposals/proposal_standings')
 const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const {
-  calcTargetBlockHeight,
-  hasEnoughOceans
-} = require('../snapshot/snapshot_utils')
+const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
 
@@ -53,18 +50,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
     proposals.map(async (proposal) => {
       getProposalRecord(proposal, proposals)
       try {
-        const wallet_0x = proposal.get('Wallet Address')
-        const proposalStanding = proposal.get('Proposal Standing')
-
-        // Please update enums as required
-        const goodStanding =
-          proposalStanding === Standings.Completed ||
-          proposalStanding === Standings.Refunded ||
-          proposalStanding === Standings.Undefined ||
-          proposalStanding === Standings.Unreported ||
-          proposalStanding === Standings.NewProject
-
-        if (hasEnoughOceans(wallet_0x) && goodStanding === true) {
+        if (proposal.get('Proposal State') === State.Accepted) {
           recordsPayload.push({
             id: proposal.id,
             fields: {
@@ -79,7 +65,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
           recordsPayload.push({
             id: proposal.id,
             fields: {
-              'Proposal State': 'Rejected',
+              'Proposal State': proposal.get('Proposal State'),
               'Voting Starts': null,
               'Voting Ends': null,
               'Snapshot Block': null,
