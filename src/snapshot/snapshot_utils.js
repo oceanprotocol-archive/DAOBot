@@ -297,7 +297,7 @@ const getProposalVotesGQL = async (ipfsHash) => {
       query: getVotesQuery(ipfsHash)
     })
   }
-  const response = await fetch('https://hub.snapshot.org/graphql', options)
+  const response = await fetch(`${hubUrl}/graphql`, options)
 
   // If a user allocates all his voting power just to 1 proposal,
   // on the snapshot response for that wallet, the choices array
