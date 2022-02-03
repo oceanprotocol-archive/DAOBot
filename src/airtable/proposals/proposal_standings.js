@@ -232,7 +232,8 @@ const getProposalRecord = async (proposal, allProposals) => {
       'Proposal Standing': newStanding,
       'Disputed Status': disputed,
       'Outstanding Proposals': undefined,
-      'Reason Rejected': validProposal === true ? undefined : validProposal
+      'Reason Rejected':
+        validProposal === true ? 'Valid Proposal' : validProposal
     }
   }
 }
