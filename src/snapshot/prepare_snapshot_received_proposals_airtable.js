@@ -9,10 +9,7 @@ const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const {
-  calcTargetBlockHeight,
-  hasEnoughOceans
-} = require('../snapshot/snapshot_utils')
+const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
 
@@ -51,14 +48,30 @@ const prepareProposalsForSnapshot = async (curRound) => {
 
   await Promise.all(
     proposals.map(async (proposal) => {
-      recordsPayload.push({
-        id: proposal.id,
-        fields: {
-          'Proposal State': 'Accepted',
-          'Voting Starts': voteStartTime,
-          'Voting Ends': voteEndTime,
-          'Snapshot Block': Number(estimatedBlockHeight),
-          'Deployment Ready': 'Yes'
+      getProposalRecord(proposal, proposals)
+      try {
+        if (proposal.get('Proposal State') === State.Accepted) {
+          recordsPayload.push({
+            id: proposal.id,
+            fields: {
+              'Proposal State': 'Accepted',
+              'Voting Starts': voteStartTime,
+              'Voting Ends': voteEndTime,
+              'Snapshot Block': Number(estimatedBlockHeight),
+              'Deployment Ready': 'Yes'
+            }
+          })
+        } else {
+          recordsPayload.push({
+            id: proposal.id,
+            fields: {
+              'Proposal State': proposal.get('Proposal State'),
+              'Voting Starts': null,
+              'Voting Ends': null,
+              'Snapshot Block': null,
+              'Deployment Ready': 'No'
+            }
+          })
         }
       })
     })
