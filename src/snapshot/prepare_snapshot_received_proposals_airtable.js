@@ -2,10 +2,6 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  getProposalRecord,
-  State
-} = require('../airtable/proposals/proposal_standings')
-const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
@@ -48,30 +44,16 @@ const prepareProposalsForSnapshot = async (curRound) => {
 
   await Promise.all(
     proposals.map(async (proposal) => {
-      getProposalRecord(proposal, proposals)
-      if (proposal.get('Proposal State') === State.Accepted) {
-        recordsPayload.push({
-          id: proposal.id,
-          fields: {
-            'Proposal State': 'Accepted',
-            'Voting Starts': voteStartTime,
-            'Voting Ends': voteEndTime,
-            'Snapshot Block': Number(estimatedBlockHeight),
-            'Deployment Ready': 'Yes'
-          }
-        })
-      } else {
-        recordsPayload.push({
-          id: proposal.id,
-          fields: {
-            'Proposal State': proposal.get('Proposal State'),
-            'Voting Starts': null,
-            'Voting Ends': null,
-            'Snapshot Block': null,
-            'Deployment Ready': 'No'
-          }
-        })
-      }
+      recordsPayload.push({
+        id: proposal.id,
+        fields: {
+          'Proposal State': 'Accepted',
+          'Voting Starts': voteStartTime,
+          'Voting Ends': voteEndTime,
+          'Snapshot Block': Number(estimatedBlockHeight),
+          'Deployment Ready': 'Yes'
+        }
+      })
     })
   )
 
