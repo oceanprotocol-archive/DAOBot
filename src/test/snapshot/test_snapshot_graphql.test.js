@@ -172,7 +172,7 @@ describe('Snapshot GraphQL test', () => {
     expect(votes.length > 80).toBe(true)
   })
 
-  it('Validates scores from Single-Batch Voting', async () => {
+  it.skip('Validates scores from Single-Batch Voting', async () => {
     const strategy = getVoteCountStrategy(1)
 
     let votes = []

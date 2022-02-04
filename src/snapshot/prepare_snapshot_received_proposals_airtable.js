@@ -2,10 +2,6 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  getProposalRecord,
-  State
-} = require('../airtable/proposals/proposal_standings')
-const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
