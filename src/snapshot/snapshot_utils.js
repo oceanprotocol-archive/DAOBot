@@ -154,6 +154,93 @@ const strategy = {
         }
       }
     }
+  ],
+  strategy_qv: [
+    {
+      name: 'ocean-dao-brightid',
+      params: {
+        brightIdMultiplier: 4,
+        notVerifiedMultiplier: 1,
+        registry: '0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0',
+        symbol: 'OCEAN',
+        strategies: [
+          {
+            name: 'erc20-balance-of',
+            params: {
+              symbol: 'OCEAN',
+              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+              decimals: 18
+            }
+          },
+          {
+            name: 'ocean-marketplace',
+            params: {
+              symbol: 'OCEAN',
+              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+              decimals: 18
+            }
+          },
+          {
+            name: 'sushiswap',
+            params: {
+              symbol: 'OCEAN',
+              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+              decimals: 18
+            }
+          },
+          {
+            name: 'uniswap',
+            params: {
+              symbol: 'OCEAN',
+              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+              decimals: 18
+            }
+          },
+          {
+            name: 'contract-call',
+            params: {
+              address: '0x9712Bb50DC6Efb8a3d7D12cEA500a50967d2d471',
+              args: [
+                '%{address}',
+                '0xCDfF066eDf8a770E9b6A7aE12F7CFD3DbA0011B5',
+                '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
+              ],
+              decimals: 18,
+              symbol: 'OCEAN',
+              methodABI: {
+                inputs: [
+                  {
+                    internalType: 'address',
+                    name: 'provider',
+                    type: 'address'
+                  },
+                  {
+                    internalType: 'address',
+                    name: 'poolToken',
+                    type: 'address'
+                  },
+                  {
+                    internalType: 'address',
+                    name: 'reserveToken',
+                    type: 'address'
+                  }
+                ],
+                name: 'totalProviderAmount',
+                outputs: [
+                  {
+                    internalType: 'uint256',
+                    name: '',
+                    type: 'uint256'
+                  }
+                ],
+                stateMutability: 'view',
+                type: 'function'
+              }
+            }
+          }
+        ]
+      }
+    }
   ]
 }
 
@@ -176,7 +263,8 @@ const getVoteCountStrategy = (roundNumber) => {
 
   if (roundNumber < 5) return strategy.strategy_v0_1
   if (roundNumber < 9) return strategy.strategy_v0_2
-  return strategy.strategy_v0_3
+  if (roundNumber <= 13) return strategy.strategy_v0_3
+  return strategy.strategy_qv
 }
 
 const getVotesQuery = (ifpshash) => `query Votes {
@@ -209,7 +297,7 @@ const getProposalVotesGQL = async (ipfsHash) => {
       query: getVotesQuery(ipfsHash)
     })
   }
-  const response = await fetch('https://hub.snapshot.org/graphql', options)
+  const response = await fetch(`${hubUrl}/graphql`, options)
 
   // If a user allocates all his voting power just to 1 proposal,
   // on the snapshot response for that wallet, the choices array

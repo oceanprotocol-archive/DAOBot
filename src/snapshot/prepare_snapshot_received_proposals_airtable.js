@@ -2,10 +2,6 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  getProposalRecord,
-  State
-} = require('../airtable/proposals/proposal_standings')
-const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
@@ -36,7 +32,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
   // TODO-RA: Proposals are being set to "Accepted" ahead of time, and are not being found.
   // Changed to this for R13 to work => `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Accepted"), "true")`
   const proposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
   )
   const estimatedBlockHeight = calcTargetBlockHeight(
     currentBlockHeight,
@@ -48,34 +44,16 @@ const prepareProposalsForSnapshot = async (curRound) => {
 
   await Promise.all(
     proposals.map(async (proposal) => {
-      getProposalRecord(proposal, proposals)
-      try {
-        if (proposal.get('Proposal State') === State.Accepted) {
-          recordsPayload.push({
-            id: proposal.id,
-            fields: {
-              'Proposal State': 'Accepted',
-              'Voting Starts': voteStartTime,
-              'Voting Ends': voteEndTime,
-              'Snapshot Block': Number(estimatedBlockHeight),
-              'Deployment Ready': 'Yes'
-            }
-          })
-        } else {
-          recordsPayload.push({
-            id: proposal.id,
-            fields: {
-              'Proposal State': proposal.get('Proposal State'),
-              'Voting Starts': null,
-              'Voting Ends': null,
-              'Snapshot Block': null,
-              'Deployment Ready': 'No'
-            }
-          })
+      recordsPayload.push({
+        id: proposal.id,
+        fields: {
+          'Proposal State': 'Accepted',
+          'Voting Starts': voteStartTime,
+          'Voting Ends': voteEndTime,
+          'Snapshot Block': Number(estimatedBlockHeight),
+          'Deployment Ready': 'Yes'
         }
-      } catch (err) {
-        Logger.error(err)
-      }
+      })
     })
   )
 
