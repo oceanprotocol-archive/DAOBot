@@ -33,7 +33,8 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes
+  syncGSheetsActiveProposalVotes,
+  createRoundResultsGSheet
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
@@ -110,6 +111,20 @@ const main = async () => {
   if (curRoundState === undefined) {
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
+      const oceanPrice = await getTokenPrice() // get the latest Ocean price
+      const earmarkStructure = await completeEarstructuresValues(
+        lastRound,
+        oceanPrice,
+        lastRound.get('Basis Currency')
+      ) // calculate the earmark values based on the updated Ocean price
+      const roundUpdateData = {
+        'OCEAN Price': oceanPrice,
+        Earmarks: JSON.stringify(earmarkStructure),
+        'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
+      }
+
+      await lastRound.updateFields(roundUpdateData) // update the round record
+
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
@@ -117,7 +132,15 @@ const main = async () => {
         lastRoundNumber,
         lastRoundBallotType
       )
-      await syncGSheetsActiveProposalVotes(lastRoundNumber, lastRoundBallotType)
+
+      try {
+        await syncGSheetsActiveProposalVotes(
+          lastRoundNumber,
+          lastRoundBallotType
+        )
+      } catch (err) {
+        Logger.error(`Error syncing GSheets Active Proposal Votes: ${err}`)
+      }
 
       // Complete round calculations
       const proposalsFunded = await processFundingRoundComplete(
@@ -174,6 +197,8 @@ const main = async () => {
       )
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
+
+      await createRoundResultsGSheet(curRoundNumber)
 
       let fundingAvailable = 0
 

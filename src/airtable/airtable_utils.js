@@ -90,23 +90,35 @@ const updateProposalRecords = async (records) => {
 }
 
 const updateRoundRecord = async (record) => {
-  await fetch(
-    `https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/Funding Rounds`,
-    {
-      method: 'patch', // make sure it is a "PATCH request"
-      headers: {
-        Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ records: record })
-    }
-  )
-    .then((res) => {
-      Logger.log('Response from Airtable: ', res.status)
-    })
-    .catch((err) => {
-      Logger.error(err)
-    })
+  return new Promise((resolve, reject) => {
+    fetch(
+      `https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/Funding Rounds`,
+      {
+        method: 'patch', // make sure it is a "PATCH request"
+        headers: {
+          Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ records: record })
+      }
+    )
+      .then((res) => {
+        Logger.log('Response from Airtable: ', res.status)
+        return res.json()
+      })
+      .then((res) => {
+        if (res.error) {
+          Logger.error(res.error)
+          reject(res.error)
+        }
+        Logger.log(res)
+        resolve(res)
+      })
+      .catch((err) => {
+        Logger.error(err)
+        reject(err)
+      })
+  })
 }
 
 module.exports = {

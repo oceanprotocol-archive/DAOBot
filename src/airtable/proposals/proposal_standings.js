@@ -1,6 +1,8 @@
 const { getProposalsSelectQuery } = require('../airtable_utils')
 const { hasEnoughOceans } = require('../../snapshot/snapshot_utils')
 const Logger = require('../../utils/logger')
+const { levels } = require('../project_summary')
+const { verifyEmail } = require('../../functions/utils')
 
 // Proposal States
 const State = {
@@ -150,18 +152,50 @@ const getAllRoundProposals = async (maxRound, minRound = 1) => {
   return allProposals
 }
 
+const validateProposal = (proposal, level) => {
+  if (proposal.get('Round') < 13) return true
+  const isn = (x) => x == null || x === ''
+  if (proposal.get('USD Requested') > level.ceiling)
+    return 'Invalid USD Requested'
+
+  if (isn(proposal.get('Wallet Address'))) return 'Missing Wallet Address'
+  if (isn(proposal.get('One Liner'))) return 'Missing One Liner'
+  if (isn(proposal.get('Proposal URL'))) return 'Missing Proposal URL'
+  if (isn(proposal.get('Grant Deliverables')))
+    return 'Missing Grant Deliverables'
+  if (isn(proposal.get('Project Lead Full Name')))
+    return 'Missing Project Lead Full Name'
+  if (isn(proposal.get('Country of Recipient')))
+    return 'Missing Country of Recipient'
+
+  if (isn(proposal.get('Project Email Address'))) return 'Missing Email Address'
+  if (verifyEmail(proposal.get('Project Email Address')) === false)
+    return 'Invalid Email Address'
+
+  return true
+}
+
 const getProposalRecord = async (proposal, allProposals) => {
+  const completedProposals = allProposals.filter(
+    (x) =>
+      x.get('Proposal Standing') === Standings.Completed &&
+      x.get('Project Name') === proposal.get('Project Name')
+  ).length
+  const level = levels(completedProposals)
   const proposalURL = proposal.get('Proposal URL')
   const areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address'))
   const ethTransactionExists =
     proposal.get('ETH Transaction') !== undefined &&
     proposal.get('ETH Transaction') !== null &&
     proposal.get('ETH Transaction') !== ''
-  const proposalState = getProposalState(
+  let proposalState = getProposalState(
     proposal.get('Proposal State'),
     areOceansEnough,
     ethTransactionExists
   )
+  const validProposal = validateProposal(proposal, level)
+  if (validProposal !== true) proposalState = State.Rejected // Set the proposal state to rejected if the proposal is not valid
+
   const currentStanding = proposal.get('Proposal Standing')
   const deliverableChecklist = proposal.get('Deliverable Checklist') || []
   const deliverableUpdate = proposal.get('Last Deliverable Update')
@@ -197,7 +231,8 @@ const getProposalRecord = async (proposal, allProposals) => {
       'Proposal State': proposalState,
       'Proposal Standing': newStanding,
       'Disputed Status': disputed,
-      'Outstanding Proposals': undefined
+      'Outstanding Proposals': undefined,
+      'Reason Rejected': validProposal === true ? undefined : validProposal
     }
   }
 }
@@ -347,5 +382,6 @@ module.exports = {
   getProjectsLatestProposal,
   updateCurrentRoundStandings,
   projectHasCompletedProposals,
-  getProposalState
+  getProposalState,
+  validateProposal
 }
