@@ -23,11 +23,11 @@ beforeEach(async function () {
     id: 'round_14',
     fields: {
       'OCEAN Price': 0.66,
-      Earmarks: "{\"New Entrants\":{\"OCEAN\":24000,\"USD\":15740.969},\"New Outreach\":{\"OCEAN\":12000,\"USD\":7870.484},\"Core Tech\":{\"OCEAN\":30000,\"USD\":19676.211},\"General\":{\"OCEAN\":134000,\"USD\":87887.074}}",
+      Earmarks: "{\"New Entrants\":{\"OCEAN\":24000,\"USD\":15840},\"New Outreach\":{\"OCEAN\":12000,\"USD\":7920},\"Core Tech\":{\"OCEAN\":30000,\"USD\":19800},\"General\":{\"OCEAN\":134000,\"USD\":88440}}",
       'Funding Available OCEAN': 200000,
-      'Funding Available USD': 115000,
+      'Funding Available USD': 132000,
       'Basis Token': 'USD',
-      'Funds Left': 'Burn'
+      'Funds Left': 'Recycle'
     },
     get: function (key) {
       return this.fields[key]
@@ -122,12 +122,11 @@ describe('Calculating Winners', function () {
     should.equal(downvotedProposals.length, 8)
 
     const winningProposals = getWinningProposals(allProposals, fundingRound)
-    const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     // sum all winnings
     let totalOceanGranted = 0
     winningProposals.forEach((proposal) => {totalOceanGranted += proposal.fields['OCEAN Granted']})
 
-    console.log(totalOceanGranted)
+    totalOceanGranted.should.equal(200000)
   })
 })
