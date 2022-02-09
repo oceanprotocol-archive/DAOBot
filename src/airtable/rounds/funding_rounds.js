@@ -255,7 +255,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       fundsLeftOcean += winningProposals.fundsLeftOcean
       fundsRecycled += winningProposals.fundsLeft
       fundsRecycledOcean += winningProposals.fundsLeftOcean
-      usdEarmarked += currentUsdEarmarked - fundsLeft
+      usdEarmarked += currentUsdEarmarked - winningProposals.fundsLeft
       winningProposals.winningProposals
         .map((x) => x.id)
         .forEach((proposalId) => {
