@@ -94,7 +94,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   })
 
   // Step 2 - Update all DB records
-  // await updateProposalRecords(airtableRows)
+  await updateProposalRecords(airtableRows)
   Logger.log(
     '\n[%s]\nUpdated [%s] rows to Airtable',
     new Date().toString(),
@@ -205,4 +205,4 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   return burntFunds
 }
 
-module.exports = { processFundingRoundComplete, computeBurnedFunds }
+module.exports = { processFundingRoundComplete, computeBurnedFunds, clearFundedRecords, dumpWiningProposalsByEarmarksToGSheet }
