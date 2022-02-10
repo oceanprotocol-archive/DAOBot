@@ -2,8 +2,8 @@
 
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
+const Logger = require('../../utils/logger')
 dotenv.config()
-const should = require('chai').should()
 const {
   completeEarstructuresValues,
   getWinningProposals,
@@ -15,23 +15,22 @@ const {
 const { getProposalsSelectQuery } = require('../../airtable/airtable_utils')
 const { getTokenPrice } = require('../../functions/chainlink')
 const {
-    clearFundedRecords,
-    dumpWiningProposalsByEarmarksToGSheet
-  } = require('../../airtable/process_airtable_funding_round_complete')
+  clearFundedRecords,
+  dumpWiningProposalsByEarmarksToGSheet
+} = require('../../airtable/process_airtable_funding_round_complete')
 const {
-    getValues,
-    addSheet,
-    updateValues
-  } = require('../../gsheets/gsheets_utils')
+  getValues,
+  addSheet,
+  updateValues
+} = require('../../gsheets/gsheets_utils')
 const { initOAuthToken } = require('../../gsheets/gsheets')
 
 jest.setTimeout(900000)
 
 describe('Calculating Winners', function () {
-
   it('Checks current round results', async function () {
     const curRound = await getCurrentRound()
-    if(curRound.get('Round State') !== 'Voting') return
+    if (curRound.get('Round State') !== 'Voting') return
     const oceanPrice = await getTokenPrice() // get the latest Ocean price
     const earmarkStructure = await completeEarstructuresValues(
       curRound,
@@ -39,28 +38,37 @@ describe('Calculating Winners', function () {
       curRound.get('Basis Currency')
     ) // calculate the earmark values based on the updated Ocean price
 
-    curRound['OCEAN Price'] = oceanPrice,
-    curRound['Earmarks'] = JSON.stringify(earmarkStructure),
-    curRound['Funding Available USD'] = curRound.get('Funding Available') * oceanPrice
+    curRound['OCEAN Price'] = oceanPrice
+    curRound.Earmarks = JSON.stringify(earmarkStructure)
+    curRound['Funding Available USD'] =
+      curRound.get('Funding Available') * oceanPrice
 
     // Complete round calculations
     const activeProposals = await getProposalsSelectQuery(
-        `AND({Round} = "${curRound.get('Round')}", NOT({Proposal State} = "Withdrawn"), "true")`
+      `AND({Round} = "${curRound.get(
+        'Round'
+      )}", NOT({Proposal State} = "Withdrawn"), "true")`
     )
-    
+
     clearFundedRecords(activeProposals)
     const downvotedProposals = getDownvotedProposals(activeProposals)
-    const winningProposals = getWinningProposals(activeProposals, curRound.get('Round'))
+    const winningProposals = getWinningProposals(
+      activeProposals,
+      curRound.get('Round')
+    )
     const finalResults = calculateFinalResults(winningProposals, curRound)
-    
-    const oceanFunded = finalResults.resultsByEarmark.usdEarmarked / curRound.get('OCEAN Price')
-    oceanFunded.should.equal(curRound.get('Funding Available') - finalResults.resultsByEarmark.fundsLeftOcean)
+    const oceanFunded =
+      finalResults.resultsByEarmark.usdEarmarked / curRound.get('OCEAN Price')
+    oceanFunded.should.equal(
+      curRound.get('Funding Available') -
+        finalResults.resultsByEarmark.fundsLeftOcean
+    )
 
-    //write results to GSsheets
+    // write results to GSsheets
     const downvotedResults = await dumpResultsToGSheet(downvotedProposals)
 
     const partiallyFundedResults = await dumpResultsToGSheet(
-        finalResults.partiallyFunded
+      finalResults.partiallyFunded
     )
     const notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
 
@@ -72,14 +80,14 @@ describe('Calculating Winners', function () {
     // Get the sheet, otherwise create it
     let sheet = await getValues(oAuth, sheetName, 'A1:B3')
     if (sheet === undefined) {
-        sheet = await addSheet(oAuth, sheetName)
-        Logger.log('Created new sheet [%s].', sheetName) 
+      sheet = await addSheet(oAuth, sheetName)
+      Logger.log('Created new sheet [%s].', sheetName)
     }
     let gsheetRows = []
     // Flatten results onto gsheetRows
     gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
-        finalResults.resultsByEarmark,
-        gsheetRows
+      finalResults.resultsByEarmark,
+      gsheetRows
     )
     partiallyFundedResults.splice(0, 0, ['Partially Funded'])
     partiallyFundedResults.push([''])
@@ -95,17 +103,18 @@ describe('Calculating Winners', function () {
     gsheetRows.push([''])
     gsheetRows.push(['Summed round results'])
     const oceanUSD = curRound.get('OCEAN Price')
-    const foundsLeftRuleString = fundsLeftRule === 'Burn' ? 'Burned' : 'Recycled'
+    const foundsLeftRuleString =
+      fundsLeftRule === 'Burn' ? 'Burned' : 'Recycled'
     const usdResultsTexts = []
     const oceanResultsTexts = []
     const usdResultsValues = []
     const oceanResultsValues = []
     finalResults.resultsByEarmark.earmarks.forEach((earmark) => {
-        usdResultsTexts.push(`${earmark} USD ${foundsLeftRuleString}`)
-        oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
-        const usdFundsLeft = finalResults.resultsByEarmark[earmark].fundsLeft
-        usdResultsValues.push(finalResults.resultsByEarmark[earmark].fundsLeft)
-        oceanResultsValues.push(usdFundsLeft / oceanPrice)
+      usdResultsTexts.push(`${earmark} USD ${foundsLeftRuleString}`)
+      oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
+      const usdFundsLeft = finalResults.resultsByEarmark[earmark].fundsLeft
+      usdResultsValues.push(finalResults.resultsByEarmark[earmark].fundsLeft)
+      oceanResultsValues.push(usdFundsLeft / oceanPrice)
     })
 
     // Total USD&OCEAN burned/recycled
@@ -113,14 +122,16 @@ describe('Calculating Winners', function () {
     oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
     usdResultsValues.push(finalResults.resultsByEarmark.fundsRecycled)
     oceanResultsValues.push(
-        finalResults.resultsByEarmark.fundsRecycled / oceanUSD
+      finalResults.resultsByEarmark.fundsRecycled / oceanUSD
     )
 
     // Total USD&OCEAN granted
     usdResultsTexts.push(`Total USD Granted`)
     oceanResultsTexts.push(`Total OCEAN Granted`)
     usdResultsValues.push(finalResults.resultsByEarmark.usdEarmarked)
-    oceanResultsValues.push(finalResults.resultsByEarmark.usdEarmarked / oceanUSD)
+    oceanResultsValues.push(
+      finalResults.resultsByEarmark.usdEarmarked / oceanUSD
+    )
 
     gsheetRows.push(usdResultsTexts)
     gsheetRows.push(usdResultsValues)
@@ -129,10 +140,10 @@ describe('Calculating Winners', function () {
     gsheetRows.push([])
 
     await updateValues(
-        oAuth,
-        sheetName,
-        'A1:I' + (gsheetRows.length + 1),
-        gsheetRows
+      oAuth,
+      sheetName,
+      'A1:I' + (gsheetRows.length + 1),
+      gsheetRows
     )
   })
 })

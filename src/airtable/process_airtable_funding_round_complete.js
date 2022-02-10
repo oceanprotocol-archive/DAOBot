@@ -205,4 +205,9 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   return burntFunds
 }
 
-module.exports = { processFundingRoundComplete, computeBurnedFunds, clearFundedRecords, dumpWiningProposalsByEarmarksToGSheet }
+module.exports = {
+  processFundingRoundComplete,
+  computeBurnedFunds,
+  clearFundedRecords,
+  dumpWiningProposalsByEarmarksToGSheet
+}

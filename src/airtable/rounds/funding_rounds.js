@@ -139,15 +139,14 @@ const calculateWinningProposalsForEarmark = (
 
       // Some USD might have been carried over from previous earmaks
       const grantCarry = p.get('USD Granted') || 0
-      const usdRequestedLeft = Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice
+      const usdRequestedLeft =
+        Math.ceil((usdRequested - grantCarry) / oceanPrice) * oceanPrice
 
       // Can we grant the full usdRequestedLeft
       const canFullGrant = fundsLeft - usdRequestedLeft > 0
 
       // Grant the remainder
-      const usdGranted = canFullGrant
-          ? usdRequestedLeft
-          : fundsLeft
+      const usdGranted = canFullGrant ? usdRequestedLeft : fundsLeft
       const totalUsdGranted = usdGranted + grantCarry
 
       const oceanGranted = !canFullGrant
@@ -159,9 +158,7 @@ const calculateWinningProposalsForEarmark = (
       p.fields['USD Granted'] = oceanGranted * oceanPrice
       p.fields['OCEAN Granted'] = oceanGranted
       p.fields['Proposal State'] = 'Granted'
-      fundsLeft = fundsLeft - usdGranted <= 0
-          ? 0
-          : fundsLeft - usdGranted
+      fundsLeft = fundsLeft - usdGranted <= 0 ? 0 : fundsLeft - usdGranted
       fundsLeftOcean = fundsLeft / oceanPrice
 
       // If we reached the total, then it won via this grant pot
@@ -174,7 +171,7 @@ const calculateWinningProposalsForEarmark = (
   return {
     winningProposals: winningProposals,
     fundsLeft: fundsLeft,
-    fundsLeftOcean: fundsLeftOcean,
+    fundsLeftOcean: fundsLeftOcean
   }
 }
 
@@ -187,7 +184,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   const allWinningProposals = [] // every proposal that won funding
   const earmarkedWinnerIds = [] // every proposal that won, indexed by proposal_id
   const resultsByEarmark = {} // all winning proposals, indexed by earmark
-  let earmarks = []
+  const earmarks = []
   let fundsLeft = 0 // cache - tracks how much funds are left over to be burned/assigned to general
   let fundsLeftOcean = 0 // cache - tracks how much funds are left over to be burned/assigned to general
   let fundsRecycled = 0 // summary - total funds recycled
@@ -240,12 +237,11 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
         fundsLeftOcean: earmarksJson[earmark].USD / oceanPrice,
         fundsRecycledOcean: earmarksJson[earmark].USD / oceanPrice
       }
-    }
-    else {
+    } else {
       const winningProposals = calculateWinningProposalsForEarmark(
-          earmarkProposals,
-          currentUsdEarmarked,
-          oceanPrice
+        earmarkProposals,
+        currentUsdEarmarked,
+        oceanPrice
       )
       resultsByEarmark[earmark] = winningProposals
       winningProposals.winningProposals.forEach((proposal) => {
