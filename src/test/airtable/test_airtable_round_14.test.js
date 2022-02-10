@@ -122,10 +122,10 @@ describe('Calculating Winners', function () {
     should.equal(downvotedProposals.length, 8)
 
     const winningProposals = getWinningProposals(allProposals, fundingRound)
+    const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     // sum all winnings
-    let totalOceanGranted = 0
-    winningProposals.forEach((proposal) => {totalOceanGranted += proposal.fields['OCEAN Granted']})
+    let totalOceanGranted = finalResults.resultsByEarmark.usdEarmarked / fundingRound.get('OCEAN Price')
 
     totalOceanGranted.should.equal(200000)
   })
