@@ -30,6 +30,9 @@ jest.setTimeout(900000)
 describe('Calculating Winners', function () {
   it('Checks current round results', async function () {
     const curRound = await getCurrentRound()
+
+    // the following line will disable this test, should be commented in to make the test run
+    if (curRound.get('Round') !== 1) return
     if (curRound.get('Round State') !== 'Voting') return
     const oceanPrice = await getTokenPrice() // get the latest Ocean price
     const earmarkStructure = await completeEarstructuresValues(
