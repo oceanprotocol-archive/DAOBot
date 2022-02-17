@@ -250,17 +250,17 @@ const strategy = {
                 decimals: 18
               }
             }
-          ],
-          56: [
-            {
-              name: 'erc20-balance-of',
-              params: {
-                symbol: 'OCEAN',
-                address: '0xdce07662ca8ebc241316a15b611c89711414dd1a',
-                decimals: 18
-              }
-            }
           ]
+          // 56: [
+          //   {
+          //     name: 'erc20-balance-of',
+          //     params: {
+          //       symbol: 'OCEAN',
+          //       address: '0xdce07662ca8ebc241316a15b611c89711414dd1a',
+          //       decimals: 18
+          //     }
+          //   }
+          // ]
         }
       }
     }
