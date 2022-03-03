@@ -248,6 +248,7 @@ const strategy = {
       params: {
         brightIdMultiplier: 4,
         notVerifiedMultiplier: 1,
+        brightIdNetwork: '1',
         registry: '0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0',
         symbol: 'OCEAN',
         strategies: {
