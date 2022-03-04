@@ -33,8 +33,7 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes,
-  createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
@@ -66,7 +65,6 @@ const main = async () => {
   let curRoundState
   let curRoundStartDate
   let curRoundProposalsDueBy
-  let curRoundProposalsDueBy_plus15
   let curRoundVoteStart
   let curRoundVoteEnd
   let curRoundVoteType
@@ -77,10 +75,6 @@ const main = async () => {
     curRoundState = curRound.get('Round State')
     curRoundStartDate = curRound.get('Start Date')
     curRoundProposalsDueBy = moment(curRound.get('Proposals Due By'))
-      .utc()
-      .toISOString()
-    curRoundProposalsDueBy_plus15 = moment(curRound.get('Proposals Due By'))
-      .add(15, 'minutes')
       .utc()
       .toISOString()
     curRoundVoteStart = curRound.get('Voting Starts')
@@ -111,6 +105,8 @@ const main = async () => {
   if (curRoundState === undefined) {
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
+      Logger.log('Complete the current round and start the next one.')
+
       const oceanPrice = await getTokenPrice() // get the latest Ocean price
       const earmarkStructure = await completeEarstructuresValues(
         lastRound,
@@ -198,10 +194,7 @@ const main = async () => {
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
 
-      await createRoundResultsGSheet(curRoundNumber)
-
       let fundingAvailable = 0
-
       let fundingAvailableUSD = 0
 
       switch (basisCurrency) {
@@ -266,28 +259,6 @@ const main = async () => {
           id: curRound.id,
           fields: {
             'Round State': RoundState.Voting
-          }
-        }
-      ]
-      await updateRoundRecord(roundUpdate)
-    } else if (
-      curRoundState === RoundState.DueDiligence &&
-      now <= curRoundProposalsDueBy_plus15
-    ) {
-      // 15 minute grace period from DD to allow Alex to update proposals
-      Logger.log('Update Proposals - Grace Period.')
-
-      await prepareNewProposals(curRound, curRoundNumber)
-
-      const allProposals = await getProposalsSelectQuery(
-        `{Round} = ${curRoundNumber}`
-      )
-      // Update proposal count
-      const roundUpdate = [
-        {
-          id: curRound.id,
-          fields: {
-            Proposals: allProposals.length
           }
         }
       ]
