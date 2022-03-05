@@ -150,6 +150,13 @@ const spring_dao_quadratic_blockNumber = 13347979
 const spring_dao_quadratic_proposalIPFSHash =
   'QmX1H9SiZnM7MvaxzSKNwXKtt9p95RfiWDTKAQLNWnFS1q'
 
+const r15_blockNumber = 14317148
+const r15_proposalHash = "QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ"
+const r15_voter_validation = {
+  '0x5D2B315C465e133a346C960F46f5AA1ED88a3179': 316000,
+  '0xCe7BE31f48205C48A91A84E777a66252Bba87F0b': 161000,
+}
+
 // Tests against Snapshot GraphQL endpoint
 describe('Snapshot GraphQL test', () => {
   it('Validates votes from proposal', async () => {
@@ -328,5 +335,44 @@ describe('Snapshot GraphQL test', () => {
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
     Logger.log(reducedVoterScores)
+  })
+
+  it('Validates scores from Round 15', async () => {
+    const strategy = getVoteCountStrategy(15)
+
+    let votes = []
+    await getProposalVotesGQL(r15_proposalHash).then(
+        (result) => {
+          ;({ votes } = result.data)
+        }
+    )
+    expect(votes.length > 40).toBe(true)
+
+    const voters = []
+    for (var i = 0; i < votes.length; ++i) {
+      voters.push(votes[i].voter)
+    }
+
+    const voterScores = await getVoterScores(
+        strategy,
+        voters,
+        r15_blockNumber
+    )
+    const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
+
+    Logger.log(voterScores)
+    reducedVoterScores.map((x) => {
+      const voterAddress = Object.keys(x)[0]
+      const validationValue = r15_voter_validation[voterAddress]
+
+      if (validationValue !== undefined) {
+        Logger.log(`Calculated score ${x[voterAddress].balance.toFixed(2)}`)
+        Logger.log(`Expected score ${validationValue.toFixed(2)}`)
+
+        if(should.not.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))) {
+          assert.fail('Snapshot score is not the same as expected => https://snapshot.org/#/officialoceandao.eth/proposal/QmQgfxvLqz88pL3ByK6U82bxezCU8MAiCSgxtTTCoR3fWm')
+        }
+      }
+    })
   })
 })
