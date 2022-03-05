@@ -153,8 +153,8 @@ const spring_dao_quadratic_proposalIPFSHash =
 const r15_blockNumber = 14317148
 const r15_proposalHash = "QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ"
 const r15_voter_validation = {
-  '0x5D2B315C465e133a346C960F46f5AA1ED88a3179': 316000,
-  '0xCe7BE31f48205C48A91A84E777a66252Bba87F0b': 161000,
+  '0x5D2B315C465e133a346C960F46f5AA1ED88a3179': 315730.2643226361,
+  '0xCe7BE31f48205C48A91A84E777a66252Bba87F0b': 160971.5058013848,
 }
 
 // Tests against Snapshot GraphQL endpoint
@@ -362,17 +362,11 @@ describe('Snapshot GraphQL test', () => {
 
     Logger.log(voterScores)
     reducedVoterScores.map((x) => {
-      const voterAddress = Object.keys(x)[0]
+      const voterAddress = x.address
       const validationValue = r15_voter_validation[voterAddress]
 
-      if (validationValue !== undefined) {
-        Logger.log(`Calculated score ${x[voterAddress].balance.toFixed(2)}`)
-        Logger.log(`Expected score ${validationValue.toFixed(2)}`)
-
-        if(should.not.equal(x[voterAddress].balance.toFixed(2), validationValue.toFixed(2))) {
-          assert.fail('Snapshot score is not the same as expected => https://snapshot.org/#/officialoceandao.eth/proposal/QmQgfxvLqz88pL3ByK6U82bxezCU8MAiCSgxtTTCoR3fWm')
-        }
-      }
+      if (validationValue !== undefined)
+        should.equal(x.balance.toFixed(2), validationValue.toFixed(2), 'Snapshot score is not the same as expected')
     })
   })
 })
