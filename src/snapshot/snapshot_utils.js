@@ -493,6 +493,36 @@ const reduceProposalScores = (ballotType, voterScores) => {
   return scores
 }
 
+// Calculate match for each grant
+const calculateMatch = (granularVotes, totalVotes) => {
+  let granularMatch = {}; // collect matching contribution per grant
+  let summed = 0; // Setup summed grant contributions
+
+  // Loop over each grant
+  for (const grant of Object.keys(granularVotes)) {
+    let sumAmount = 0;
+
+    // Sum the square root of each grant contribution
+    for (let j = 0; j < granularVotes[grant].length; j++) {
+      sumAmount += Math.sqrt(granularVotes[grant][j]);
+    }
+
+    // Square the total value of each summed grants contributions
+    sumAmount *= sumAmount;
+    granularMatch[grant] = sumAmount;
+    summed += sumAmount;
+  }
+
+  // Setup a divisor based on available match
+  let divisor = totalVotes / summed;
+  // Multiply matched values with divisor to get match amount in range of available funds
+  for (const grant of Object.keys(granularVotes)) {
+    granularMatch[grant] *= divisor;
+  }
+
+  return granularMatch
+};
+
 // Configure the ballot for a single proposal
 const buildGranularProposalPayload = (proposal, roundNumber, voteType) => {
   const strategy = getVoteCountStrategy(roundNumber)
@@ -650,6 +680,7 @@ module.exports = {
   local_broadcast_proposal,
   calcTargetBlockHeight,
   hasEnoughOceans,
+  calculateMatch,
   VoteType,
   BallotType
 }
