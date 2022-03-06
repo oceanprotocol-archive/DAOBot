@@ -153,8 +153,59 @@ const spring_dao_quadratic_proposalIPFSHash =
 const r15_blockNumber = 14317148
 const r15_proposalHash = "QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ"
 const r15_voter_validation = {
-  '0x5D2B315C465e133a346C960F46f5AA1ED88a3179': 315730.2643226361,
-  '0xCe7BE31f48205C48A91A84E777a66252Bba87F0b': 160971.5058013848,
+  "0x3753651eb6f165488993137A1e3Ed06F1436C139": 2363.1765871548596,
+  "0xAE6A3d5F73cDA0180eeDBAa5aA801D68b3491931": 514.9962858945837,
+  "0x86307df93c38C9A8C5E7E7bd40734Ab522e393Fb": 35174.69932,
+  "0xE2A4DEd1eB0Bfa8027F1A2eD7E09D72843d6D35a": 2318.215008065661,
+  "0xe9CBb0041EC5D47996C38D9e8ba4D97961e87daa": 3731,
+  "0xfEb9Dc9A327000a10eD7FE95dC87eE0969f102b3": 7636,
+  "0x32b4Dd84380a880AB298875Ef7C155ab90823384": 7478.14844932361,
+  "0x5b3d1710851c651ff8075a3aDe3eDFd23B557E75": 506,
+  "0x2442F2b9B7a0a99046C5D39B520d99D263165BC5": 13891.91727434,
+  "0x21e06646433954AaBaCE8E3d93d502e423249299": 4000,
+  "0x42a19cd756651A488f1899157c45Af929bf3695F": 32838.1856814305,
+  "0x7996756d47ccA280637279346854aEF4405CB882": 32149.84958153,
+  "0xa83BD8f47a739be8Bc7D2172C7bF638A3558190B": 7417.7561000000005,
+  "0x16e3cd34D685E9af1a76eccc3FcB5951233379F2": 926.9107125,
+  "0x006d559fc29090589d02fB71d4142aa58b030013": 600,
+  "0x8246137C39BB05261972655186A868bdC8a9Eb11": 372.5535536372656,
+  "0x114bCceEC1A85be5eF46c903994B74DA2d41Ce53": 18000,
+  "0xc787E5C727cbc9cCe4888EB1c92d5f8f8966B824": 757.7661,
+  "0x1a7EeDEadC8E38FADfF8719F22d9Ca54EDa406A0": 60049.395915592526,
+  "0xcFd1d657f820404fEdb594E5B0981a1b03Dd6BEf": 110137.98867090329,
+  "0xb1B1dba36512C4943F2D517D2EdC256875404C5d": 71093.77263943224,
+  "0x27B3035ab7F71d711dE25f114768F5F64B61857B": 44349.8,
+  "0x275aB2f4e5DD3CB7AA8Ec4f16a79F4023cc5f7Ef": 7500,
+  "0xa4c6c2013810661a6750443aEF86cFeAc983e07f": 48943.48,
+  "0x5d01096DD2a43089aBb7DAd405e9B61779b5f786": 555.59627,
+  "0x9F67E932b35658657A81C1511a0f5221Ae59098f": 2036.12,
+  "0xCe7BE31f48205C48A91A84E777a66252Bba87F0b": 160971.5058013848,
+  "0xF9ac73f30dBe52c10e3d5950db66357f9d0be44D": 40784.33206940859,
+  "0xD0a2813A5d4fB68e2192d04fF9e1c6A72A9285e8": 1873.0676,
+  "0x15b5359fd05A37ba6546AaCabe92D9354aD18D07": 19110.543091004733,
+  "0x0363F3C31076a64b85Ceb69a28f958A7c1181CEe": 1611.7498795415638,
+  "0x169821D39aEBE75E6E6550d03Eb0B2eec3AF991a": 709.4677771486047,
+  "0xc9bdE6dd3FAEebf986840F2feA3d7d5680c03b98": 8000,
+  "0x5D2B315C465e133a346C960F46f5AA1ED88a3179": 315730.2643226361,
+  "0xeFB850EA4963Eb6d1A914D4Eb0b114026da51623": 64275.17668764358,
+  "0xEdDd6dA80fEa5c7B848F50eE9d2e9fa4A212B88b": 10434.31,
+  "0x2F94d8479DE67B01514856Df271E52Ed1f6446E6": 1331,
+  "0x241355880Cdadca9D601567959fe40795c891213": 5000,
+  "0x5bA017cC1093292238CD4C7B204AA33082463544": 1550.603263821675,
+  "0x8f1bbc2de4480F274AbCEeCAe53438Ba87dB9498": 3479.0643752460546,
+  "0x77edDB82E5e9901aA494825bC362fA93120B892c": 35293.888,
+  "0x4F20e69E7bA5aB2Fb2ae25A1d17C93fE5307faA9": 10623.26425653,
+  "0x862f02e24fDdE7452f584f2438aA870856673437": 2399.55,
+  "0xe6E3459bA0d70699F54464cc4b5d273810E7EC7B": 500,
+  "0xC9F7dda9FF5884f79483d374acfBbdb58aa83b4e": 644.45,
+  "0xD2c39D160483078317a569ddFA69f85Ef7F3B16e": 23940,
+  "0xaF768E4fBf309B4d68A96B327A9708b36C6577D8": 655,
+  "0x8eAC3cF74fe6dC46A8ed9bF07a15F67dFbeEFdc9": 3560,
+  "0xbbd33AFa85539fa65cc08A2e61a001876D2f13FE": 20301.53667133912,
+  "0x6672610269880aA0483651c705134ABBE3C9a0d6": 6,
+  "0x0cEC1Dbc5Db276dE35808bf717a4491082fDb8d8": 1976.95,
+  "0x0EAEe7557fB9f7BCEc342BAffD628A6bd2CD3bC7": 2205.74835494816,
+  "0x9129c926A92E1e1FB30Fae508b05481aCaE02dbB": 5020
 }
 
 // Tests against Snapshot GraphQL endpoint
@@ -341,6 +392,7 @@ describe('Snapshot GraphQL test', () => {
     const strategy = getVoteCountStrategy(15)
 
     let votes = []
+    let granularVotes = {}
     await getProposalVotesGQL(r15_proposalHash).then(
         (result) => {
           ;({ votes } = result.data)
@@ -360,13 +412,39 @@ describe('Snapshot GraphQL test', () => {
     )
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
-    Logger.log(voterScores)
     reducedVoterScores.map((x) => {
       const voterAddress = x.address
-      const validationValue = r15_voter_validation[voterAddress]
+      let sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
 
+      // Distribute balance per choice voted on
+      for (const [key, value] of Object.entries(x.choice)) {
+        if( granularVotes[key] === undefined )
+          granularVotes[key] = []
+
+        granularVotes[key].push(x.balance * (value / sumChoices))
+      }
+
+      const validationValue = r15_voter_validation[voterAddress]
       if (validationValue !== undefined)
         should.equal(x.balance.toFixed(2), validationValue.toFixed(2), 'Snapshot score is not the same as expected')
     })
+
+    // Sum votes by choice
+    // We can verify these are not the same as in snapshot
+    let choiceSums = {}
+    for (const [key, value] of Object.entries(granularVotes)) {
+      let sumChoice = value.reduce((a, b) => a + b)
+      choiceSums[key] = sumChoice
+    }
+
+    // TODO - Implement QF + Verify results against Snapshot FE
+    // sum the square root of each grant voted and quare the total value
+    let sqrtPwr = {}
+    for (const [key, value] of Object.entries(granularVotes)) {
+      sqrtPwr[key] = value.map(x => Math.sqrt(x))
+      sqrtPwr[key] = Math.pow(sqrtPwr[key].reduce((a,b) => a + b), 2)
+    }
+
+    Logger.log(sumSqrtPwr)
   })
 })
