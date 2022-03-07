@@ -3,16 +3,11 @@ const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const {
-  getProposalsSelectQuery,
-  updateProposalRecords,
-  sumSnapshotVotesToAirtable
-} = require('./airtable_utils')
+const { getProposalsSelectQuery } = require('./airtable_utils')
 const {
   getVoteCountStrategy,
   getVoterScores,
   reduceVoterScores,
-  reduceProposalScores,
   getProposalVotesGQL,
   calculateMatch
 } = require('../snapshot/snapshot_utils')
@@ -24,10 +19,8 @@ const { getCurrentRound } = require('./rounds/funding_rounds')
 var allProposals = []
 var proposalVotes = {}
 var proposalScores = {}
-var proposalVoteSummary = {}
 const getAllProposalVotes = async () => {
   const curRound = await getCurrentRound()
-  const curRoundBallotType = curRound.get('Ballot Type')
   const curRoundNumber = curRound.get('Round')
 
   for (var roundNum = 1; roundNum < curRoundNumber; roundNum++) {
