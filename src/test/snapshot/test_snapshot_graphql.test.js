@@ -339,7 +339,6 @@ describe('Snapshot GraphQL test', () => {
     const strategy = getVoteCountStrategy(15)
 
     let votes = []
-    let granularVotes = {}
     await getProposalVotesGQL(r15_proposalHash).then((result) => {
       ;({ votes } = result.data)
     })

@@ -19,6 +19,7 @@ const { getCurrentRound } = require('./rounds/funding_rounds')
 var allProposals = []
 var proposalVotes = {}
 var proposalScores = {}
+// eslint-disable-next-line no-unused-vars
 const getAllProposalVotes = async () => {
   const curRound = await getCurrentRound()
   const curRoundNumber = curRound.get('Round')

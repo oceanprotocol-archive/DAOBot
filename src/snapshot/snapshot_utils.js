@@ -463,7 +463,7 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (ballotType, voterScores) => {
-  // DEPRECATED, USE calculateMatch
+  // ! USE calculateMatch for QF
   const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
