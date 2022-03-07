@@ -13,7 +13,8 @@ const {
   getVotesQuery,
   reduceVoterScores,
   getProposalVotesGQL,
-  getVoterScores
+  getVoterScores,
+  calculateMatch
 } = require('../../snapshot/snapshot_utils')
 
 afterAll(() => {
@@ -149,6 +150,9 @@ const uni_sushi_bancor_voterValidation = {
 const spring_dao_quadratic_blockNumber = 13347979
 const spring_dao_quadratic_proposalIPFSHash =
   'QmX1H9SiZnM7MvaxzSKNwXKtt9p95RfiWDTKAQLNWnFS1q'
+
+const r15_blockNumber = 14317148
+const r15_proposalHash = 'QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ'
 
 // Tests against Snapshot GraphQL endpoint
 describe('Snapshot GraphQL test', () => {
@@ -328,5 +332,28 @@ describe('Snapshot GraphQL test', () => {
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
     Logger.log(reducedVoterScores)
+  })
+
+  // This test uses a vanilla matching function implementation for QF
+  it('Validates scores from Round 15', async () => {
+    const strategy = getVoteCountStrategy(15)
+
+    let votes = []
+    await getProposalVotesGQL(r15_proposalHash).then((result) => {
+      ;({ votes } = result.data)
+    })
+    expect(votes.length > 40).toBe(true)
+
+    const voters = []
+    for (var i = 0; i < votes.length; ++i) {
+      voters.push(votes[i].voter)
+    }
+
+    const voterScores = await getVoterScores(strategy, voters, r15_blockNumber)
+    const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
+
+    const granularMatch = calculateMatch(reducedVoterScores)
+
+    Logger.log('Result', granularMatch)
   })
 })

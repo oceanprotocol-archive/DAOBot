@@ -463,6 +463,7 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (ballotType, voterScores) => {
+  // ! USE calculateMatch for QF
   const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
@@ -491,6 +492,35 @@ const reduceProposalScores = (ballotType, voterScores) => {
   }, {})
 
   return scores
+}
+
+// Calculate match for each grant
+const calculateMatch = (reducedVoterScores) => {
+  const granularVotes = {}
+  reducedVoterScores.map((x) => {
+    const sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
+    // Distribute balance per choice voted on
+    for (const [key, value] of Object.entries(x.choice)) {
+      if (granularVotes[key] === undefined) granularVotes[key] = []
+      granularVotes[key].push(x.balance * (value / sumChoices))
+    }
+  })
+
+  const choiceSums = {}
+  let totalVotes = 0
+  let summed = 0
+  for (const [key, value] of Object.entries(granularVotes)) {
+    choiceSums[key] = value.map(Math.sqrt).reduce((a, b) => a + b) ** 2
+    summed += value.reduce((a, b) => a + b)
+    totalVotes += choiceSums[key]
+  }
+
+  const divisor = summed / totalVotes
+
+  for (const grant of Object.keys(choiceSums)) {
+    choiceSums[grant] *= divisor
+  }
+  return choiceSums
 }
 
 // Configure the ballot for a single proposal
@@ -650,6 +680,7 @@ module.exports = {
   local_broadcast_proposal,
   calcTargetBlockHeight,
   hasEnoughOceans,
+  calculateMatch,
   VoteType,
   BallotType
 }

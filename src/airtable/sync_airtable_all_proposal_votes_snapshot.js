@@ -3,17 +3,13 @@ const Logger = require('../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
-const {
-  getProposalsSelectQuery,
-  updateProposalRecords,
-  sumSnapshotVotesToAirtable
-} = require('./airtable_utils')
+const { getProposalsSelectQuery } = require('./airtable_utils')
 const {
   getVoteCountStrategy,
   getVoterScores,
   reduceVoterScores,
-  reduceProposalScores,
-  getProposalVotesGQL
+  getProposalVotesGQL,
+  calculateMatch
 } = require('../snapshot/snapshot_utils')
 
 // DRY/PARAMETERIZE
@@ -23,11 +19,9 @@ const { getCurrentRound } = require('./rounds/funding_rounds')
 var allProposals = []
 var proposalVotes = {}
 var proposalScores = {}
-var proposalVoteSummary = {}
-
+// eslint-disable-next-line no-unused-vars
 const getAllProposalVotes = async () => {
   const curRound = await getCurrentRound()
-  const curRoundBallotType = curRound.get('Ballot Type')
   const curRoundNumber = curRound.get('Round')
 
   for (var roundNum = 1; roundNum < curRoundNumber; roundNum++) {
@@ -61,10 +55,7 @@ const getAllProposalVotes = async () => {
             proposalVotes[ipfsHash],
             voterScores
           )
-          proposalScores[ipfsHash] = reduceProposalScores(
-            curRoundBallotType,
-            reducedVoterScores
-          )
+          proposalScores[ipfsHash] = calculateMatch(reducedVoterScores)
         } catch (err) {
           Logger.error(err)
         }
@@ -75,21 +66,23 @@ const getAllProposalVotes = async () => {
 
 // This updates every record with the latest snapshot votes
 const main = async () => {
-  await getAllProposalVotes()
-  Logger.log('\n============ Total Proposal Scores [%s]', proposalScores.length)
+  return console.error("Don't run me")
 
-  proposalVoteSummary = await sumSnapshotVotesToAirtable(
-    allProposals,
-    proposalScores
-  )
-  Logger.log('\n============ Total Proposals [%s]', proposalVoteSummary.length)
+  // await getAllProposalVotes()
+  // Logger.log('\n============ Total Proposal Scores [%s]', proposalScores.length)
 
-  await updateProposalRecords(proposalVoteSummary)
-  Logger.log(
-    '[%s]\nUpdated [%s] rows to Airtable',
-    new Date().toString(),
-    proposalVoteSummary.length
-  )
+  // proposalVoteSummary = await sumSnapshotVotesToAirtable(
+  //   allProposals,
+  //   proposalScores
+  // )
+  // Logger.log('\n============ Total Proposals [%s]', proposalVoteSummary.length)
+
+  // await updateProposalRecords(proposalVoteSummary)
+  // Logger.log(
+  //   '[%s]\nUpdated [%s] rows to Airtable',
+  //   new Date().toString(),
+  //   proposalVoteSummary.length
+  // )
 }
 
 main()
