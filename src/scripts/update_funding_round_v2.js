@@ -12,8 +12,7 @@ const {
 const {
     RoundState,
     getCurrentRound,
-    completeEarstructuresValues,
-    calculateWinningProposalsForEarmark
+    completeEarstructuresValues
 } = require('../airtable/rounds/funding_rounds')
 const {
     processAirtableNewProposals

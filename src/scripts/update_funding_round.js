@@ -12,28 +12,16 @@ const {
 const {
   RoundState,
   getCurrentRound,
-  getWinningProposals,
-  getDownvotedProposals,
   completeEarstructuresValues,
-  calculateFinalResults,
-  calculateWinningProposalsForEarmark,
-  dumpResultsToGSheet
-} = require('../airtable/rounds/funding_rounds')
+  calculateWinningProposalsForEarmark
+}  = require('../airtable/rounds/funding_rounds')
 const {
   processAirtableNewProposals
 } = require('../airtable/process_airtable_new_proposals')
 const {
   processFundingRoundComplete,
-  computeBurnedFunds,
-  clearFundedRecords,
-  dumpWiningProposalsByEarmarksToGSheet
+  computeBurnedFunds
 } = require('../airtable/process_airtable_funding_round_complete')
-const { initOAuthToken } = require('../gsheets/gsheets')
-const {
-  getValues,
-  addSheet,
-  updateValues
-} = require('../gsheets/gsheets_utils')
 const {
   prepareProposalsForSnapshot
 } = require('../snapshot/prepare_snapshot_received_proposals_airtable')
