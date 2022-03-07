@@ -279,8 +279,6 @@ const updateSubmissionPeriod = async (round) => {
 
 const startDueDilligencePeriod = async (round) => {
     let roundNumber = round.get('Round')
-    let roundBasisCurrency = round.get('Basis Currency')
-
     await prepareNewProposals(round, roundNumber)
 
     const allProposals = await getProposalsSelectQuery(
