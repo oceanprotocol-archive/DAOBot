@@ -13,7 +13,8 @@ const {
   getVoterScores,
   reduceVoterScores,
   reduceProposalScores,
-  getProposalVotesGQL
+  getProposalVotesGQL,
+  calculateMatch
 } = require('../snapshot/snapshot_utils')
 
 // Let's track the state of various proposals
@@ -54,10 +55,8 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
           proposalVotes[ipfsHash],
           scores
         )
-        proposalScores[ipfsHash] = reduceProposalScores(
-          curRoundBallotType,
-          voterScores[ipfsHash]
-        )
+
+        proposalScores[ipfsHash] = calculateMatch(voterScores[ipfsHash])
       } catch (err) {
         Logger.error(err)
       }
@@ -90,4 +89,4 @@ const syncAirtableActiveProposalVotes = async (
   )
 }
 
-module.exports = { syncAirtableActiveProposalVotes }
+module.exports = { syncAirtableActiveProposalVotes, getActiveProposalVotes }

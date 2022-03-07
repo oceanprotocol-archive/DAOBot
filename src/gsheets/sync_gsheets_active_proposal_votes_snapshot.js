@@ -14,6 +14,9 @@ const {
   reduceVoterScores,
   reduceProposalScores
 } = require('../snapshot/snapshot_utils')
+const {
+  getActiveProposalVotes
+} = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 
 // Let's track the state of various proposals
 let activeProposals = {}
@@ -370,53 +373,6 @@ const dumpRoundSummaryToGSheets = async (
   await updateValues(oAuth, sheetName, 'J1:Q' + flatObj.length, flatObj)
 }
 
-// DRY
-const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
-  const proposalVotes = {}
-  const voterScores = {}
-  const proposalScores = {}
-
-  activeProposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", AND(NOT({Proposal State} = "Withdrawn"), NOT({Proposal State} = "Rejected"), "true"), "true")`
-  )
-
-  await Promise.all(
-    activeProposals.map(async (proposal) => {
-      try {
-        const ipfsHash = proposal.get('ipfsHash')
-        const strategy = getVoteCountStrategy(proposal.get('Round'))
-        await getProposalVotesGQL(ipfsHash).then((result) => {
-          proposalVotes[ipfsHash] = result.data.votes
-        })
-        const voters = []
-        for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
-          voters.push(proposalVotes[ipfsHash][i].voter)
-        }
-
-        const scores = await getVoterScores(
-          strategy,
-          voters,
-          proposal.get('Snapshot Block')
-        )
-
-        voterScores[ipfsHash] = reduceVoterScores(
-          strategy,
-          proposalVotes[ipfsHash],
-          scores
-        )
-        proposalScores[ipfsHash] = reduceProposalScores(
-          curRoundBallotType,
-          voterScores[ipfsHash]
-        )
-      } catch (err) {
-        Logger.error(err)
-      }
-    })
-  )
-
-  return [voterScores, proposalScores]
-}
-
 const syncGSheetsActiveProposalVotes = async (
   curRoundNumber,
   curRoundBallotType
@@ -439,7 +395,7 @@ const syncGSheetsActiveProposalVotes = async (
 
   // Output the round summary
   proposalSummary = await calculateProposalSummary(
-    activeProposals,
+    activeProposals, // ACTIVE PROPOSALS IS NOT DEFINED??
     voterScores,
     proposalScores
   )
