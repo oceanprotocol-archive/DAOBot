@@ -56,7 +56,15 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
           scores
         )
 
-        proposalScores[ipfsHash] = calculateMatch(voterScores[ipfsHash])
+        if (curRoundNumber >= 14) {
+          proposalScores[ipfsHash] = calculateMatch(voterScores[ipfsHash])
+        } else {
+          proposalScores[ipfsHash] = reduceProposalScores(
+            strategy,
+            proposalVotes[ipfsHash],
+            voterScores[ipfsHash]
+          )
+        }
       } catch (err) {
         Logger.error(err)
       }
