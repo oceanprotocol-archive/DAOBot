@@ -101,7 +101,7 @@ const updateVotes = async (round) => {
 
     // Update votes
     await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
-    // await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+    await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
 }
 
 const updateWinners = async (round) => {
@@ -137,8 +137,7 @@ const updateWinners = async (round) => {
 }
 
 const updateReports = async (round) => {
-    // await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
-    // await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+    // Update all reports
     /*
     // the following line will disable this test, should be commented in to make the test run
     if (curRound.get('Round') !== 1) return
