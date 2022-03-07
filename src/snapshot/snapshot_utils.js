@@ -463,6 +463,7 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (ballotType, voterScores) => {
+  // ! USE calculateMatch for QF
   const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
@@ -494,34 +495,33 @@ const reduceProposalScores = (ballotType, voterScores) => {
 }
 
 // Calculate match for each grant
-const calculateMatch = (granularVotes, totalVotes) => {
-  let granularMatch = {}; // collect matching contribution per grant
-  let summed = 0; // Setup summed grant contributions
-
-  // Loop over each grant
-  for (const grant of Object.keys(granularVotes)) {
-    let sumAmount = 0;
-
-    // Sum the square root of each grant contribution
-    for (let j = 0; j < granularVotes[grant].length; j++) {
-      sumAmount += Math.sqrt(granularVotes[grant][j]);
+const calculateMatch = (reducedVoterScores) => {
+  const granularVotes = {}
+  reducedVoterScores.map((x) => {
+    const sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
+    // Distribute balance per choice voted on
+    for (const [key, value] of Object.entries(x.choice)) {
+      if (granularVotes[key] === undefined) granularVotes[key] = []
+      granularVotes[key].push(x.balance * (value / sumChoices))
     }
+  })
 
-    // Square the total value of each summed grants contributions
-    sumAmount *= sumAmount;
-    granularMatch[grant] = sumAmount;
-    summed += sumAmount;
+  const choiceSums = {}
+  let totalVotes = 0
+  let summed = 0
+  for (const [key, value] of Object.entries(granularVotes)) {
+    choiceSums[key] = value.map(Math.sqrt).reduce((a, b) => a + b) ** 2
+    summed += value.reduce((a, b) => a + b)
+    totalVotes += choiceSums[key]
   }
 
-  // Setup a divisor based on available match
-  let divisor = totalVotes / summed;
-  // Multiply matched values with divisor to get match amount in range of available funds
-  for (const grant of Object.keys(granularVotes)) {
-    granularMatch[grant] *= divisor;
-  }
+  const divisor = summed / totalVotes
 
-  return granularMatch
-};
+  for (const grant of Object.keys(choiceSums)) {
+    choiceSums[grant] *= divisor
+  }
+  return choiceSums
+}
 
 // Configure the ballot for a single proposal
 const buildGranularProposalPayload = (proposal, roundNumber, voteType) => {

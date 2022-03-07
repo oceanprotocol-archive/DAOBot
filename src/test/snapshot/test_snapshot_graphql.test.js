@@ -152,7 +152,7 @@ const spring_dao_quadratic_proposalIPFSHash =
   'QmX1H9SiZnM7MvaxzSKNwXKtt9p95RfiWDTKAQLNWnFS1q'
 
 const r15_blockNumber = 14317148
-const r15_proposalHash = "QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ"
+const r15_proposalHash = 'QmYj1PtRV2hRw54Yjd1y5YBt3GgQmjTjyyLGRzhtweHUVZ'
 
 // Tests against Snapshot GraphQL endpoint
 describe('Snapshot GraphQL test', () => {
@@ -339,12 +339,9 @@ describe('Snapshot GraphQL test', () => {
     const strategy = getVoteCountStrategy(15)
 
     let votes = []
-    let granularVotes = {}
-    await getProposalVotesGQL(r15_proposalHash).then(
-        (result) => {
-          ;({ votes } = result.data)
-        }
-    )
+    await getProposalVotesGQL(r15_proposalHash).then((result) => {
+      ;({ votes } = result.data)
+    })
     expect(votes.length > 40).toBe(true)
 
     const voters = []
@@ -352,48 +349,11 @@ describe('Snapshot GraphQL test', () => {
       voters.push(votes[i].voter)
     }
 
-    const voterScores = await getVoterScores(
-        strategy,
-        voters,
-        r15_blockNumber
-    )
+    const voterScores = await getVoterScores(strategy, voters, r15_blockNumber)
     const reducedVoterScores = reduceVoterScores(strategy, votes, voterScores)
 
-    reducedVoterScores.map((x) => {
-      const voterAddress = x.address
-      let sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
+    const granularMatch = calculateMatch(reducedVoterScores)
 
-      // Distribute balance per choice voted on
-      for (const [key, value] of Object.entries(x.choice)) {
-        if( granularVotes[key] === undefined )
-          granularVotes[key] = []
-
-        granularVotes[key].push(x.balance * (value / sumChoices))
-      }
-    })
-
-    // Sum votes by choice
-    // We can verify these are not the same as in snapshot
-    let choiceSums = {}
-    let totalVotes = 0
-    for (const [key, value] of Object.entries(granularVotes)) {
-      choiceSums[key] = value.reduce((a, b) => a + b)
-      totalVotes += choiceSums[key]
-    }
-
-    const granularMatch = calculateMatch(granularVotes, totalVotes)
-
-    let qfResults = {}
-    let totalQFVotes = 0
-    for (const x of Object.keys(choiceSums)) {
-      qfResults[x] = choiceSums[x] + granularMatch[x]
-      totalQFVotes += qfResults[x]
-    }
-
-    Logger.log("Sum voting power", totalVotes)
-    Logger.log("QF voting power", totalQFVotes)
-    Logger.log("Base Votes", choiceSums)
-    Logger.log("Match Voting Power", granularMatch)
-    Logger.log("QF Results", qfResults)
+    Logger.log('Result', granularMatch)
   })
 })
