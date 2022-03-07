@@ -155,90 +155,203 @@ const strategy = {
       }
     }
   ],
-  strategy_qv: [
+  strategy_qv_v1: [
     {
       name: 'ocean-dao-brightid',
       params: {
         brightIdMultiplier: 4,
         notVerifiedMultiplier: 1,
+        brightIdNetwork: '1',
         registry: '0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0',
         symbol: 'OCEAN',
-        strategies: [
-          {
-            name: 'erc20-balance-of',
-            params: {
-              symbol: 'OCEAN',
-              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
-              decimals: 18
-            }
-          },
-          {
-            name: 'ocean-marketplace',
-            params: {
-              symbol: 'OCEAN',
-              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
-              decimals: 18
-            }
-          },
-          {
-            name: 'sushiswap',
-            params: {
-              symbol: 'OCEAN',
-              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
-              decimals: 18
-            }
-          },
-          {
-            name: 'uniswap',
-            params: {
-              symbol: 'OCEAN',
-              address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
-              decimals: 18
-            }
-          },
-          {
-            name: 'contract-call',
-            params: {
-              address: '0x9712Bb50DC6Efb8a3d7D12cEA500a50967d2d471',
-              args: [
-                '%{address}',
-                '0xCDfF066eDf8a770E9b6A7aE12F7CFD3DbA0011B5',
-                '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
-              ],
-              decimals: 18,
-              symbol: 'OCEAN',
-              methodABI: {
-                inputs: [
-                  {
-                    internalType: 'address',
-                    name: 'provider',
-                    type: 'address'
-                  },
-                  {
-                    internalType: 'address',
-                    name: 'poolToken',
-                    type: 'address'
-                  },
-                  {
-                    internalType: 'address',
-                    name: 'reserveToken',
-                    type: 'address'
-                  }
+        strategies: {
+          1: [
+            {
+              name: 'erc20-balance-of',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cd07ab37855c090aaf366e4ce1b9f48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'ocean-marketplace',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'sushiswap',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'uniswap',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'contract-call',
+              params: {
+                address: '0x9712Bb50DC6Efb8a3d7D12cEA500a50967d2d471',
+                args: [
+                  '%{address}',
+                  '0xCDfF066eDf8a770E9b6A7aE12F7CFD3DbA0011B5',
+                  '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
                 ],
-                name: 'totalProviderAmount',
-                outputs: [
-                  {
-                    internalType: 'uint256',
-                    name: '',
-                    type: 'uint256'
-                  }
-                ],
-                stateMutability: 'view',
-                type: 'function'
+                decimals: 18,
+                symbol: 'OCEAN',
+                methodABI: {
+                  inputs: [
+                    {
+                      internalType: 'address',
+                      name: 'provider',
+                      type: 'address'
+                    },
+                    {
+                      internalType: 'address',
+                      name: 'poolToken',
+                      type: 'address'
+                    },
+                    {
+                      internalType: 'address',
+                      name: 'reserveToken',
+                      type: 'address'
+                    }
+                  ],
+                  name: 'totalProviderAmount',
+                  outputs: [
+                    {
+                      internalType: 'uint256',
+                      name: '',
+                      type: 'uint256'
+                    }
+                  ],
+                  stateMutability: 'view',
+                  type: 'function'
+                }
               }
             }
-          }
-        ]
+          ]
+        }
+      }
+    }
+  ],
+  strategy_qv_v2: [
+    {
+      name: 'ocean-dao-brightid',
+      params: {
+        brightIdMultiplier: 4,
+        notVerifiedMultiplier: 1,
+        brightIdNetwork: '1',
+        registry: '0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0',
+        symbol: 'OCEAN',
+        strategies: {
+          1: [
+            {
+              name: 'erc20-balance-of',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cd07ab37855c090aaf366e4ce1b9f48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'ocean-marketplace',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'sushiswap',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'uniswap',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x967da4048cD07aB37855c090aAF366e4ce1b9F48',
+                decimals: 18
+              }
+            },
+            {
+              name: 'contract-call',
+              params: {
+                address: '0x9712Bb50DC6Efb8a3d7D12cEA500a50967d2d471',
+                args: [
+                  '%{address}',
+                  '0xCDfF066eDf8a770E9b6A7aE12F7CFD3DbA0011B5',
+                  '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
+                ],
+                decimals: 18,
+                symbol: 'OCEAN',
+                methodABI: {
+                  inputs: [
+                    {
+                      internalType: 'address',
+                      name: 'provider',
+                      type: 'address'
+                    },
+                    {
+                      internalType: 'address',
+                      name: 'poolToken',
+                      type: 'address'
+                    },
+                    {
+                      internalType: 'address',
+                      name: 'reserveToken',
+                      type: 'address'
+                    }
+                  ],
+                  name: 'totalProviderAmount',
+                  outputs: [
+                    {
+                      internalType: 'uint256',
+                      name: '',
+                      type: 'uint256'
+                    }
+                  ],
+                  stateMutability: 'view',
+                  type: 'function'
+                }
+              }
+            }
+          ],
+          137: [
+            {
+              name: 'erc20-balance-of',
+              params: {
+                symbol: 'OCEAN',
+                address: '0x282d8efCe846A88B159800bd4130ad77443Fa1A1',
+                decimals: 18
+              }
+            }
+          ],
+          56: [
+            {
+              name: 'erc20-balance-of',
+              params: {
+                symbol: 'OCEAN',
+                address: '0xdce07662ca8ebc241316a15b611c89711414dd1a',
+                decimals: 18
+              }
+            }
+          ]
+        }
       }
     }
   ]
@@ -263,8 +376,9 @@ const getVoteCountStrategy = (roundNumber) => {
 
   if (roundNumber < 5) return strategy.strategy_v0_1
   if (roundNumber < 9) return strategy.strategy_v0_2
-  if (roundNumber <= 13) return strategy.strategy_v0_3
-  return strategy.strategy_qv
+  if (roundNumber < 14) return strategy.strategy_v0_3
+  if (roundNumber < 15) return strategy.strategy_qv_v1
+  return strategy.strategy_qv_v2
 }
 
 const getVotesQuery = (ifpshash) => `query Votes {
@@ -349,6 +463,7 @@ const reduceVoterScores = (strategy, proposalVotes, voterScores) => {
 
 // Returns reduced proposal summary based on many voters => {1:int,2:int}
 const reduceProposalScores = (ballotType, voterScores) => {
+  // ! USE calculateMatch for QF
   const scores = ballotType === BallotType.Granular ? { 1: 0, 2: 0 } : {}
 
   Object.entries(voterScores).reduce((total, cur) => {
@@ -377,6 +492,35 @@ const reduceProposalScores = (ballotType, voterScores) => {
   }, {})
 
   return scores
+}
+
+// Calculate match for each grant
+const calculateMatch = (reducedVoterScores) => {
+  const granularVotes = {}
+  reducedVoterScores.map((x) => {
+    const sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
+    // Distribute balance per choice voted on
+    for (const [key, value] of Object.entries(x.choice)) {
+      if (granularVotes[key] === undefined) granularVotes[key] = []
+      granularVotes[key].push(x.balance * (value / sumChoices))
+    }
+  })
+
+  const choiceSums = {}
+  let totalVotes = 0
+  let summed = 0
+  for (const [key, value] of Object.entries(granularVotes)) {
+    choiceSums[key] = value.map(Math.sqrt).reduce((a, b) => a + b) ** 2
+    summed += value.reduce((a, b) => a + b)
+    totalVotes += choiceSums[key]
+  }
+
+  const divisor = summed / totalVotes
+
+  for (const grant of Object.keys(choiceSums)) {
+    choiceSums[grant] *= divisor
+  }
+  return choiceSums
 }
 
 // Configure the ballot for a single proposal
@@ -536,6 +680,7 @@ module.exports = {
   local_broadcast_proposal,
   calcTargetBlockHeight,
   hasEnoughOceans,
+  calculateMatch,
   VoteType,
   BallotType
 }

@@ -136,79 +136,9 @@ const updateWinners = async (round) => {
     await updateRoundRecord(roundUpdate)
 }
 
-const startSubmissionPeriod = async (round) => {
-    // Start the current round
-    const roundUpdate = [
-        {
-            id: round.id,
-            fields: {
-                'Round State': RoundState.Started
-            }
-        }
-    ]
-    await updateRoundRecord(roundUpdate)
-}
-
-const updateSubmissionPeriod = async (round) => {
-    let roundNumber = round.get('Round')
-    await prepareNewProposals(round, roundNumber)
-}
-
-const startDueDilligencePeriod = async (round) => {
-    let roundNumber = round.get('Round')
-    let roundBasisCurrency = round.get('Basis Currency')
-
-    await prepareNewProposals(round, roundNumber)
-
-    const allProposals = await getProposalsSelectQuery(
-        `{Round} = ${roundNumber}`
-    )
-
-    await createRoundResultsGSheet(roundNumber)
-
-    const roundUpdate = [
-        {
-            id: round.id,
-            fields: {
-                'Round State': RoundState.DueDiligence,
-                'Proposals': allProposals.length,
-            }
-        }
-    ]
-    await updateRoundRecord(roundUpdate)
-
-    updateFunding(round)
-}
-
-const startVotingPeriod = async (round) => {
-    Logger.log('Start Voting period.')
-
-    // Submit to snapshot + Enter voting state
-    if (curRoundBallotType === BallotType.Granular) {
-        await submitProposalsToSnaphotGranular(curRoundNumber, curRoundVoteType)
-    } else if (curRoundBallotType === BallotType.Batch) {
-        await submitProposalsToSnaphotBatch(curRoundNumber, curRoundVoteType)
-    }
-
-    const roundUpdate = [
-        {
-            id: round.id,
-            fields: {
-                'Round State': RoundState.Voting
-            }
-        }
-    ]
-    await updateRoundRecord(roundUpdate)
-}
-
-const updateVotingPeriod = (round) => {
-    updateFunding(round)
-    updateVotes(round)
-    updateWinners(round)
-}
-
-const endVotingPeriod = async (round) => {
-    // TODO - Complete round calculations
+const updateReports = async (round) => {
+    // await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
+    // await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
     /*
     // the following line will disable this test, should be commented in to make the test run
     if (curRound.get('Round') !== 1) return
@@ -328,6 +258,82 @@ const endVotingPeriod = async (round) => {
         gsheetRows
     )
     */
+}
+
+const startSubmissionPeriod = async (round) => {
+    // Start the current round
+    const roundUpdate = [
+        {
+            id: round.id,
+            fields: {
+                'Round State': RoundState.Started
+            }
+        }
+    ]
+    await updateRoundRecord(roundUpdate)
+}
+
+const updateSubmissionPeriod = async (round) => {
+    let roundNumber = round.get('Round')
+    await prepareNewProposals(round, roundNumber)
+}
+
+const startDueDilligencePeriod = async (round) => {
+    let roundNumber = round.get('Round')
+    let roundBasisCurrency = round.get('Basis Currency')
+
+    await prepareNewProposals(round, roundNumber)
+
+    const allProposals = await getProposalsSelectQuery(
+        `{Round} = ${roundNumber}`
+    )
+
+    await createRoundResultsGSheet(roundNumber)
+
+    const roundUpdate = [
+        {
+            id: round.id,
+            fields: {
+                'Round State': RoundState.DueDiligence,
+                'Proposals': allProposals.length,
+            }
+        }
+    ]
+    await updateRoundRecord(roundUpdate)
+
+    updateFunding(round)
+}
+
+const startVotingPeriod = async (round) => {
+    Logger.log('Start Voting period.')
+
+    // Submit to snapshot + Enter voting state
+    if (curRoundBallotType === BallotType.Granular) {
+        await submitProposalsToSnaphotGranular(curRoundNumber, curRoundVoteType)
+    } else if (curRoundBallotType === BallotType.Batch) {
+        await submitProposalsToSnaphotBatch(curRoundNumber, curRoundVoteType)
+    }
+
+    const roundUpdate = [
+        {
+            id: round.id,
+            fields: {
+                'Round State': RoundState.Voting
+            }
+        }
+    ]
+    await updateRoundRecord(roundUpdate)
+}
+
+const updateVotingPeriod = (round) => {
+    updateFunding(round)
+    updateVotes(round)
+    updateWinners(round)
+    updateReports(round)
+}
+
+const endVotingPeriod = async (round) => {
+    updateVotingPeriod(round)
 
     // Start the next round
     const roundUpdate = [

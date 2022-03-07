@@ -12,6 +12,7 @@ const {
   updateCurrentRoundStandings
 } = require('./proposals/proposal_standings')
 
+// ? Only needs to happen once on a per-proposal basis.
 const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
   const allProposals = await getAllRoundProposals(curRoundNumber - 1)
