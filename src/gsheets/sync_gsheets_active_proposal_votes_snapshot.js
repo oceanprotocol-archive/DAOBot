@@ -7,13 +7,7 @@ dotenv.config()
 const { getProposalsSelectQuery } = require('../airtable/airtable_utils')
 const { initOAuthToken } = require('./gsheets')
 const { getValues, addSheet, updateValues } = require('./gsheets_utils')
-const {
-  getVoteCountStrategy,
-  getVoterScores,
-  getProposalVotesGQL,
-  reduceVoterScores,
-  reduceProposalScores
-} = require('../snapshot/snapshot_utils')
+
 const {
   getActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
