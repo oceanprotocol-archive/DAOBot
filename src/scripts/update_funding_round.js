@@ -14,7 +14,7 @@ const {
   getCurrentRound,
   completeEarstructuresValues,
   calculateWinningProposalsForEarmark
-}  = require('../airtable/rounds/funding_rounds')
+} = require('../airtable/rounds/funding_rounds')
 const {
   processAirtableNewProposals
 } = require('../airtable/process_airtable_new_proposals')
@@ -33,8 +33,7 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes,
-  createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
@@ -198,8 +197,6 @@ const main = async () => {
       )
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
-
-      await createRoundResultsGSheet(curRoundNumber)
 
       let fundingAvailable = 0
 

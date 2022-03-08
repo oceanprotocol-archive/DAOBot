@@ -4,7 +4,6 @@ const { BallotType } = require('../snapshot/snapshot_utils')
 const Logger = require('../utils/logger')
 dotenv.config()
 
-const { getProposalsSelectQuery } = require('../airtable/airtable_utils')
 const { initOAuthToken } = require('./gsheets')
 const { getValues, addSheet, updateValues } = require('./gsheets_utils')
 
@@ -12,69 +11,9 @@ const {
   getActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 
-// Let's track the state of various proposals
-let activeProposals = {}
-// var voterScores = {}
-// var proposalScores = {}
-
 // gsheet summaries to make downstream happy
 let proposalSummary = {}
 let roundSummary = {}
-
-// Per Snapshot Proposal -> Google Sheet
-// 1. Get proposal data
-// 2. Creates sheet if doesn't exist
-// 3. Flatten proposals into an array of values
-// 4. Dumps flat scores & header from snapshot
-
-/*
-const dumpFromSnapshotRawToGSheet = async (
-  curRoundNumber,
-  ipfsHash,
-  voterScores
-) => {
-  const oAuth = await initOAuthToken()
-
-  // DRY
-  // Get the sheet, otherwise create it
-  var proposal = await getValues(oAuth, ipfsHash, 'A1:B3')
-  if (proposal === undefined) {
-    await addSheet(oAuth, ipfsHash, curRoundNumber)
-    console.log(
-      'Created new sheet [%s] at index [%s].',
-      ipfsHash,
-      curRoundNumber
-    )
-  }
-
-  // Flatten votes from this proposal
-  var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
-    try {
-      const vote = v[1]
-      return [vote.address, vote.balance]
-    } catch (err) {
-      Logger.error(err)
-    }
-  })
-  // Flatten votes from this proposal
-  var flatObj = Object.entries(voterScores[ipfsHash]).map((v) => {
-    try {
-      const vote = v[1]
-      return [
-        vote.address,
-        JSON.stringify(vote.choice),
-        vote.created,
-        vote.balance
-      ]
-    } catch (err) {
-      console.log(err)
-    }
-  })
-  // Dump flattened data from snapshot to sheet
-  flatObj.splice(0, 0, ['address', 'choice', 'created', 'balace'])
-  await updateValues(oAuth, ipfsHash, 'A1:E' + flatObj.length, flatObj)
-}
-*/
 
 // For each proposal, calculate their summary
 const calculateProposalSummary = async (
@@ -285,44 +224,6 @@ const calculateRoundSummary = async (
   ]
 }
 
-const createRoundResultsGSheet = async (curRoundNumber) => {
-  const oAuth = await initOAuthToken()
-  const proposalSummary = []
-
-  activeProposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", AND(NOT({Proposal State} = "Withdrawn"), NOT({Proposal State} = "Rejected"), "true"), "true")`
-  )
-
-  // DRY
-  // Get the sheet, otherwise create it
-  const sheetName = `Round ${curRoundNumber} Results`
-  var sheet = await getValues(oAuth, sheetName, 'A1:B3')
-  if (sheet === undefined) {
-    await addSheet(oAuth, sheetName)
-    await Logger.log('Created new sheet [%s] at index 0.', sheetName)
-  }
-
-  activeProposals.forEach((p) => {
-    proposalSummary.push(['', p.get('Project Name'), 0, 0, 0, 0])
-  })
-
-  // Dump flattened data from proposalSummary to sheet
-  proposalSummary.splice(0, 0, [
-    'ipfsHash',
-    'Project Name',
-    'Yes',
-    'No',
-    'Num Voters',
-    'Sum Votes'
-  ])
-  await updateValues(
-    oAuth,
-    sheetName,
-    'A1:F' + proposalSummary.length,
-    proposalSummary
-  )
-}
-
 // ProposalSummary + RoundSummary -> Google Sheet
 const dumpRoundSummaryToGSheets = async (
   curRoundNumber,
@@ -396,4 +297,4 @@ const syncGSheetsActiveProposalVotes = async (
   Logger.log('Updated GSheets')
 }
 
-module.exports = { syncGSheetsActiveProposalVotes, createRoundResultsGSheet }
+module.exports = { syncGSheetsActiveProposalVotes }

@@ -5,8 +5,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  syncGSheetsActiveProposalVotes,
-  createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes
 } = require('../../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../../snapshot/snapshot_utils')
 
@@ -20,13 +19,5 @@ describe('GSheets Sync functionality', function () {
     const curRoundNumber = 11
     const ballotType = BallotType.Batch
     await syncGSheetsActiveProposalVotes(curRoundNumber, ballotType)
-  })
-})
-
-// Tests Skip. Use them to verify that Round Results sheet is created in the dued diligent period.
-describe('GSheets Round Results creation functionality', function () {
-  it.skip('Checks that Round Results sheet is created before voting period starts', async function () {
-    const curRoundNumber = 12
-    await createRoundResultsGSheet(curRoundNumber)
   })
 })
