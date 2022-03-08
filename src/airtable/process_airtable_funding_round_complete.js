@@ -29,20 +29,21 @@ const clearFundedRecords = (proposals) => {
 }
 
 const dumpWiningProposalsByEarmarksToGSheet = async (
-  earmarkedResults,
+  resultsByEarmark,
   gsheetRows
 ) => {
-  for (const earmarkResult in earmarkedResults) {
+  for (const earmark in resultsByEarmark) {
     let earmarkGSheetResults = []
-    if (earmarkedResults[earmarkResult].winningProposals) {
+    if (resultsByEarmark[earmark].winningProposals) {
       earmarkGSheetResults = await dumpResultsToGSheet(
-        earmarkedResults[earmarkResult].winningProposals
+        resultsByEarmark[earmark].winningProposals
       )
-      earmarkGSheetResults.splice(0, 0, [`${earmarkResult} Winners`])
-    } else if (earmarkedResults[earmarkResult].length === 0) {
-      earmarkGSheetResults.push([`${earmarkResult} Winners`])
+      earmarkGSheetResults.splice(0, 0, [`${earmark} Winners`])
+    } else if (resultsByEarmark[earmark].length === 0) {
+      earmarkGSheetResults.push([`${earmark} Winners`])
       earmarkGSheetResults.push([
         'Project Name',
+        'Earmark',
         'Yes Votes',
         'No Votes',
         'Pct Yes',
@@ -75,7 +76,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let airtableRows = []
   airtableRows = airtableRows.concat(downvotedProposals)
   airtableRows = airtableRows.concat(
-    finalResults.earmarkedResults.winningProposals
+    finalResults.resultsByEarmark.winningProposals
   )
   airtableRows = airtableRows.concat(finalResults.partiallyFunded)
   airtableRows = airtableRows.concat(finalResults.notFunded)
@@ -123,7 +124,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   let gsheetRows = []
   // Flatten results onto gsheetRows
   gsheetRows = await dumpWiningProposalsByEarmarksToGSheet(
-    finalResults.earmarkedResults,
+    finalResults.resultsByEarmark,
     gsheetRows
   )
   partiallyFundedResults.splice(0, 0, ['Partially Funded'])
@@ -145,27 +146,27 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   const oceanResultsTexts = []
   const usdResultsValues = []
   const oceanResultsValues = []
-  finalResults.earmarkedResults.earmarks.forEach((earmark) => {
+  finalResults.resultsByEarmark.earmarks.forEach((earmark) => {
     usdResultsTexts.push(`${earmark} USD ${foundsLeftRuleString}`)
     oceanResultsTexts.push(`${earmark} OCEAN ${foundsLeftRuleString}`)
-    const usdFundsLeft = finalResults.earmarkedResults[earmark].fundsLeft
-    usdResultsValues.push(finalResults.earmarkedResults[earmark].fundsLeft)
+    const usdFundsLeft = finalResults.resultsByEarmark[earmark].fundsLeft
+    usdResultsValues.push(finalResults.resultsByEarmark[earmark].fundsLeft)
     oceanResultsValues.push(usdFundsLeft / oceanPrice)
   })
 
   // Total USD&OCEAN burned/recycled
   usdResultsTexts.push(`Total USD ${foundsLeftRuleString}`)
   oceanResultsTexts.push(`Total OCEAN ${foundsLeftRuleString}`)
-  usdResultsValues.push(finalResults.earmarkedResults.fundsRecycled)
+  usdResultsValues.push(finalResults.resultsByEarmark.fundsRecycled)
   oceanResultsValues.push(
-    finalResults.earmarkedResults.fundsRecycled / oceanUSD
+    finalResults.resultsByEarmark.fundsRecycled / oceanUSD
   )
 
   // Total USD&OCEAN granted
   usdResultsTexts.push(`Total USD Granted`)
   oceanResultsTexts.push(`Total OCEAN Granted`)
-  usdResultsValues.push(finalResults.earmarkedResults.usdEarmarked)
-  oceanResultsValues.push(finalResults.earmarkedResults.usdEarmarked / oceanUSD)
+  usdResultsValues.push(finalResults.resultsByEarmark.usdEarmarked)
+  oceanResultsValues.push(finalResults.resultsByEarmark.usdEarmarked / oceanUSD)
 
   gsheetRows.push(usdResultsTexts)
   gsheetRows.push(usdResultsValues)
@@ -176,7 +177,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   await updateValues(
     oAuth,
     sheetName,
-    'A1:H' + (gsheetRows.length + 1),
+    'A1:I' + (gsheetRows.length + 1),
     gsheetRows
   )
   Logger.log(
@@ -186,7 +187,7 @@ const processFundingRoundComplete = async (curRound, curRoundNumber) => {
   )
 
   return (
-    finalResults.earmarkedResults.winningProposals.length +
+    finalResults.resultsByEarmark.winningProposals.length +
     finalResults.partiallyFunded.length
   )
 }
@@ -200,8 +201,13 @@ const computeBurnedFunds = async (curRound, curRoundNumber) => {
   const finalResults = calculateFinalResults(winningProposals, curRound)
   const oceanPrice = curRound.get('OCEAN Price')
 
-  const burntFunds = finalResults.earmarkedResults.fundsLeft / oceanPrice
+  const burntFunds = finalResults.resultsByEarmark.fundsLeft / oceanPrice
   return burntFunds
 }
 
-module.exports = { processFundingRoundComplete, computeBurnedFunds }
+module.exports = {
+  processFundingRoundComplete,
+  computeBurnedFunds,
+  clearFundedRecords,
+  dumpWiningProposalsByEarmarksToGSheet
+}

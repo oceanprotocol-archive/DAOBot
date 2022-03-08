@@ -33,8 +33,7 @@ const {
   syncAirtableActiveProposalVotes
 } = require('../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
-  syncGSheetsActiveProposalVotes,
-  createRoundResultsGSheet
+  syncGSheetsActiveProposalVotes
 } = require('../gsheets/sync_gsheets_active_proposal_votes_snapshot')
 const { BallotType } = require('../snapshot/snapshot_utils')
 const { sleep } = require('../functions/utils')
@@ -109,6 +108,7 @@ const main = async () => {
   const now = moment().utc().toISOString()
 
   if (curRoundState === undefined) {
+    // TODO - Clean up results & gsheets
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
       const oceanPrice = await getTokenPrice() // get the latest Ocean price
@@ -124,7 +124,6 @@ const main = async () => {
       }
 
       await lastRound.updateFields(roundUpdateData) // update the round record
-
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
@@ -143,6 +142,7 @@ const main = async () => {
       }
 
       // Complete round calculations
+      // TODO - make this repeatable
       const proposalsFunded = await processFundingRoundComplete(
         lastRound,
         lastRoundNumber
@@ -197,8 +197,6 @@ const main = async () => {
       )
       const tokenPrice = await getTokenPrice()
       const basisCurrency = curRound.get('Basis Currency')
-
-      await createRoundResultsGSheet(curRoundNumber)
 
       let fundingAvailable = 0
 
@@ -297,7 +295,9 @@ const main = async () => {
 
       // Update votes
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
-      // await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+
+      // TODO - Clean up results & gsheets
+      await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
     }
   }
 }

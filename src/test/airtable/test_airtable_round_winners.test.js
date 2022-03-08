@@ -266,12 +266,12 @@ describe('Calculating Winners', function () {
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.earmarkedResults.winningProposals.length, 5)
+    should.equal(finalResults.resultsByEarmark.winningProposals.length, 4)
     should.equal(finalResults.partiallyFunded.length, 1)
-    should.equal(finalResults.notFunded.length, 0)
+    should.equal(finalResults.notFunded.length, 1)
 
     should.equal(
-      finalResults.earmarkedResults.winningProposals.length +
+      finalResults.resultsByEarmark.winningProposals.length +
         finalResults.partiallyFunded.length +
         finalResults.notFunded.length +
         downvotedProposals.length,
@@ -280,7 +280,7 @@ describe('Calculating Winners', function () {
 
     // Validate all winning, not funded, and downvoted proposals have the right Proposal State
     should.equal(
-      finalResults.earmarkedResults.winningProposals[0].fields[
+      finalResults.resultsByEarmark.winningProposals[0].fields[
         'Proposal State'
       ],
       'Granted'
@@ -294,7 +294,7 @@ describe('Calculating Winners', function () {
 
     // Validate USD amount adds up
     const earmarkedUSDGranted =
-      finalResults.earmarkedResults.winningProposals.reduce(
+      finalResults.resultsByEarmark.winningProposals.reduce(
         (total, p) => total + p.get('USD Granted'),
         0
       )
@@ -305,7 +305,7 @@ describe('Calculating Winners', function () {
 
     Logger.log(earmarkedUSDGranted, partialUSDGranted)
 
-    should.equal(earmarkedUSDGranted + partialUSDGranted, 36000)
+    should.equal(earmarkedUSDGranted + partialUSDGranted, 35000)
   })
 
   it('Validates gsheet output is correct.', async function () {
@@ -319,7 +319,7 @@ describe('Calculating Winners', function () {
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     const earmarkedResults = await dumpResultsToGSheet(
-      finalResults.earmarkedResults.winningProposals
+      finalResults.resultsByEarmark.winningProposals
     )
     const partiallyFundedResults = await dumpResultsToGSheet(
       finalResults.partiallyFunded
@@ -462,6 +462,6 @@ describe('Calculating Winners', function () {
       fundingRound,
       oceanPrice
     )
-    should.equal(earmarkedResults.winningProposals.length, 3)
+    should.equal(earmarkedResults.winningProposals.length, 1)
   })
 })

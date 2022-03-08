@@ -17,16 +17,13 @@ const {
   calculateMatch
 } = require('../snapshot/snapshot_utils')
 
-// Let's track the state of various proposals
-var activeProposals = {}
-// var proposalVotes = {}
-
+// ? curRoundBallotType - does this need to work retroactively?
 const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   const proposalVotes = {}
   const voterScores = {}
   const proposalScores = {}
 
-  activeProposals = await getProposalsSelectQuery(
+  const activeProposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
   )
 
@@ -71,7 +68,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
     })
   )
 
-  return [voterScores, proposalScores]
+  return [activeProposals, voterScores, proposalScores]
 }
 
 const syncAirtableActiveProposalVotes = async (
@@ -82,7 +79,8 @@ const syncAirtableActiveProposalVotes = async (
     curRoundNumber,
     curRoundBallotType
   )
-  const proposalScores = results[1]
+  const activeProposals = results[0]
+  const proposalScores = results[2]
 
   const proposalVoteSummary = await sumSnapshotVotesToAirtable(
     activeProposals,
