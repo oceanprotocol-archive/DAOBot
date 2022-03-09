@@ -134,9 +134,7 @@ const levels = (completed) => {
   // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r12-update-funding-tiers
   if (completed === 0) return { level: 'New Project', ceiling: 3000 }
   if (completed === 1) return { level: 'Existing Project', ceiling: 10000 }
-  if (completed >= 2 && completed < 5)
-    return { level: 'Experienced Project', ceiling: 20000 }
-  if (completed >= 5) return { level: 'Veteran Project', ceiling: 35000 }
+  if (completed >= 2) return { level: 'Experienced Project', ceiling: 20000 }
 }
 
 const toAirtableList = (projects) => {
