@@ -3,7 +3,7 @@ const updateFundingRound = require('./src/scripts/update_funding_round')
 const { deleteAll, processAll } = require('./src/airtable/project_summary')
 
 let updating = false
-// runs every 5 minutes
+// runs every minute
 Cron('0 * * * * *', async () => {
   if (updating) return
   updating = true
