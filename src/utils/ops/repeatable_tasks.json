@@ -13,7 +13,7 @@
   },
   {
     "title": "R{{ROUND_NUMBER}} Townhalls setup",
-    "body": "- [ ] Create TownHall round {{ROUND_NUMBER}} [events](https://github.com/oceanprotocol/oceandao/wiki/OceanDAO-Town-Hall)\n- [ ] Create TownHall presentations inside of drive\n- [ ] Share weekly TH presentation internally + with community ahead of time, for others to edit\n- [ ] Setup TownHall event inside Discord Events.\n- [ ] Share TH \"event happening in the next 1 hour\" internally + with community ahead of time\n- [ ] Record Town Hall.\n- [ ] Update TownHall page with round 16 events\n- [ ] Update TownHall page with the presentation\n- [ ] Update TownHall page with recording once it's available to be shared",
+    "body": "- [ ] Create TownHall round {{ROUND_NUMBER}} [events](https://github.com/oceanprotocol/oceandao/wiki/OceanDAO-Town-Hall)\n- [ ] Create TownHall presentations inside of drive\n- [ ] Share weekly TH presentation internally + with community ahead of time, for others to edit\n- [ ] Update TH presentations to be contextual to the Round {{ROUND_NUMBER}} Ops - Starting, Completing, Winners, Etc...\n- [ ] Create TownHall event inside Discord Events.\n- [ ] Share TH \"event happening in the next 1 hour\" internally + with community ahead of time\n- [ ] Record Town Hall.\n- [ ] Update TownHall page with round 16 events\n- [ ] Update TownHall page with the presentation\n- [ ] Update TownHall page with recording once it's available to be shared",
     "assignees": ["idiom-bytes"],
     "labels": ["Type: OPS"]
   },
