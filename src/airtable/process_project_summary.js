@@ -1,7 +1,7 @@
 // @format
 const { deleteAll, processAll } = require('./project_summary.js')
 
-;(async () => {
+const main = async () => {
   // NOTE: In this implementation, we consider the "Project Summary" table a
   // "Pivot Table" of "All Proposals [1]. This consideration is reflected in
   // the way this code updates the "Project Summary" table given changes on the
@@ -17,4 +17,6 @@ const { deleteAll, processAll } = require('./project_summary.js')
   // - 2: https://github.com/oceanprotocol/DAOBot/pull/27#pullrequestreview-785866379
   await deleteAll()
   await processAll()
-})()
+}
+
+module.exports = main
