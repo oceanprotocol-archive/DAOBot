@@ -1,5 +1,6 @@
 const fetch = require('cross-fetch')
 const base = require('airtable').base(process.env.AIRTABLE_BASEID)
+var Airtable = require('airtable')
 const Logger = require('../utils/logger')
 const splitArr = (arr, chunk) => {
   const arrSplit = []
@@ -22,6 +23,14 @@ const getRoundsSelectQuery = async (selectQuery) => {
   }
 }
 
+const getTableFields = async (tableName, airtableBaseId, view) => {
+  const newBase = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(airtableBaseId);
+  const selectQuery = view ? {view: view} : undefined;
+  return await newBase(tableName).select(
+    selectQuery
+  ).firstPage()
+}
+
 // TODO - Query+Paginate
 const getProposalsSelectQuery = async (selectQuery, sortQuery = []) => {
   try {
@@ -30,6 +39,18 @@ const getProposalsSelectQuery = async (selectQuery, sortQuery = []) => {
         view: 'All Proposals',
         filterByFormula: selectQuery,
         sort: sortQuery
+      })
+      .firstPage()
+  } catch (err) {
+    Logger.error(err)
+  }
+}
+
+const getProposals = async () => {
+  try {
+    return await base('Proposals')
+      .select({
+        view: 'All Proposals'
       })
       .firstPage()
   } catch (err) {
@@ -99,7 +120,7 @@ const updateRoundRecord = async (record) => {
           Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ records: record })
+        body: bodyContent
       }
     )
       .then((res) => {
@@ -121,10 +142,61 @@ const updateRoundRecord = async (record) => {
   })
 }
 
+const deleteProposalRecords = async (records,tableName) => {
+  const splitRecords = splitArr(records, 8)
+  console.log(process.env.AIRTABLE_BASEID)
+  const newBase = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(process.env.AIRTABLE_BASEID);
+  console.log(splitRecords)
+  await splitRecords.map(async (batch) => {
+      const recordsIdList = await transformBatchForDelete(batch)
+      console.log(recordsIdList)
+      await newBase(tableName).destroy(recordsIdList, function(err, deletedRecords) {
+        if (err) {
+          Logger.error(err);
+          return;
+        }
+        Logger.log('Deleted', deletedRecords.length, 'records')
+     })
+  })
+}
+
+const transformBatchForDelete = async (batch) =>{
+  let data = []
+  await batch.forEach((record) => {
+    data.push(record.id)
+  })
+  return data
+}
+
+const addRecordsToAirtable = async(records, tableName) => {
+  await fetch(
+    `https://api.airtable.com/v0/${process.env.AIRTABLE_BASEID}/${tableName}`,
+    {
+      method: 'POST',
+      view: 'All Proposals',
+      headers: {
+        Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({'records' : records})
+    }
+  )
+    .then((res) => {
+      Logger.log('Response from Airtable: ', res.status)
+    })
+    .catch((err) => {
+      Logger.error(err)
+    }) 
+}
+
 module.exports = {
   getRoundsSelectQuery,
   getProposalsSelectQuery,
   updateProposalRecords,
   updateRoundRecord,
-  sumSnapshotVotesToAirtable
+  deleteProposalRecords,
+  sumSnapshotVotesToAirtable,
+  getProposals,
+  addRecordsToAirtable,
+  getTableFields
 }
