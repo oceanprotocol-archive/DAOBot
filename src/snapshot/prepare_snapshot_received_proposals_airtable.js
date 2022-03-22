@@ -2,17 +2,10 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const {
-  Standings,
-  getProposalRecord
-} = require('../airtable/proposals/proposal_standings')
-const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const {
-  calcTargetBlockHeight,
-  hasEnoughOceans
-} = require('../snapshot/snapshot_utils')
+const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
 
@@ -39,7 +32,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
   // TODO-RA: Proposals are being set to "Accepted" ahead of time, and are not being found.
   // Changed to this for R13 to work => `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Accepted"), "true")`
   const proposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Received", {Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
   )
   const estimatedBlockHeight = calcTargetBlockHeight(
     currentBlockHeight,

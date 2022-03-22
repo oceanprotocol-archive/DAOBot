@@ -20,6 +20,7 @@ const getTokenPrice = async () => {
     return result.data.market_data.current_price.usd
   } catch (err) {
     Logger.error(err)
+    throw Error(`Error getting token price: ${err}`)
   }
 }
 

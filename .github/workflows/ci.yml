@@ -54,5 +54,6 @@ jobs:
           ETH_PRIVATE_KEY: ${{ secrets.ETH_PRIVATE_KEY }}
           GACTIONS_ENV: ${{ secrets.GACTIONS_ENV }}
           LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
+          SNAPSHOT_HUB_URL: ${{ secrets.SNAPSHOT_HUB_URL }}
           WALLET_ADDRESS_WITH_ENOUGH_OCEANS: ${{ secrets.WALLET_ADDRESS_WITH_ENOUGH_OCEANS }}
           WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS: ${{ secrets.WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS }}

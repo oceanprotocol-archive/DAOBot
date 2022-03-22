@@ -265,15 +265,13 @@ describe('Calculating Winners', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
-    Logger.log(finalResults)
-
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.earmarkedResults.winningProposals.length, 4)
+    should.equal(finalResults.resultsByEarmark.winningProposals.length, 4)
     should.equal(finalResults.partiallyFunded.length, 1)
     should.equal(finalResults.notFunded.length, 1)
 
     should.equal(
-      finalResults.earmarkedResults.winningProposals.length +
+      finalResults.resultsByEarmark.winningProposals.length +
         finalResults.partiallyFunded.length +
         finalResults.notFunded.length +
         downvotedProposals.length,
@@ -282,7 +280,7 @@ describe('Calculating Winners', function () {
 
     // Validate all winning, not funded, and downvoted proposals have the right Proposal State
     should.equal(
-      finalResults.earmarkedResults.winningProposals[0].fields[
+      finalResults.resultsByEarmark.winningProposals[0].fields[
         'Proposal State'
       ],
       'Granted'
@@ -291,15 +289,12 @@ describe('Calculating Winners', function () {
       finalResults.partiallyFunded[0].fields['Proposal State'],
       'Granted'
     )
-    should.equal(
-      finalResults.notFunded[0].fields['Proposal State'],
-      'Not Granted'
-    )
+
     should.equal(downvotedProposals[0].fields['Proposal State'], 'Down Voted')
 
     // Validate USD amount adds up
     const earmarkedUSDGranted =
-      finalResults.earmarkedResults.winningProposals.reduce(
+      finalResults.resultsByEarmark.winningProposals.reduce(
         (total, p) => total + p.get('USD Granted'),
         0
       )
@@ -324,7 +319,7 @@ describe('Calculating Winners', function () {
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     const earmarkedResults = await dumpResultsToGSheet(
-      finalResults.earmarkedResults.winningProposals
+      finalResults.resultsByEarmark.winningProposals
     )
     const partiallyFundedResults = await dumpResultsToGSheet(
       finalResults.partiallyFunded
@@ -424,6 +419,7 @@ describe('Calculating Winners', function () {
   })
 
   it('Check if funds left from earmaks are burned if burn switch selected', async function () {
+    fundingRound.fields['OCEAN Price'] = 0.2
     const oceanPrice = fundingRound.get('OCEAN Price')
     fundingRound.fields['Basis Token'] = 'OCEAN'
     fundingRound.fields['Funds Left'] = 'Burn'
@@ -436,6 +432,7 @@ describe('Calculating Winners', function () {
       basisToken
     )
     fundingRound.fields.Earmarks = JSON.stringify(newEarmarks)
+
     // set earmarks for proposals and add USD Granted
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[0].fields['USD Requested'] = 2000
@@ -465,6 +462,6 @@ describe('Calculating Winners', function () {
       fundingRound,
       oceanPrice
     )
-    should.equal(earmarkedResults.winningProposals.length, 3)
+    should.equal(earmarkedResults.winningProposals.length, 1)
   })
 })

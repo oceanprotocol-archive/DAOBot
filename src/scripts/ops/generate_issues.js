@@ -38,15 +38,20 @@ async function checkAndGenerateNextRoundOpsSchedule(currentRoundNumber) {
       nextRoundVoteEnd !== undefined &&
       opsGenerated === undefined
     ) {
-      // Generate the OPS schedule issues on github
-      await generateRoundGithubIssues(
-        nextRoundNumber,
-        nextRoundStartDate,
-        nextRoundProposalsDueBy,
-        nextRoundVoteStart,
-        nextRoundVoteEnd
-      )
-
+      try {
+        // Generate the OPS schedule issues on github
+        await generateRoundGithubIssues(
+          nextRoundNumber,
+          nextRoundStartDate,
+          nextRoundProposalsDueBy,
+          nextRoundVoteStart,
+          nextRoundVoteEnd
+        )
+      } catch (error) {
+        Logger.error(
+          'There has been a problem with your fetch operation: ' + error.message
+        )
+      }
       // Update Airtable OPS field
       const roundUpdate = [{ id: nextRound.id, fields: { OPS: true } }]
       await updateRoundRecord(roundUpdate)
@@ -65,40 +70,34 @@ async function generateRoundGithubIssues(
     Logger.error(`Github token missing`)
     return
   }
-  try {
-    const issues = loadRoundIssues(
-      roundNumber,
-      roundProposalStartDate,
-      roundProposalEndDate,
-      roundVotingStartDate,
-      roundVotingEndDate
-    )
-    issues.forEach((issue) => {
-      fetch(`https://api.github.com/repos/${organisation}/${repo}/issues`, {
-        method: 'post',
-        body: JSON.stringify(issue),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `token ${token}`
+  const issues = loadRoundIssues(
+    roundNumber,
+    roundProposalStartDate,
+    roundProposalEndDate,
+    roundVotingStartDate,
+    roundVotingEndDate
+  )
+  issues.forEach((issue) => {
+    fetch(`https://api.github.com/repos/${organisation}/${repo}/issues`, {
+      method: 'post',
+      body: JSON.stringify(issue),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `token ${token}`
+      }
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        var jsonString = JSON.stringify(json)
+        var obj = JSON.parse(jsonString)
+
+        if (obj.id != null) {
+          Logger.log(`Issue created at ${obj.url}`)
+        } else {
+          Logger.error(`Something went wrong. Response: ${jsonString}`)
         }
       })
-        .then((res) => res.json())
-        .then((json) => {
-          var jsonString = JSON.stringify(json)
-          var obj = JSON.parse(jsonString)
-
-          if (obj.id != null) {
-            Logger.log(`Issue created at ${obj.url}`)
-          } else {
-            Logger.error(`Something went wrong. Response: ${jsonString}`)
-          }
-        })
-    })
-  } catch (error) {
-    Logger.error(
-      'There has been a problem with your fetch operation: ' + error.message
-    )
-  }
+  })
   Logger.log('-----====== Generated OPS schedule issues =======-----')
 }
 
@@ -154,12 +153,16 @@ function fillIssueWithRoundParameters(
     '{{ROUND_VOTING_END_DATE}}': roundVotingEndDate
   }
   for (const [pattern, value] of Object.entries(patterns)) {
-    title = title.replaceAll(pattern, value)
-    body = body.replaceAll(pattern, value)
+    title = replaceAll(title, pattern, value)
+    body = replaceAll(body, pattern, value)
   }
   processedIssue.title = title
   processedIssue.body = body
   return processedIssue
+}
+
+function replaceAll(str, match, replacement) {
+  return str.replace(new RegExp(match, 'g'), () => replacement)
 }
 
 module.exports = { checkAndGenerateNextRoundOpsSchedule }

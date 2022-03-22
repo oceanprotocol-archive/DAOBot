@@ -12,6 +12,7 @@ const {
   updateCurrentRoundStandings
 } = require('./proposals/proposal_standings')
 
+// ? Only needs to happen once on a per-proposal basis.
 const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
   const allProposals = await getAllRoundProposals(curRoundNumber - 1)
@@ -27,10 +28,6 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
 
   // Step 2 - Resolve & Report standings
   await processHistoricalStandings(proposalStandings)
-  Logger.log(
-    '\n======== Reported Proposal Standings\n',
-    JSON.stringify(proposalStandings)
-  )
 
   // Add all historical proposals that we're going to update
   let rows = []
