@@ -482,9 +482,9 @@ describe('Process Project Standings', function () {
         'Invalid USD Requested'
       ) // 2 projects completed
 
-      proposal.fields['USD Requested'] = 20000
+      proposal.fields['USD Requested'] = 35000
       expect(validateProposal(proposal, levels(5))).to.equal(true) // 5 projects completed
-      proposal.fields['USD Requested'] = 20001
+      proposal.fields['USD Requested'] = 35001
       expect(validateProposal(proposal, levels(5))).to.equal(
         'Invalid USD Requested'
       ) // 5 projects completed
