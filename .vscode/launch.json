@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/src/scripts/update_funding_round.js"
+            "program": "${workspaceFolder}/src/airtable/process_project_summary.js"
         }
     ]
 }
