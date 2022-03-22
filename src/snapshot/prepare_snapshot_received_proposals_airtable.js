@@ -5,9 +5,16 @@ const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
+const {
+  calcTargetBlockHeight,
+  hasEnoughOceans
+} = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
+const {
+  Standings,
+  getProposalRecord
+} = require('../airtable/proposals/proposal_standings')
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
