@@ -302,4 +302,4 @@ const main = async () => {
   }
 }
 
-main()
+module.exports = main
