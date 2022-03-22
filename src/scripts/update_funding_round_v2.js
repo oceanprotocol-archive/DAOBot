@@ -207,7 +207,7 @@ const updateVotingPeriod = async (round) => {
 }
 
 const endVotingPeriod = async (round) => {
-  updateVotingPeriod(round)
+  await updateVotingPeriod(round)
   await updateWinners(round)
 
   // Start the next round
@@ -222,52 +222,19 @@ const endVotingPeriod = async (round) => {
   await updateRoundRecord(roundUpdate)
 }
 
-// Split up functionality
-// Make it easy to debug/trigger events
-const main = async () => {
-  const curRound = await getCurrentRound()
-  let curRoundNumber
-  let curRoundState
-  let curRoundStartDate
-  let curRoundProposalsDueBy
-  let curRoundVoteStart
-  let curRoundVoteEnd
-
-  if (curRound !== undefined) {
-    curRoundNumber = curRound.get('Round')
-    curRoundState = curRound.get('Round State')
-    curRoundStartDate = curRound.get('Start Date')
-    curRoundProposalsDueBy = moment(curRound.get('Proposals Due By'))
-      .utc()
-      .toISOString()
-    curRoundVoteStart = curRound.get('Voting Starts')
-    curRoundVoteEnd = curRound.get('Voting Ends')
-
-    // TODO-RA: This function will take longer and longer to process
-    await processAirtableProposalStandings(curRoundNumber) // process proposal standings
-    await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
-  }
-
-  const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
-  let lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
-  let lastRoundState
-  let lastRoundVoteEnd
-
-  if (lastRound !== undefined && lastRound.length > 0) {
-    ;[lastRound] = lastRound
-    lastRoundState = lastRound.get('Round State')
-    lastRoundVoteEnd = lastRound.get('Voting Ends')
-  }
-
+const updateFundingRound = async (curRound) => {
   const now = moment().utc().toISOString()
+  const curRoundState = curRound.get('Round State')
+  const curRoundStartDate = curRound.get('Start Date')
+  const curRoundProposalsDueBy = moment(curRound.get('Proposals Due By'))
+    .utc()
+    .toISOString()
+  const curRoundVoteStart = curRound.get('Voting Starts')
+  const curRoundVoteEnd = curRound.get('Voting Ends')
 
   switch (curRoundState) {
     case undefined:
-      if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
-        updateVotingPeriod(lastRound)
-        endVotingPeriod(lastRound)
-        startSubmissionPeriod(curRound)
-      } else if (now >= curRoundStartDate) startSubmissionPeriod(curRound)
+      if (now >= curRoundStartDate) startSubmissionPeriod(curRound)
       break
     case RoundState.Started:
       if (now < curRoundProposalsDueBy) updateSubmissionPeriod(curRound)
@@ -278,8 +245,28 @@ const main = async () => {
       break
     case RoundState.Voting:
       if (now < curRoundVoteEnd) updateVotingPeriod(curRound)
+      else if (now >= curRoundVoteEnd) {
+        // complete the round
+        updateVotingPeriod(curRound)
+        endVotingPeriod(curRound)
+      }
       break
   }
+}
+
+const main = async () => {
+  const curRound = await getCurrentRound()
+  const curRoundNumber = curRound.get('Round')
+
+  // TODO: Fix this to only process against last round, or project.
+  await processAirtableProposalStandings(curRoundNumber)
+  await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
+
+  const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
+  const lastRound = await getRoundsSelectQuery(`{Round} = ${lastRoundNumber}`)
+
+  updateFundingRound(lastRound)
+  updateFundingRound(curRound)
 }
 
 main()
