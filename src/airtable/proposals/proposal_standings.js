@@ -85,7 +85,10 @@ const getProposalState = (
     (proposalState === State.Rejected || proposalState === State.Undefined)
   ) {
     proposalState = State.Accepted
-  } else if (proposalState === State.Undefined) {
+  } else if (
+    !hasEnoughOceans &&
+    (proposalState === State.Undefined || proposalState === State.Accepted)
+  ) {
     proposalState = State.Rejected
   }
 
