@@ -5,8 +5,10 @@ const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const { hasEnoughOceans } = require('../snapshot/snapshot_utils')
-const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
+const {
+  calcTargetBlockHeight,
+  hasEnoughOceans
+} = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
 const {
