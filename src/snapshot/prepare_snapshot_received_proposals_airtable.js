@@ -5,6 +5,7 @@ const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
+const { hasEnoughOceans } = require('../snapshot/snapshot_utils')
 const { calcTargetBlockHeight } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
@@ -50,6 +51,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
     proposals.map(async (proposal) => {
       getProposalRecord(proposal, proposals)
       try {
+        const wallet_0x = proposal.get('Wallet Address')
         const proposalStanding = proposal.get('Proposal Standing')
 
         // Please update enums as required
@@ -60,7 +62,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
           proposalStanding === Standings.Unreported ||
           proposalStanding === Standings.NewProject
 
-        if (goodStanding === true) {
+        if ((await hasEnoughOceans(wallet_0x)) && goodStanding === true) {
           recordsPayload.push({
             id: proposal.id,
             fields: {
