@@ -53,7 +53,6 @@ const prepareProposalsForSnapshot = async (curRound) => {
     proposals.map(async (proposal) => {
       getProposalRecord(proposal, proposals)
       try {
-        const wallet_0x = proposal.get('Wallet Address')
         const proposalStanding = proposal.get('Proposal Standing')
 
         // Please update enums as required
@@ -64,7 +63,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
           proposalStanding === Standings.Unreported ||
           proposalStanding === Standings.NewProject
 
-        if ((await hasEnoughOceans(wallet_0x)) && goodStanding === true) {
+        if (goodStanding === true) {
           recordsPayload.push({
             id: proposal.id,
             fields: {
