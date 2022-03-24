@@ -85,10 +85,7 @@ const getProposalState = (
     (proposalState === State.Rejected || proposalState === State.Undefined)
   ) {
     proposalState = State.Accepted
-  } else if (
-    !hasEnoughOceans &&
-    (proposalState === State.Undefined || proposalState === State.Accepted)
-  ) {
+  } else if (proposalState === State.Undefined) {
     proposalState = State.Rejected
   }
 
@@ -188,19 +185,13 @@ const getProposalRecord = async (proposal, allProposals, curRoundNumber) => {
   const proposalURL = proposal.get('Proposal URL')
 
   let lastOceanBalanceCheckDate = proposal.get('Last Balance Check')
-  let areOceansEnough =
-    proposal.get('Proposal Standing') !== '' &&
-    proposal.get('Proposal Standing') !== 'No Ocean'
+  let areOceansEnough = proposal.get('Proposal Standing') !== 'No Ocean'
   if (
-    !(
-      curRoundNumber !== undefined &&
-      parseInt(curRoundNumber) !== parseInt(proposal.get('Round'))
-    )
+    !(curRoundNumber !== undefined && curRoundNumber !== proposal.get('Round'))
   ) {
     if (
       !lastOceanBalanceCheckDate ||
-      new Date(lastOceanBalanceCheckDate).getTime() + 1000 * 60 * 15 <
-        Date.now() // undefined or 15 minutes has passed
+      new Date(lastOceanBalanceCheckDate) + 1000 * 60 * 15 < new Date() // undefined or 15 minutes has passed
     ) {
       areOceansEnough = await hasEnoughOceans(proposal.get('Wallet Address')) // get Ocean balance
       lastOceanBalanceCheckDate = new Date() // update last Ocean balance check date
