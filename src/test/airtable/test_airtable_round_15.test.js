@@ -3,7 +3,6 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 const {
-  computeBurnedFunds,
   clearFundedRecords
 } = require('../../airtable/process_airtable_funding_round_complete')
 dotenv.config()
