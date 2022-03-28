@@ -163,6 +163,7 @@ const calculateWinningProposalsForEarmark = (
         funded++
       }
     })
+    if (!proposals.some((x) => x.fields.funded !== x.fields.maxFund)) break // If all projects are funded, break
     if (funded === 0) {
       // One last time
       const projectsWithoutFundingAndNotGranted = proposals.filter(
