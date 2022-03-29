@@ -113,7 +113,8 @@ const getDownvotedProposals = (proposals) => {
 const calculateWinningProposalsForEarmark = (
   proposals,
   fundsAvailableUSD,
-  oceanPrice
+  oceanPrice,
+  earmark = ''
 ) => {
   proposals.sort((a, b) =>
     a.get('Voted Yes') - a.get('Voted No') <
@@ -138,7 +139,10 @@ const calculateWinningProposalsForEarmark = (
       x.get('Basis Currency') === 'USD'
         ? x.get('USD Granted')
         : x.get('OCEAN Granted') ?? 0
-    x.fields.minFund = x.get(`Minimum ${x.get(`Basis Currency`)} Requested`)
+    x.fields.minFund =
+      earmark === 'General'
+        ? x.get(`Minimum ${x.get(`Basis Currency`)} Requested`)
+        : 0
   })
 
   while (proposals.reduce((a, b) => a + b.fields.funded, 0) < totalPool) {
@@ -285,7 +289,8 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       const winningProposals = calculateWinningProposalsForEarmark(
         earmarkProposals,
         currentUsdEarmarked,
-        oceanPrice
+        oceanPrice,
+        earmark
       )
       resultsByEarmark[earmark] = winningProposals
       winningProposals.winningProposals.forEach((proposal) => {
@@ -312,8 +317,22 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   resultsByEarmark.fundsRecycled = fundsRecycled
   resultsByEarmark.fundsLeftOcean = fundsLeftOcean
   resultsByEarmark.fundsRecycledOcean = fundsRecycledOcean
+  const notGrantedProposals = proposals.filter((x) => {
+    return (
+      earmarkedWinnerIds.lastIndexOf(x.id) === -1 ||
+      x.get('Minimum OCEAN Requested') < x.get('OCEAN Granted')
+    )
+  })
+  if (notGrantedProposals.length === 0) return resultsByEarmark
 
-  return resultsByEarmark
+  const proposalLostWithLeastVotes = notGrantedProposals.reduce((a, b) => {
+    return a.fields['Voted Yes'] < b.fields['Voted No'] ? a : b
+  }).id
+
+  // delete proposal lost with least votes from proposals
+  proposals = proposals.filter((x) => x.id !== proposalLostWithLeastVotes)
+
+  return calculateWinningAllProposals(proposals, fundingRound, oceanPrice)
 }
 
 const calculateFinalResults = (proposals, fundingRound) => {
