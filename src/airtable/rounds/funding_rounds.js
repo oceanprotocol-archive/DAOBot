@@ -209,6 +209,7 @@ const calculateWinningProposalsForEarmark = (
     delete p.fields.funded
     delete p.fields.weight
     delete p.fields.maxFund
+    delete p.fields.minFund
   }
 
   return {
