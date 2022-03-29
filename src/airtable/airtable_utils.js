@@ -120,7 +120,7 @@ const updateRoundRecord = async (record) => {
           Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`, // API key
           'Content-Type': 'application/json'
         },
-        body: bodyContent
+        body: JSON.stringify(record)
       }
     )
       .then((res) => {
@@ -144,12 +144,9 @@ const updateRoundRecord = async (record) => {
 
 const deleteProposalRecords = async (records,tableName) => {
   const splitRecords = splitArr(records, 8)
-  console.log(process.env.AIRTABLE_BASEID)
   const newBase = new Airtable({apiKey: process.env.AIRTABLE_API_KEY}).base(process.env.AIRTABLE_BASEID);
-  console.log(splitRecords)
   await splitRecords.map(async (batch) => {
       const recordsIdList = await transformBatchForDelete(batch)
-      console.log(recordsIdList)
       await newBase(tableName).destroy(recordsIdList, function(err, deletedRecords) {
         if (err) {
           Logger.error(err);

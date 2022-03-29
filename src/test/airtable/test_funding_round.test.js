@@ -3,13 +3,21 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
+const should = require('chai').should()
+
+const {
+  RoundState,
+  getCurrentRound,
+} = require('../../airtable/rounds/funding_rounds')
 
 const {
   deleteProposalRecords,
   getProposals,
   getTableFields,
-  addRecordsToAirtable
+  addRecordsToAirtable,
+  updateRoundRecord
 } = require('../../airtable/airtable_utils')
+const main = require('../../scripts/update_funding_round')
 const {
   syncAirtableActiveProposalVotes
 } = require('../../airtable/sync_airtable_active_proposal_votes_snapshot')
@@ -18,6 +26,20 @@ const {
 } = require('../../airtable/process_airtable_funding_round_complete')
 const { BallotType } = require('../../snapshot/snapshot_utils')
 const { expect } = require('chai')
+
+function addDaysToDate(days){
+  var res = new Date();
+  res.setDate(res.getDate() + days);
+  console.log(res.toISOString())
+  return res.toISOString();
+}
+
+function subtractsDaysFromDate(days){
+  var res = new Date();
+  res.setDate(res.getDate() - days);
+  console.log(res.toISOString())
+  return res.toISOString();
+}
 
 const newProposals = [
   {
@@ -100,11 +122,13 @@ const newFundingRounds = [
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0}, \"General\": {\"OCEAN\": 65000,\"USD\": 0}\n}",
       "Proposals Granted": 5,
       "Funding Available": 65000,
-      "Proposals Due By": "2020-12-14T23:59:00.000Z",
-      "Voting Ends": "2020-12-21T23:59:00.000Z",
+      "Start Date": "2021-12-10T23:59:00.000Z",
+      "Proposals Due By": "2021-12-14T23:59:00.000Z",
+      "Voting Starts": "2021-12-16T23:59:00.000Z",
+      "Voting Ends": "2021-12-21T23:59:00.000Z",
       "Proposals": 9,
       "Round": "1",
-      "Round State": "Ended",
+      "Round State": RoundState.Voting,
       "Vote Type": "single-choice",
       "Ballot Type": "Batch",
       "Basis Currency": "OCEAN"
@@ -117,11 +141,13 @@ const newFundingRounds = [
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0},\n\"General\": {\"OCEAN\": 90000,\"USD\": 0}\n}",
       "Proposals Granted": 9,
       "Funding Available": 90000,
-      "Proposals Due By": "2021-02-01T23:59:00.000Z",
-      "Voting Ends": "2021-02-04T23:59:00.000Z",
+      "Start Date": addDaysToDate(0),
+      "Proposals Due By": addDaysToDate(2),
+      "Voting Starts": addDaysToDate(4),
+      "Voting Ends": addDaysToDate(6),
       "Proposals": 16,
       "Round": "2",
-      "Round State": "Ended",
+      "Round State": undefined,
       "Vote Type": "single-choice",
       "Ballot Type": "Batch",
       "Basis Currency": "OCEAN"
@@ -143,5 +169,43 @@ describe('Start Funding Round', function () {
     const fundingRounds = await getTableFields('Funding Rounds',"appe3NtI7wcUn7qqq",'Rounds')
     await deleteProposalRecords(fundingRounds, 'Funding Rounds')
     await addRecordsToAirtable(newFundingRounds,'Funding Rounds')
+  })
+
+  it('Tests that last round is finnished and next round is started', async function (){
+    await main()
+    const curRound = await getCurrentRound()
+    should.equal(curRound.fields['Round State'],RoundState.Started)
+  })
+
+  it('Tests that started round is going into DD period', async function (){
+    let curRound = await getCurrentRound()
+    const roundUpdate = {records: [
+      {
+        id: curRound.id,
+        fields: {
+          'Proposals Due By': subtractsDaysFromDate(1)
+        }
+      }
+    ]}
+    await updateRoundRecord(roundUpdate)
+    await main()
+    curRound = await getCurrentRound()
+    should.equal(curRound.fields['Round State'],RoundState.DueDiligence)
+  })
+
+  it('Tests that current round is going into Voting state', async function (){
+    curRound = await getCurrentRound()
+    const roundUpdate = {records: [
+      {
+        id: curRound.id,
+        fields: {
+          'Voting Starts': subtractsDaysFromDate(1)
+        }
+      }
+    ]}
+    await updateRoundRecord(roundUpdate)
+    await main()
+    curRound = await getCurrentRound()
+    should.equal(curRound.fields['Round State'],RoundState.Voting)
   })
 })

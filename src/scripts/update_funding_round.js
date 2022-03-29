@@ -123,7 +123,7 @@ const main = async () => {
         'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
       }
 
-      await lastRound.updateFields(roundUpdateData) // update the round record
+      //await lastRound.updateFields(roundUpdateData) // update the round record
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
@@ -148,13 +148,13 @@ const main = async () => {
         lastRoundNumber
       )
       // Start the next round
-      const roundUpdate = [
+      const roundUpdate = {records:[
         {
           id: lastRound.id,
           fields: {
             'Round State': RoundState.Ended,
-            'Proposals Granted': proposalsFunded,
-            'OCEAN Burned': fundsBurned
+            'Proposals Granted': proposalsFunded ? proposalsFunded : 0,
+            'OCEAN Burned': fundsBurned ? fundsBurned : 0 
           }
         },
         {
@@ -163,20 +163,20 @@ const main = async () => {
             'Round State': RoundState.Started
           }
         }
-      ]
+      ]}
       await updateRoundRecord(roundUpdate)
     } else if (now >= curRoundStartDate) {
       Logger.log('Start current round.')
 
       // Start the current round
-      const roundUpdate = [
+      const roundUpdate = {records:[
         {
           id: curRound.id,
           fields: {
             'Round State': RoundState.Started
           }
         }
-      ]
+      ]}
       await updateRoundRecord(roundUpdate)
     }
   } else {
@@ -223,7 +223,7 @@ const main = async () => {
           Logger.log('No Basis Currency was selected for this round.')
       }
 
-      const roundUpdate = [
+      const roundUpdate = {records:[
         {
           id: curRound.id,
           fields: {
@@ -238,6 +238,7 @@ const main = async () => {
           }
         }
       ]
+    }
 
       // Enter Due Diligence period
       calculateWinningProposalsForEarmark(
@@ -259,14 +260,14 @@ const main = async () => {
         await submitProposalsToSnaphotBatch(curRoundNumber, curRoundVoteType)
       }
 
-      const roundUpdate = [
+      const roundUpdate = {records:[
         {
           id: curRound.id,
           fields: {
             'Round State': RoundState.Voting
           }
         }
-      ]
+      ]}
       await updateRoundRecord(roundUpdate)
     } else if (
       curRoundState === RoundState.DueDiligence &&
