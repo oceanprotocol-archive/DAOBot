@@ -338,7 +338,7 @@ let downvotedProposals
 let winningProposals
 let finalResults
 
-describe('Calculating Winners', function () {
+describe('Calculating Winners for round 15', function () {
   it('Check if earmark is setup', async function () {
     // from Airtable
     const tokenPrice = fundingRound.fields['OCEAN Price']
@@ -353,6 +353,16 @@ describe('Calculating Winners', function () {
         (newEarmarks[earmark].USD / tokenPrice).toFixed(2)
       )
     }
+  })
+
+  it('There should be no projects funded below 1k', async function () {
+    winningProposals
+      .some(
+        (proposal) =>
+          proposal.fields['OCEAN Granted'] !== 0 &&
+          proposal.fields['OCEAN Granted'] < 1000
+      )
+      .should.equal(false)
   })
 
   it('There should be 2 downvoted proposals', async function () {
