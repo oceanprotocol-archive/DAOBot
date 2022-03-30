@@ -509,15 +509,7 @@ const reduceProposalScores = (ballotType, voterScores) => {
 }
 
 // Calculate match for each grant
-/**
- * 
- * @param [{
-    "choice": { 1: int, 2: int },
-    "balance": int
-  }]
- * @returns {1:int,2:int,...}
- */
-const calculateMatch = (reducedVoterScores, pool) => {
+const calculateMatch = (reducedVoterScores) => {
   const granularVotes = {}
   reducedVoterScores.map((x) => {
     const sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
