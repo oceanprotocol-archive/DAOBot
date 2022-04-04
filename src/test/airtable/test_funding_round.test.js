@@ -15,7 +15,9 @@ const {
   getProposals,
   getTableFields,
   addRecordsToAirtable,
-  updateRoundRecord
+  updateRoundRecord,
+  getProposalsSelectQueryFromBaseId,
+  getProposalsSelectQuery
 } = require('../../airtable/airtable_utils')
 const main = require('../../scripts/update_funding_round')
 const {
@@ -41,7 +43,7 @@ function subtractsDaysFromDate(days){
   return res.toISOString();
 }
 
-const newProposals = [
+/*const newProposals = [
   {
     "fields": {
       "Project Name": "Decentralized File Rating",
@@ -112,12 +114,12 @@ const newProposals = [
       "Reason Rejected": " "
     }
   }
-]
+]*/
 
 const newFundingRounds = [
   {
     "fields": {
-      "Name": "Round 1",
+      "Name": "Round 15",
       "Max Grant": 13000,
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0}, \"General\": {\"OCEAN\": 65000,\"USD\": 0}\n}",
       "Proposals Granted": 5,
@@ -136,8 +138,8 @@ const newFundingRounds = [
   },
   {
     "fields": {
-      "Name": "Round 2",
-      "Max Grant": 10000,
+      "Name": "Round 16",
+      "OCEAN Price": 0.67,
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0},\n\"General\": {\"OCEAN\": 90000,\"USD\": 0}\n}",
       "Proposals Granted": 9,
       "Funding Available": 90000,
@@ -145,7 +147,7 @@ const newFundingRounds = [
       "Proposals Due By": addDaysToDate(2),
       "Voting Starts": addDaysToDate(4),
       "Voting Ends": addDaysToDate(6),
-      "Proposals": 16,
+      "Proposals": 3,
       "Round": "2",
       "Round State": undefined,
       "Vote Type": "single-choice",
@@ -162,7 +164,19 @@ describe('Start Funding Round', function () {
   it('Removes all proposals and creates new ones', async function () {
     const proposals = await getTableFields('Proposals',"appe3NtI7wcUn7qqq",'All Proposals')
     await deleteProposalRecords(proposals, 'Proposals')
-    await addRecordsToAirtable(newProposals,'Proposals')
+    const newProposals = await getProposalsSelectQueryFromBaseId(
+      `{Round} = 15`, "appzTwkdC3NEVEdXk"
+    )
+    let newProposalsFormated = []
+    newProposals.forEach((record) => {
+      record.RecordId = undefined
+      const formatedProposal = {
+        'fields':record.fields
+      }
+      newProposalsFormated.push(formatedProposal)
+    })
+    console.log(newProposalsFormated)
+    await addRecordsToAirtable(newProposalsFormated,'Proposals')
   })
 
   it('Removes all funding rounds and creates new ones', async function () {
@@ -171,7 +185,7 @@ describe('Start Funding Round', function () {
     await addRecordsToAirtable(newFundingRounds,'Funding Rounds')
   })
 
-  it('Tests that last round is finnished and next round is started', async function (){
+  /*it('Tests that last round is finnished and next round is started', async function (){
     await main()
     const curRound = await getCurrentRound()
     should.equal(curRound.fields['Round State'],RoundState.Started)
@@ -207,5 +221,5 @@ describe('Start Funding Round', function () {
     await main()
     curRound = await getCurrentRound()
     should.equal(curRound.fields['Round State'],RoundState.Voting)
-  })
+  })*/
 })

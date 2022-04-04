@@ -46,6 +46,20 @@ const getProposalsSelectQuery = async (selectQuery, sortQuery = []) => {
   }
 }
 
+const getProposalsSelectQueryFromBaseId = async (selectQuery, baseId) => {
+  const base = require('airtable').base(baseId)
+  try {
+    return await base('Proposals')
+      .select({
+        view: 'All Proposals',
+        filterByFormula: selectQuery
+      })
+      .firstPage()
+  } catch (err) {
+    Logger.error(err)
+  }
+}
+
 const getProposals = async () => {
   try {
     return await base('Proposals')
@@ -180,9 +194,11 @@ const addRecordsToAirtable = async(records, tableName) => {
   )
     .then((res) => {
       Logger.log('Response from Airtable: ', res.status)
+      console.log(res)
     })
     .catch((err) => {
       Logger.error(err)
+      console.log(err)
     }) 
 }
 
@@ -195,5 +211,6 @@ module.exports = {
   sumSnapshotVotesToAirtable,
   getProposals,
   addRecordsToAirtable,
-  getTableFields
+  getTableFields,
+  getProposalsSelectQueryFromBaseId
 }
