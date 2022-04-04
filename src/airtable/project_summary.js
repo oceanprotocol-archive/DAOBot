@@ -131,7 +131,6 @@ const updatedRecordById = async (recordId, dataObject) => {
 }
 
 const levels = (completed) => {
-  // TODO - Add a round param. Pass in funding tiers from airtable.
   // NOTE: Reference: https://github.com/oceanprotocol/oceandao/wiki#r12-update-funding-tiers
   if (completed === 0) return { level: 'New Project', ceiling: 3000 }
   if (completed === 1) return { level: 'Existing Project', ceiling: 10000 }
