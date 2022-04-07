@@ -240,10 +240,7 @@ const main = async () => {
       ]
 
       try {
-        await syncGSheetsActiveProposalVotes(
-          curRoundNumber,
-          curRoundBallotType
-        )
+        await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
       } catch (err) {
         Logger.error(`Error syncing GSheets Active Proposal Votes: ${err}`)
       }
