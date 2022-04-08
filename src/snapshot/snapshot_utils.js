@@ -45,6 +45,8 @@ const getWalletBalance = async (wallet0x, required) => {
     totalBalance += parseFloat(ethers.utils.formatEther(balance))
     if (totalBalance >= required) return true
   }
+
+  return false
 }
 
 const hasEnoughOceans = async (wallet_address) => {
