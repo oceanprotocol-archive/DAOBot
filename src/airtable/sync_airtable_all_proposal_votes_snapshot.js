@@ -37,7 +37,7 @@ const getAllProposalVotes = async () => {
           const ipfsHash = proposal.get('ipfsHash')
 
           await getProposalVotesGQL(ipfsHash).then((result) => {
-            proposalVotes[ipfsHash] = result.data.votes
+            proposalVotes[ipfsHash] = result.data?.votes
           })
           const voters = []
           for (var index = 0; index < proposalVotes[ipfsHash].length; ++index) {
