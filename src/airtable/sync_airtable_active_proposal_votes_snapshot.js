@@ -24,7 +24,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   const proposalScores = {}
 
   const activeProposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), NOT({Proposal State} = "Withdrawn"), "true")`
   )
 
   await Promise.all(
