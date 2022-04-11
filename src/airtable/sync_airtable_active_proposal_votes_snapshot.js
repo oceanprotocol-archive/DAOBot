@@ -34,7 +34,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
         const strategy = getVoteCountStrategy(proposal.get('Round'))
 
         await getProposalVotesGQL(ipfsHash).then((result) => {
-          proposalVotes[ipfsHash] = result.data.votes
+          proposalVotes[ipfsHash] = result.data?.votes
         })
         const voters = []
         for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {

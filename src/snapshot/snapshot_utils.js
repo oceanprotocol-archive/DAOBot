@@ -433,7 +433,7 @@ const getProposalVotesGQL = async (ipfsHash) => {
   // So we need to transform that 1e+41 into a natural number
   // to correcly calculate the votes count and the sum of allocated tokens
   const result = await response.json()
-  for (const [, vote] of Object.entries(result.data.votes)) {
+  for (const [, vote] of Object.entries(result.data?.votes)) {
     for (const [choiceIndex, voteCount] of Object.entries(vote.choice)) {
       if (voteCount === 1e41) vote.choice[choiceIndex] = 1
     }
