@@ -433,7 +433,7 @@ const getProposalVotesGQL = async (ipfsHash) => {
   // So we need to transform that 1e+41 into a natural number
   // to correcly calculate the votes count and the sum of allocated tokens
   const result = await response.json()
-  for (const [, vote] of Object.entries(result.data.votes)) {
+  for (const [, vote] of Object.entries(result.data?.votes)) {
     for (const [choiceIndex, voteCount] of Object.entries(vote.choice)) {
       if (voteCount === 1e41) vote.choice[choiceIndex] = 1
     }
@@ -509,15 +509,7 @@ const reduceProposalScores = (ballotType, voterScores) => {
 }
 
 // Calculate match for each grant
-/**
- * 
- * @param [{
-    "choice": { 1: int, 2: int },
-    "balance": int
-  }]
- * @returns {1:int,2:int,...}
- */
-const calculateMatch = (reducedVoterScores, pool) => {
+const calculateMatch = (reducedVoterScores) => {
   const granularVotes = {}
   reducedVoterScores.map((x) => {
     const sumChoices = Object.values(x.choice).reduce((a, b) => a + b)
