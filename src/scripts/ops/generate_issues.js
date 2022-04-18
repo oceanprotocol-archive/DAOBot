@@ -150,7 +150,11 @@ function fillIssueWithRoundParameters(
       .subtract(1, 'days')
       .utc()
       .toISOString(),
-    '{{ROUND_VOTING_END_DATE}}': roundVotingEndDate
+    '{{ROUND_VOTING_END_DATE}}': roundVotingEndDate,
+    '{{ROUND_CLAIM_GRANTS_DUE_DATE}}': moment(roundVotingEndDate)
+        .add(14, 'days')
+        .utc()
+        .toISOString(),
   }
   for (const [pattern, value] of Object.entries(patterns)) {
     title = replaceAll(title, pattern, value)
