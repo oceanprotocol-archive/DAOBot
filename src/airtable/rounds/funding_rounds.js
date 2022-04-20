@@ -154,7 +154,8 @@ const calculateWinningProposalsForEarmark = (
     let funded = 0
     proposals.map((x) => {
       if (
-        x.fields.weight * multiplierOcean >= x.fields.maxFund &&
+        x.fields.weight * multiplierOcean + x.fields.funded >=
+          x.fields.maxFund &&
         x.fields.funded !== x.fields.maxFund
       ) {
         x.fields.funded = x.fields.maxFund
@@ -179,7 +180,7 @@ const calculateWinningProposalsForEarmark = (
         if (x.fields.funded !== x.fields.maxFund) {
           x.fields.funded = Math.min(
             x.fields.maxFund,
-            x.fields.weight * multiplierOceanNew
+            x.fields.weight * multiplierOceanNew + x.fields.funded
           )
         }
       })
@@ -187,7 +188,9 @@ const calculateWinningProposalsForEarmark = (
     }
   }
 
-  const winningProposals = proposals.filter((x) => x.fields.funded > 0)
+  const winningProposals = proposals.filter(
+    (x) => x.fields.funded === x.fields.maxFund
+  )
   for (const p of proposals) {
     p.fields['USD Requested'] = p.get('USD Requested')
     p.fields['OCEAN Requested'] = p.get('USD Requested') / oceanPrice
@@ -309,10 +312,7 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   resultsByEarmark.fundsLeftOcean = fundsLeftOcean
   resultsByEarmark.fundsRecycledOcean = fundsRecycledOcean
   const notGrantedProposals = proposals.filter((x) => {
-    return (
-      earmarkedWinnerIds.lastIndexOf(x.id) === -1 ||
-      x.get('Minimum USD Requested') > x.get('USD Granted')
-    )
+    return x.get('Minimum USD Requested') > x.get('USD Granted')
   })
   if (notGrantedProposals.length === 0) return resultsByEarmark
 
