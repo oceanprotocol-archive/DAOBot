@@ -182,8 +182,8 @@ const calculateWinningProposalsForEarmark = (
       proposals.map((x) => {
         if (!x.isFunded()) {
           x.fields.funded = Math.min(
-            x.fields.maxFund - x.fields.totalFund,
-            x.fields.weight * multiplierOceanNew + x.fundAmount()
+            x.fields.maxFund - x.fundAmount(),
+            x.fields.weight * multiplierOceanNew
           )
         }
       })
@@ -207,6 +207,12 @@ const calculateWinningProposalsForEarmark = (
       p.fields['OCEAN Granted'] = p.fundAmount()
     }
     p.fields['Proposal State'] = 'Granted'
+
+    console.log(
+      `${p.get('Project Name')},${p.fields.funded * oceanPrice},${
+        p.fields.totalFund * oceanPrice
+      },${p.fields.maxFund * oceanPrice},${earmark}`
+    )
 
     delete p.fields.funded
     delete p.fields.weight
