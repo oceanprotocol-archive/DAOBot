@@ -133,16 +133,19 @@ const calculateWinningProposalsForEarmark = (
         ? x.get('USD Requested')
         : x.get('USD Requested') / oceanPrice
 
-    x.fields.funded =
+    x.fields.funded = 0
+
+    x.fields.totalFund =
       x.get('Basis Currency') === 'USD'
         ? x.get('USD Granted')
         : x.get('OCEAN Granted') ?? 0
+
+    x.isFunded = () => x.fields.maxFund === x.fields.totalFund + x.fields.funded
+    x.fundAmount = () => x.fields.funded + x.fields.totalFund
   })
 
   while (proposals.reduce((a, b) => a + b.fields.funded, 0) < totalPool) {
-    const projectsWithoutFunding = proposals.filter(
-      (x) => x.fields.funded !== x.fields.maxFund
-    )
+    const projectsWithoutFunding = proposals.filter((x) => !x.isFunded())
     if (projectsWithoutFunding.length === 0) break
     const sumWeights = projectsWithoutFunding.reduce(
       (a, b) => a + b.fields.weight,
@@ -154,19 +157,19 @@ const calculateWinningProposalsForEarmark = (
     let funded = 0
     proposals.map((x) => {
       if (
-        x.fields.weight * multiplierOcean + x.fields.funded >=
+        x.fields.weight * multiplierOcean + x.fundAmount() >=
           x.fields.maxFund &&
-        x.fields.funded !== x.fields.maxFund
+        !x.isFunded()
       ) {
-        x.fields.funded = x.fields.maxFund
+        x.fields.funded = x.fields.maxFund - x.fields.totalFund
         funded++
       }
     })
-    if (!proposals.some((x) => x.fields.funded !== x.fields.maxFund)) break // If all projects are funded, break && jit, this might be redundant
+    if (!proposals.some((x) => !x.isFunded())) break // If all projects are funded, break && jit, this might be redundant
     if (funded === 0) {
       // One last time
       const projectsWithoutFundingAndNotGranted = proposals.filter(
-        (x) => x.fields.funded !== x.fields.maxFund
+        (x) => !x.isFunded()
       )
 
       const sumWeights = projectsWithoutFundingAndNotGranted.reduce(
@@ -177,10 +180,10 @@ const calculateWinningProposalsForEarmark = (
       const multiplierOceanNew = (totalPool - fundedTillNow) / sumWeights
 
       proposals.map((x) => {
-        if (x.fields.funded !== x.fields.maxFund) {
+        if (!x.isFunded()) {
           x.fields.funded = Math.min(
-            x.fields.maxFund,
-            x.fields.weight * multiplierOceanNew + x.fields.funded
+            x.fields.maxFund - x.fields.totalFund,
+            x.fields.weight * multiplierOceanNew + x.fundAmount()
           )
         }
       })
@@ -188,28 +191,30 @@ const calculateWinningProposalsForEarmark = (
     }
   }
 
-  const winningProposals = proposals.filter(
-    (x) => x.fields.funded === x.fields.maxFund
-  )
+  const winningProposals = proposals.filter((x) => x.isFunded())
+
+  const fundsLeft =
+    totalPool - proposals.reduce((a, b) => a + b.fields.funded, 0)
+
   for (const p of proposals) {
     p.fields['USD Requested'] = p.get('USD Requested')
     p.fields['OCEAN Requested'] = p.get('USD Requested') / oceanPrice
     if (basisCurrency === 'USD') {
-      p.fields['USD Granted'] = p.fields.funded
-      p.fields['OCEAN Granted'] = p.fields.funded / oceanPrice
+      p.fields['USD Granted'] = p.fundAmount()
+      p.fields['OCEAN Granted'] = p.fundAmount() / oceanPrice
     } else {
-      p.fields['USD Granted'] = p.fields.funded * oceanPrice
-      p.fields['OCEAN Granted'] = p.fields.funded
+      p.fields['USD Granted'] = p.fundAmount() * oceanPrice
+      p.fields['OCEAN Granted'] = p.fundAmount()
     }
     p.fields['Proposal State'] = 'Granted'
 
     delete p.fields.funded
     delete p.fields.weight
     delete p.fields.maxFund
+    delete p.fields.totalFund
+    delete p.isFunded
+    delete p.fundAmount
   }
-
-  const fundsLeft =
-    totalPool - proposals.reduce((a, b) => a + b.fields['OCEAN Granted'], 0)
 
   return {
     winningProposals: winningProposals,
@@ -350,14 +355,6 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       (x) =>
         proposalsNeverGonnaBeFunded.map((z) => z.id).includes(x.id) === false
     )
-
-    proposals.forEach((proposal) => {
-      proposal.fields['USD Granted'] = 0
-      proposal.fields['OCEAN Granted'] = 0
-      proposal.fields['Proposal State'] = 'Not Granted'
-    })
-
-    return calculateWinningAllProposals(proposals, fundingRound, oceanPrice)
   } else {
     console.log('Dropping:', proposalLostWithLeastVotes.get('Project Name'))
     proposalLostWithLeastVotes.fields['USD Granted'] = 0
@@ -365,13 +362,13 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
     proposalLostWithLeastVotes.fields['Proposal State'] = 'Not Granted'
 
     proposals = proposals.filter((x) => x.id !== proposalLostWithLeastVotes.id)
-    proposals.forEach((proposal) => {
-      proposal.fields['USD Granted'] = 0
-      proposal.fields['OCEAN Granted'] = 0
-      proposal.fields['Proposal State'] = 'Not Granted'
-    })
-    return calculateWinningAllProposals(proposals, fundingRound, oceanPrice)
   }
+  proposals.forEach((proposal) => {
+    proposal.fields['USD Granted'] = 0
+    proposal.fields['OCEAN Granted'] = 0
+    proposal.fields['Proposal State'] = 'Not Granted'
+  })
+  return calculateWinningAllProposals(proposals, fundingRound, oceanPrice)
 }
 
 const calculateFinalResults = (proposals, fundingRound) => {
