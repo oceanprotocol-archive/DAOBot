@@ -7,7 +7,11 @@ Cron('0 */5 * * * *', async () => {
   updating = true
 
   console.log('updating.')
-  await updateFundingRound()
+  try {
+    await updateFundingRound()
+  } catch (err) {
+    console.error('An error occurred while updating funding rounds:', err)
+  }
   updating = false
 })
 
