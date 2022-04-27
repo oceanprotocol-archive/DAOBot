@@ -136,9 +136,9 @@ const calculateWinningProposalsForEarmark = (
     x.fields.funded = 0
 
     x.fields.totalFund =
-      x.get('Basis Currency') === 'USD'
+      (x.get('Basis Currency') === 'USD'
         ? x.get('USD Granted')
-        : x.get('OCEAN Granted') ?? 0
+        : x.get('OCEAN Granted')) ?? 0
 
     x.isFunded = () => x.fields.maxFund === x.fields.totalFund + x.fields.funded
     x.fundAmount = () => x.fields.funded + x.fields.totalFund
