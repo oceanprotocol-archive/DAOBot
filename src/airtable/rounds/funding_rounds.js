@@ -222,10 +222,14 @@ const calculateWinningProposalsForEarmark = (
     delete p.fundAmount
   }
 
+  const fundsLeftUsd =
+    basisCurrency === 'USD' ? fundsLeft : fundsLeft * oceanPrice
+  const fundsLeftOcean =
+    basisCurrency === 'USD' ? fundsLeft / oceanPrice : fundsLeft
   return {
     winningProposals: winningProposals,
-    fundsLeft: fundsLeft * oceanPrice,
-    fundsLeftOcean: fundsLeft
+    fundsLeft: fundsLeftUsd,
+    fundsLeftOcean: fundsLeftOcean
   }
 }
 // Top level function
