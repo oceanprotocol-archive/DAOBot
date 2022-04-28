@@ -531,7 +531,6 @@ describe('Calculating Winners', function () {
       fundingRound,
       oceanPrice
     )
-    console.log(earmarkedResults)
     should.equal(earmarkedResults[Earmarks.GRANT_2ND3RD].winningProposals.length, 2)
     should.equal(earmarkedResults[Earmarks.GRANT_2ND3RD].fundsLeft, 0)
     should.equal(earmarkedResults.winningProposals.length, 2)
