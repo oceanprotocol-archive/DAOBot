@@ -403,7 +403,7 @@ describe('Calculating Winners', function () {
     const oceanPrice = fundingRound.get('OCEAN Price')
     fundingRound.fields['Basis Token'] = 'OCEAN'
     fundingRound.fields['Funds Left'] = 'Recycle'
-    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":4000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
 
     const basisToken = fundingRound.fields['Basis Token']
     const newEarmarks = await completeEarstructuresValues(
@@ -432,6 +432,12 @@ describe('Calculating Winners', function () {
     allProposals[4].fields.Earmarks = Earmarks.CORE_TECH
     allProposals[5].fields['USD Granted'] = 2000
 
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[9].fields['USD Requested'] = 2500
+
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields['USD Requested'] = 2500
+
     // filter all proposals that have Earmarks
     const proposalsWithEarmark = allProposals.filter(
       (p) => p.get('Earmarks') !== undefined
@@ -443,7 +449,7 @@ describe('Calculating Winners', function () {
       fundingRound,
       oceanPrice
     )
-    should.equal(earmarkedResults.winningProposals.length, 5)
+    should.equal(earmarkedResults.winningProposals.length, 7)
   })
 
   it('Check if funds left from earmaks are burned if burn switch selected', async function () {
@@ -491,5 +497,43 @@ describe('Calculating Winners', function () {
       oceanPrice
     )
     should.equal(earmarkedResults.winningProposals.length, 1)
+  })
+
+  it('Check if funds from earmarks are recycled into General if recycle switch selected', async function () {
+    const oceanPrice = fundingRound.get('OCEAN Price')
+    fundingRound.fields['Basis Token'] = 'OCEAN'
+    fundingRound.fields['Funds Left'] = 'Recycle'
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":10000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
+
+    const basisToken = fundingRound.fields['Basis Token']
+    const newEarmarks = await completeEarstructuresValues(
+      fundingRound,
+      oceanPrice,
+      basisToken
+    )
+    fundingRound.fields.Earmarks = JSON.stringify(newEarmarks)
+
+    // set earmarks for proposals and add USD Granted
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[9].fields['USD Requested'] = 2500
+
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields['USD Requested'] = 2500
+
+    // filter all proposals that have Earmarks
+    const proposalsWithEarmark = allProposals.filter(
+      (p) => p.get('Earmarks') !== undefined
+    )
+
+    // calculate and get all winning proposals
+    const earmarkedResults = calculateWinningAllProposals(
+      proposalsWithEarmark,
+      fundingRound,
+      oceanPrice
+    )
+    console.log(earmarkedResults)
+    should.equal(earmarkedResults[Earmarks.GRANT_2ND3RD].winningProposals.length, 2)
+    should.equal(earmarkedResults[Earmarks.GRANT_2ND3RD].fundsLeft, 0)
+    should.equal(earmarkedResults.winningProposals.length, 2)
   })
 })
