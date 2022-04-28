@@ -27,7 +27,7 @@ beforeEach(async function () {
         'Voting Starts': 'July 8, 2021 23:59',
         'Voting Ends': 'July 12, 2021 23:59',
         'Earmark Percentage': 0.35,
-        Earmarks: `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":10000, "USD":8000}`,
+        Earmarks: `{"${Earmarks.GENERAL}":{"OCEAN":30000, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":48000}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":16000, "USD":8000}}`,
         'Funding Available': 400000,
         'Funding Available USD': 275000
       },
@@ -84,7 +84,7 @@ beforeEach(async function () {
         'Voting Ends': 'November 8, 2021 23:59',
         'Earmark Percentage': 0.35,
         Earmarked: 140000,
-        Earmarks: `{"${Earmarks.NEW_GENERAL}":{"OCEAN":30000, "USD":15000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":20000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":25000}}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":10000, "USD":8000}`,
+        Earmarks: `{"${Earmarks.GENERAL}":{"OCEAN":30000, "USD":15000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":20000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":25000}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":16000, "USD":8000}}`,
         'Funding Available': 500000,
         'OCEAN Price': 1.06,
         'Funding Available USD': 530000,
@@ -167,6 +167,7 @@ describe('Airtable test', () => {
 
     const oceanPrice = round11.get('OCEAN Price')
     const fundingAvailable = round11.get('Funding Available')
+    console.log(roundEarmark)
     const earmarks = JSON.parse(roundEarmark)
 
     const fundingAvailableUSD = fundingAvailable * oceanPrice
