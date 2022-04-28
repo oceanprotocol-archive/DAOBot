@@ -316,7 +316,7 @@ describe('Calculating Winners', function () {
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.resultsByEarmark.winningProposals.length, 4)
+    should.equal(finalResults.resultsByEarmark.winningProposals.length, 6)
     should.equal(finalResults.partiallyFunded.length, 2)
     should.equal(finalResults.notFunded.length, 0)
 
@@ -355,7 +355,7 @@ describe('Calculating Winners', function () {
 
     Logger.log(earmarkedUSDGranted, partialUSDGranted)
 
-    should.equal(earmarkedUSDGranted + partialUSDGranted, 40000)
+    should.equal(earmarkedUSDGranted + partialUSDGranted, 42500)
   })
 
   it('Validates gsheet output is correct.', async function () {

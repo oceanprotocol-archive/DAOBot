@@ -101,7 +101,6 @@ describe('Creating project summaries', () => {
       'RecordId',
       'Project Name',
       'Proposal Standing',
-      'OCEAN Granted',
       'Voted Yes',
       'Voted No',
       'UUID'
