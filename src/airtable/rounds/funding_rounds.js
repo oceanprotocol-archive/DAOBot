@@ -14,7 +14,8 @@ const Earmarks = {
   NEW_OUTREACH: 'New Outreach',
   NEW_ENTRANTS: 'New Entrants',
   CORE_TECH: 'Core Tech',
-  GENERAL: 'General'
+  GENERAL: 'General',
+  GRANT_2ND3RD: '2nd/3rd Grant'
 }
 
 const getFundingRound = async (roundNum) => {
