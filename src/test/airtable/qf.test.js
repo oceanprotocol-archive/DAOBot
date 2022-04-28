@@ -20,7 +20,6 @@ const data = {
   14: require('./qf_data/round14'),
   15: require('./qf_data/round15')
 }
-let rnd = 14
 
 beforeEach(async function () {})
 
@@ -55,7 +54,7 @@ describe('Compare QF Results', () => {
     clearFundedRecords(allProposals)
     winningProposals = getWinningProposals(allProposals, 14)
     finalResults = calculateFinalResults(winningProposals, fundingRound)
-    describe(`Calculating Winners for round ${rnd}`, function () {
+    describe(`Calculating Winners for round ${rn}`, function () {
       it('Check if earmark is setup', async function () {
         // from Airtable
         const tokenPrice = fundingRound.fields['OCEAN Price']
