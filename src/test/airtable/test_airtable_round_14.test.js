@@ -98,7 +98,8 @@ beforeEach(async function () {
         Earmarks: proposal[1],
         'USD Requested': proposal[2],
         'Voted Yes': proposal[3],
-        'Voted No': proposal[4]
+        'Voted No': proposal[4],
+        'Minimum USD Requested': 0
       },
       get: function (key) {
         return this.fields[key]
@@ -138,6 +139,6 @@ describe('Calculating Winners', function () {
       finalResults.resultsByEarmark.usdEarmarked /
       fundingRound.get('OCEAN Price')
 
-    totalOceanGranted.should.equal(200000)
+    Math.round(totalOceanGranted).should.equal(200000)
   })
 })
