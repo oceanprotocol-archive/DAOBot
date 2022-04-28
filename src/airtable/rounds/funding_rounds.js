@@ -246,7 +246,6 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   let fundsLeftOcean = 0 // cache - tracks how much funds are left over to be burned/assigned to general
   let fundsRecycled = 0 // summary - total funds recycled
   let fundsRecycledOcean = 0 // summary - total funds recycled
-  let usdEarmarked = 0 // summary - total usd consumed by earmarks
 
   // iterate over all earmerks
   for (const earmark in earmarksJson) {
@@ -283,7 +282,6 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
 
     // if we don't have any proposals inside of this earmark
     if (earmarkProposals.length === 0) {
-      usdEarmarked += currentUsdEarmarked //
       fundsLeft += earmarksJson[earmark].USD
       fundsLeftOcean += earmarksJson[earmark].USD / oceanPrice
       fundsRecycled += earmarksJson[earmark].USD
@@ -309,7 +307,6 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
       fundsLeftOcean += winningProposals.fundsLeftOcean
       fundsRecycled += winningProposals.fundsLeft
       fundsRecycledOcean += winningProposals.fundsLeftOcean
-      usdEarmarked += currentUsdEarmarked - winningProposals.fundsLeft
       winningProposals.winningProposals
         .map((x) => x.id)
         .forEach((proposalId) => {
