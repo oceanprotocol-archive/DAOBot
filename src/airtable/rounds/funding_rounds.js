@@ -319,7 +319,10 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
   }
 
   resultsByEarmark.winnerIds = earmarkedWinnerIds
-  resultsByEarmark.usdEarmarked = usdEarmarked
+  resultsByEarmark.usdEarmarked = proposals.reduce(
+    (a, b) => a + b.get('USD Granted'),
+    0
+  )
   resultsByEarmark.earmarks = earmarks
   resultsByEarmark.winningProposals = allWinningProposals
   resultsByEarmark.fundsLeft = fundsLeft
