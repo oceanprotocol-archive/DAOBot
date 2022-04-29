@@ -3,40 +3,54 @@ const { bufferToHex } = require('ethereumjs-util')
 const { version } = require('@snapshot-labs/snapshot.js/src/constants.json')
 const fetch = require('cross-fetch')
 const snapshot = require('@snapshot-labs/snapshot.js')
-const { web3 } = require('../functions/web3')
-
+const { ethers } = require('ethers')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
 const network = '1'
 const provider = snapshot.utils.getProvider(network)
 const Logger = require('../utils/logger')
-
+const INFURA_API_KEY = process.env.INFURA_API_KEY || 'your_key_here'
 // Consts
 const OCEAN_ERC20_0x = '0x967da4048cD07aB37855c090aAF366e4ce1b9F48'
+const OCEAN_Polygon_0x = '0x282d8efCe846A88B159800bd4130ad77443Fa1A1'
+const OCEAN_BSC_0x = '0xdce07662ca8ebc241316a15b611c89711414dd1a'
+const networks = [
+  {
+    address: OCEAN_ERC20_0x,
+    provider: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`
+  },
+  {
+    address: OCEAN_Polygon_0x,
+    provider: process.env.POLYGON_RPC_URL || `https://polygon-rpc.com`
+  },
+  {
+    address: OCEAN_BSC_0x,
+    provider: process.env.BSC_RPC_URL || `https://bsc-dataseed.binance.org/`
+  }
+]
+
 const OCEAN_ERC20_ABI = require('../utils/oceanERC20ABI.json')
 const MIN_OCEAN_REQUIRED = 500.0
-const oceanContract = new web3.eth.Contract(OCEAN_ERC20_ABI.abi, OCEAN_ERC20_0x)
 
 const getWalletBalance = async (wallet0x) => {
-  let balance = 0
+  const balances = []
 
-  if (wallet0x) {
-    balance = await oceanContract.methods.balanceOf(wallet0x).call()
-    // Adjust for 18 decimals
-    balance /= 10 ** 18
+  for (const network of networks) {
+    const provider = new ethers.providers.JsonRpcProvider(network.provider)
+    const contract = new ethers.Contract(
+      network.address,
+      OCEAN_ERC20_ABI.abi,
+      provider
+    )
+    const balance = await contract.balanceOf(wallet0x)
+    balances.push(parseInt(ethers.utils.formatEther(balance)))
   }
 
-  return balance
+  return Math.max(...balances)
 }
 
 const hasEnoughOceans = async (wallet_address) => {
   if (!wallet_address) return false
-  let balance = 0
-  try {
-    balance = await getWalletBalance(wallet_address)
-  } catch (error) {
-    Logger.error(error)
-    return false
-  }
+  const balance = await getWalletBalance(wallet_address)
   return balance >= MIN_OCEAN_REQUIRED
 }
 
@@ -419,7 +433,7 @@ const getProposalVotesGQL = async (ipfsHash) => {
   // So we need to transform that 1e+41 into a natural number
   // to correcly calculate the votes count and the sum of allocated tokens
   const result = await response.json()
-  for (const [, vote] of Object.entries(result.data.votes)) {
+  for (const [, vote] of Object.entries(result.data?.votes)) {
     for (const [choiceIndex, voteCount] of Object.entries(vote.choice)) {
       if (voteCount === 1e41) vote.choice[choiceIndex] = 1
     }

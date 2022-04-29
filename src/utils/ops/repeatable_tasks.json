@@ -8,13 +8,13 @@
   {
     "title": "R{{ROUND_NUMBER}} [Params-Roadmap WG] Prepare Round - Add new round line inside airtable ",
     "body": "- Add the new round inside airtable and fill in the following fields\n - [ ] Round number\n - [ ] Vote Type\n - [ ] Ballot type\n - [ ] Start date\n - [ ] Proposal Due By\n - [ ] Voting Starts\n - [ ] Voting Ends\n - [ ] Funding Deadline\n - [ ] Basis Currency",
-    "assignees": ["idiom-bytes"],
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS", "Parameters-Roadmap WG"]
   },
   {
     "title": "R{{ROUND_NUMBER}} Townhalls setup",
-    "body": "- [ ] Create TownHall round {{ROUND_NUMBER}} events\n- [ ] Create TownHall presentations inside of drive\n- [ ] Share TH presentation internally ahead of time for others to edit\n - [ ] Share TH \"event happening in the next 1 hour\" internally + with community ahead of time\n- [ ] Update TownHall page with round {{ROUND_NUMBER}} events\n - [ ] Update TownHall page with the presentation\n - [ ] Update TownHall page with the recording once it's available to be shared",
-    "assignees": ["idiom-bytes"],
+    "body": "- [ ] Create TownHall round {{ROUND_NUMBER}} [events](https://github.com/oceanprotocol/oceandao/wiki/OceanDAO-Town-Hall)\n- [ ] Create TownHall presentations inside of drive\n- [ ] Share weekly TH presentation internally + with community ahead of time, for others to edit\n- [ ] Update TH presentations to be contextual to the Round {{ROUND_NUMBER}} Ops - Starting, Completing, Winners, Etc...\n- [ ] Create TownHall event inside Discord Events.\n- [ ] Share TH \"event happening in the next 1 hour\" internally + with community ahead of time\n- [ ] Record Town Hall.\n- [ ] Update TownHall page with round 16 events\n- [ ] Update TownHall page with the presentation\n- [ ] Update TownHall page with recording once it's available to be shared",
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS"]
   },
   {
@@ -26,61 +26,61 @@
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Setup Airtable Views",
     "body": "**Setup round [airtable](https://airtable.com/appVer8ccYGnqSm2H/tbls5o7pVfAUU39eX/viwzRZT1hkcoJC5gF?blocks=hide) views**\n- [ ]  Round {{ROUND_NUMBER}} All Proposals\n- [ ] Round {{ROUND_NUMBER}} General\n- [ ] Round {{ROUND_NUMBER}} Overview\n- [ ] Round {{ROUND_NUMBER}} Core Tech\n- [ ] Round {{ROUND_NUMBER}} New General\n- [ ] Round {{ROUND_NUMBER}} New Outreach",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Notion Pages",
     "body": "**Setup round [Notion](https://www.notion.so/oceandao/Funding-Rounds-700b73d066e946558828d5c919d4f201) pages**\n- [ ] Round {{ROUND_NUMBER}} proposals page\n- [ ] Round {{ROUND_NUMBER}} votes page",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Site",
     "body": "**Update [site](oceanprotocol.com/dao) with**:\n - [ ] Proposals submissions deadline: {{ROUND_PROPOSALS_END_DATE}}\n- [ ] Round {{ROUND_NUMBER}} funding available\n- [ ] Voting period : {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}\n - [ ] Merge & deploy the PR",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Prepare Round - Google Schedule",
     "body": "**Add round events in the [cean Ecosystem Calendar](https://oceandao.notion.site/Ocean-Ecosystem-Calendar-4cefa1944a314128afd2ae0ea1a04eb6)**\n- [ ] OceanDAO - GR{{ROUND_NUMBER}}\n - Period: {{ROUND_PROPOSALS_START_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n - Description: Link to [port round]({{ROUND_PORT_LINK}})\n - [ ] R{{ROUND_NUMBER}} Last Week to Submit\n- Period: {{ROUND_PROPOSALS_LAST_WEEK_DATE}} - {{ROUND_PROPOSALS_END_DATE}}\n- Description: Get your proposal submissions in place!  https://oceanprotocol.com/dao\n- [ ] R{{ROUND_NUMBER}} Due Dilligence\n- Period: {{ROUND_PROPOSALS_END_DATE}} - {{ROUND_VOTING_START_DATE}}\n- [ ] R{{ROUND_NUMBER}} Voting Period\n- Period: {{ROUND_VOTING_START_DATE}} - {{ROUND_VOTING_END_DATE}}\n- Description: Cast your vote - link to the voting notion page.\n- [ ] R{{ROUND_NUMBER}} Last Day to Vote\n - Period: {{ROUND_VOTING_LAST_DAY_DATE}} - {{ROUND_VOTING_END_DATE}}\n - Description: Last day to get your votes in place!",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Communication",
     "body": "- [ ] Write a blog post for the new round",
-    "assignees": ["idiom-bytes"],
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS", "Type: MarCom"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Round - Port & Wiki",
     "body": "How to open port [video](https://drive.google.com/file/d/1RNa0Sd9tQsN7UqOaMkuELyWIs-ZL8ksu/view?usp=sharing)\n - [ ] Create Port round {{ROUND_NUMBER}} category\n- [ ] Port goes live\n- [ ] Update [wiki](https://github.com/oceanprotocol/oceandao/wiki) with round details\n - Add round parameters\n - Port: {{ROUND_PORT_LINK}}\n- Funding tiers\n- [Important Links](https://github.com/oceanprotocol/oceandao/wiki#important-links) with round notion pages and the calendar",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} Proposals Submissions - Live-OPS",
     "body": "How to do the live-ops [video](https://drive.google.com/file/d/1dtv3eb6MGU5gwrQpz7nAuRLvaqTqn_T-/view?usp=sharing)\n - [ ] Review Port for new proposals\n- [ ] Add proposals to Airtable\n- [ ] Make sure every project provided all required informations and it's properly registered\n - [ ] Check up on projects that do not have sufficient OCEAN.\n- [ ] Provide proposal summaries to MarCom for tweets.",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} Proposals Updates - Live-OPS",
     "body": "- [ ] Review port for proposal updates\n - [ ] Update proposals deliverable checklist inside airtable",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Deploy Vote - Notion Voting Page",
     "body": "- [ ] Integrate GSheet for Round {{ROUND_NUMBER}} in the Notion Voting Page",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["KatunaNorbert"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Submission Deadline - Port",
     "body": "- [ ] Close Port",
-    "assignees": ["AnaLoznianu"],
+    "assignees": ["idiom-bytes"],
     "labels": ["Type: Dev", "Type: OPS"]
   },
   {
@@ -92,7 +92,7 @@
   {
     "title": "R{{ROUND_NUMBER}} [OceanDAO Eng WG] Conclusions - Communication",
     "body": "- [ ] Write a blog post summarizing results/winners",
-    "assignees": ["idiom-bytes"],
+    "assignees": ["idiom-bytes", "malvonme"],
     "labels": ["Type: OPS", "Type: MarCom"]
   }
 ]

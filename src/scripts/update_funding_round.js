@@ -240,6 +240,12 @@ const main = async () => {
       ]
     }
 
+      try {
+        await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+      } catch (err) {
+        Logger.error(`Error syncing GSheets Active Proposal Votes: ${err}`)
+      }
+
       // Enter Due Diligence period
       calculateWinningProposalsForEarmark(
         allProposals,
@@ -298,7 +304,11 @@ const main = async () => {
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
 
       // TODO - Clean up results & gsheets
-      // await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+      try {
+        await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
+      } catch (err) {
+        Logger.error(`Error syncing GSheets Active Proposal Votes: ${err}`)
+      }
     }
   }
 }

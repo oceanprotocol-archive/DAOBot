@@ -16,7 +16,15 @@ const {
 const processAirtableProposalStandings = async (curRoundNumber) => {
   // Step 1 - Identify all proposal standings
   const allProposals = await getAllRoundProposals(curRoundNumber - 1)
-  const proposalStandings = await processProposalStandings(allProposals)
+  const proposalStandings = await processProposalStandings(
+    allProposals,
+    [],
+    curRoundNumber
+  )
+  Logger.log(
+    '\n======== Proposal Standings Found\n',
+    JSON.stringify(proposalStandings)
+  )
 
   // Step 2 - Resolve & Report standings
   await processHistoricalStandings(proposalStandings)
@@ -38,7 +46,8 @@ const processAirtableProposalStandings = async (curRoundNumber) => {
   )
   const currentProposalStandings = await processProposalStandings(
     currentRoundProposals,
-    allProposals
+    allProposals,
+    curRoundNumber
   )
   await updateCurrentRoundStandings(
     currentProposalStandings,

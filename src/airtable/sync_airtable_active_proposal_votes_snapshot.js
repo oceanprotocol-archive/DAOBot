@@ -24,7 +24,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
   const proposalScores = {}
 
   const activeProposals = await getProposalsSelectQuery(
-    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), "true")`
+    `AND({Round} = "${curRoundNumber}", NOT({Proposal State} = "Rejected"), NOT({Proposal State} = "Withdrawn"), "true")`
   )
 
   await Promise.all(
@@ -34,7 +34,7 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
         const strategy = getVoteCountStrategy(proposal.get('Round'))
 
         await getProposalVotesGQL(ipfsHash).then((result) => {
-          proposalVotes[ipfsHash] = result.data.votes
+          proposalVotes[ipfsHash] = result.data?.votes
         })
         const voters = []
         for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
