@@ -142,6 +142,7 @@ const newFundingRounds = [
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0},\n\"General\": {\"OCEAN\": 90000,\"USD\": 0}\n}",
       "Proposals Granted": 9,
       "Funding Available": 90000,
+      "Round State": 90000,
       "Start Date": addDaysToDate(0),
       "Proposals Due By": addDaysToDate(2),
       "Voting Starts": addDaysToDate(4),
@@ -192,13 +193,23 @@ describe('Start Funding Round', function () {
   it('Removes all funding rounds and creates new ones', async function () {
     const fundingRounds = await getTableFields('Funding Rounds',"appe3NtI7wcUn7qqq",'Rounds')
     await deleteProposalRecords(fundingRounds, 'Funding Rounds')
+
+    //get funding round from specified table and sets it up for testing requirements
     const newImportedFundingRound = await getFundingRoundFromSpecificTable(15, 'appeszr4DVj3R9IbF')
-    newFundingRounds[0]={'fields':{...newImportedFundingRound.fields}}
-    newFundingRounds[1].fields['Round'] = (parseInt(newImportedFundingRound.fields['Round']) + 1).toString()
+    newImportedFundingRound.fields['Round State'] = undefined
+    newImportedFundingRound.fields['Start Date'] = await subtractsDaysFromDate(1)
+    newImportedFundingRound.fields['Proposals Due By'] = await addDaysToDate(2)
+    newImportedFundingRound.fields['Voting Starts'] = await addDaysToDate(3)
+    newImportedFundingRound.fields['Voting Ends'] = await addDaysToDate(4)
+    newFundingRounds[1]={'fields':{...newImportedFundingRound.fields}}
+
+    //configure previous round parameters
+    newFundingRounds[0].fields['Round'] = (parseInt(newImportedFundingRound.fields['Round']) - 1).toString()
+    newFundingRounds[0].fields['Name'] = 'Round ' + (parseInt(newImportedFundingRound.fields['Round']) - 1).toString()
     await addRecordsToAirtable(newFundingRounds,'Funding Rounds')
   })
 
-  /*it('Tests that last round is finnished and next round is started', async function (){
+  it('Tests that last round is finnished and next round is started', async function (){
     await main()
     const curRound = await getCurrentRound()
     should.equal(curRound.fields['Round State'],RoundState.Started)
@@ -220,7 +231,7 @@ describe('Start Funding Round', function () {
     should.equal(curRound.fields['Round State'],RoundState.DueDiligence)
   })
 
-  it('Tests that current round is going into Voting state', async function (){
+  /*it('Tests that current round is going into Voting state', async function (){
     curRound = await getCurrentRound()
     const roundUpdate = {records: [
       {

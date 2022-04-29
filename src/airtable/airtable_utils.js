@@ -208,11 +208,9 @@ const addRecordsToAirtable = async(records, tableName) => {
   )
     .then((res) => {
       Logger.log('Response from Airtable: ', res.status)
-      console.log(res)
     })
     .catch((err) => {
       Logger.error(err)
-      console.log(err)
     }) 
 }
 
