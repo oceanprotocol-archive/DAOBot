@@ -165,15 +165,28 @@ describe('Start Funding Round', function () {
     const proposals = await getTableFields('Proposals',"appe3NtI7wcUn7qqq",'All Proposals')
     await deleteProposalRecords(proposals, 'Proposals')
     const newProposals = await getProposalsSelectQueryFromBaseId(
-      `{Round} = 15`, "appzTwkdC3NEVEdXk"
+      `{Round} = 15`, "appeszr4DVj3R9IbF"
     )
     let newProposalsFormated = []
+    var index = 0;
+    // TO DO: Fix all the fileds that are set to undefined
     newProposals.forEach((record) => {
-      record.RecordId = undefined
-      const formatedProposal = {
-        'fields':record.fields
-      }
+      if(index>=10) return
+      record.fields['Funding Date'] = undefined
+      record.fields['Created Date'] = undefined
+      record.fields['RecordId'] = undefined
+      record.fields['UUID'] = undefined
+      record.fields['Grant Deliverables'] = ''
+      record.fields['Deliverable Checklist'] = ''
+      record.fields['Last Deliverable Update'] = undefined
+
+      //This changes are optional
+      record.fields['Proposal Standing'] = undefined
+      record.fields['Proposal State'] = undefined
+
+      const formatedProposal = {'fields': {...record.fields}}
       newProposalsFormated.push(formatedProposal)
+      ++index
     })
     console.log(newProposalsFormated)
     await addRecordsToAirtable(newProposalsFormated,'Proposals')
