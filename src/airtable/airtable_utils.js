@@ -10,6 +10,20 @@ const splitArr = (arr, chunk) => {
   return arrSplit
 }
 
+const getRoundsSelectQueryByBase = async (selectQuery, AirtableBaseId) => {
+  const newBase = require('airtable').base(AirtableBaseId)
+  try {
+    return await newBase('Funding Rounds')
+      .select({
+        view: 'Rounds',
+        filterByFormula: selectQuery
+      })
+      .firstPage()
+  } catch (err) {
+    Logger.error(err)
+  }
+}
+
 const getRoundsSelectQuery = async (selectQuery) => {
   try {
     return await base('Funding Rounds')
@@ -212,5 +226,6 @@ module.exports = {
   getProposals,
   addRecordsToAirtable,
   getTableFields,
-  getProposalsSelectQueryFromBaseId
+  getProposalsSelectQueryFromBaseId,
+  getRoundsSelectQueryByBase
 }

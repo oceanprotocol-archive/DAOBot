@@ -8,6 +8,7 @@ const should = require('chai').should()
 const {
   RoundState,
   getCurrentRound,
+  getFundingRoundFromSpecificTable
 } = require('../../airtable/rounds/funding_rounds')
 
 const {
@@ -32,14 +33,12 @@ const { expect } = require('chai')
 function addDaysToDate(days){
   var res = new Date();
   res.setDate(res.getDate() + days);
-  console.log(res.toISOString())
   return res.toISOString();
 }
 
 function subtractsDaysFromDate(days){
   var res = new Date();
   res.setDate(res.getDate() - days);
-  console.log(res.toISOString())
   return res.toISOString();
 }
 
@@ -119,7 +118,7 @@ function subtractsDaysFromDate(days){
 const newFundingRounds = [
   {
     "fields": {
-      "Name": "Round 15",
+      "Name": "Round 1",
       "Max Grant": 13000,
       "Earmarks": "{\n\"New Entrants\":{\"OCEAN\":0,\"USD\":0}, \"General\": {\"OCEAN\": 65000,\"USD\": 0}\n}",
       "Proposals Granted": 5,
@@ -176,25 +175,26 @@ describe('Start Funding Round', function () {
       record.fields['Created Date'] = undefined
       record.fields['RecordId'] = undefined
       record.fields['UUID'] = undefined
-      record.fields['Grant Deliverables'] = ''
-      record.fields['Deliverable Checklist'] = ''
       record.fields['Last Deliverable Update'] = undefined
 
       //This changes are optional
       record.fields['Proposal Standing'] = undefined
       record.fields['Proposal State'] = undefined
+      record.fields['Basis Currency'] = 'USD'
 
       const formatedProposal = {'fields': {...record.fields}}
       newProposalsFormated.push(formatedProposal)
       ++index
     })
-    console.log(newProposalsFormated)
     await addRecordsToAirtable(newProposalsFormated,'Proposals')
   })
 
   it('Removes all funding rounds and creates new ones', async function () {
     const fundingRounds = await getTableFields('Funding Rounds',"appe3NtI7wcUn7qqq",'Rounds')
     await deleteProposalRecords(fundingRounds, 'Funding Rounds')
+    const newImportedFundingRound = await getFundingRoundFromSpecificTable(15, 'appeszr4DVj3R9IbF')
+    newFundingRounds[0]={'fields':{...newImportedFundingRound.fields}}
+    newFundingRounds[1].fields['Round'] = (parseInt(newImportedFundingRound.fields['Round']) + 1).toString()
     await addRecordsToAirtable(newFundingRounds,'Funding Rounds')
   })
 

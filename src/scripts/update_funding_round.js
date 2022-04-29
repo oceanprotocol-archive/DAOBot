@@ -60,6 +60,7 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 // DONE - Kickoff new round
 // DONE - Update existing round
 const main = async () => {
+  console.log(process.env.AIRTABLE_BASEID)
   const curRound = await getCurrentRound()
   let curRoundNumber
   let curRoundState
