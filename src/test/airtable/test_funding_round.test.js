@@ -182,6 +182,7 @@ describe('Start Funding Round', function () {
       record.fields['Proposal Standing'] = undefined
       record.fields['Proposal State'] = undefined
       record.fields['Basis Currency'] = 'USD'
+      record.fields['Round'] = undefined
 
       const formatedProposal = {'fields': {...record.fields}}
       newProposalsFormated.push(formatedProposal)
