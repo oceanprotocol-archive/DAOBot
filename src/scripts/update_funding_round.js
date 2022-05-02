@@ -105,8 +105,6 @@ const main = async () => {
     lastRoundBallotType = lastRound.get('Ballot Type')
   }
 
-  console.log(process.env.AIRTABLE_BASEID)
-  console.log(curRound)
   const now = moment().utc().toISOString()
 
   if (curRoundState === undefined) {

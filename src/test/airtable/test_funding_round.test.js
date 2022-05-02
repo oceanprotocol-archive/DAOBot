@@ -20,10 +20,6 @@ const {
 } = require('../../airtable/airtable_utils')
 const main = require('../../scripts/update_funding_round')
 
-beforeEach(() => {
-  process.env.AIRTABLE_BASEID = 'appe3NtI7wcUn7qqq'
-})
-
 function addDaysToDate(days) {
   var res = new Date()
   res.setDate(res.getDate() + days)
@@ -42,7 +38,7 @@ const newFundingRounds = [
       Name: 'Round 1',
       'Max Grant': 13000,
       Earmarks:
-        '{\n"New Entrants":{"OCEAN":0,"USD":0}, "General": {"OCEAN: 65000,"USD": 0}\n}',
+        '{"New Entrants":{"OCEAN":28200,"USD":11977.828},"New Outreach":{"OCEAN":14100,"USD":5988.914},"Core Tech":{"OCEAN":35250,"USD":14972.285},"General":{"OCEAN":157450,"USD":66876.208}}',
       'Proposals Granted': 5,
       'Funding Available': 65000,
       'Start Date': '2021-12-10T23:59:00.000Z',
@@ -62,7 +58,7 @@ const newFundingRounds = [
       Name: 'Round 16',
       'OCEAN Price': 0.67,
       Earmarks:
-        '{\n"New Entrants":{"OCEAN":0,"USD":0},\n"General": {"OCEAN": 90000,"USD": 0}\n}',
+        '{"New Entrants":{"OCEAN":28200,"USD":11977.828},"New Outreach":{"OCEAN":14100,"USD":5988.914},"Core Tech":{"OCEAN":35250,"USD":14972.285},"General":{"OCEAN":157450,"USD":66876.208}}',
       'Proposals Granted': 9,
       'Funding Available': 90000,
       'Start Date': addDaysToDate(0),
