@@ -1,5 +1,8 @@
 const moment = require('moment')
-const { getRoundsSelectQuery, getRoundsSelectQueryByBase } = require('../airtable_utils')
+const {
+  getRoundsSelectQuery,
+  getRoundsSelectQueryByBase
+} = require('../airtable_utils')
 const Logger = require('../../utils/logger')
 
 // Let's track the state of various proposals
@@ -32,7 +35,8 @@ const getFundingRound = async (roundNum) => {
 const getFundingRoundFromSpecificTable = async (roundNum, AirtableBaseId) => {
   try {
     const roundParameters = await getRoundsSelectQueryByBase(
-      `{Round} = "${roundNum}"`, AirtableBaseId
+      `{Round} = "${roundNum}"`,
+      AirtableBaseId
     )
     return roundParameters[0]
   } catch (err) {
