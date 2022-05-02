@@ -224,12 +224,6 @@ const calculateWinningProposalsForEarmark = (
     }
     p.fields['Proposal State'] = 'Granted'
 
-    console.log(
-      `${p.get('Project Name')},${p.fields.funded * oceanPrice},${
-        p.fields.totalFund * oceanPrice
-      },${p.fields.maxFund * oceanPrice},${earmark}`
-    )
-
     delete p.fields.funded
     delete p.fields.weight
     delete p.fields.maxFund

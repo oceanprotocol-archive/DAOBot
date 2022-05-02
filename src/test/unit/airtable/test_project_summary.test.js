@@ -12,7 +12,7 @@ const {
   levels,
   remove,
   deleteAll
-} = require('../../airtable/project_summary.js')
+} = require('../../../airtable/project_summary.js')
 
 afterAll(() => {
   jest.clearAllTimers()

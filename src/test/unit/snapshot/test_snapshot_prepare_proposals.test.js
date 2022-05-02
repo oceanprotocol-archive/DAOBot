@@ -6,8 +6,8 @@ dotenv.config()
 
 const { expect } = require('chai')
 const should = require('chai').should()
-const { getCurrentRound } = require('../../airtable/rounds/funding_rounds')
-const { web3 } = require('../../functions/web3')
+const { getCurrentRound } = require('../../../airtable/rounds/funding_rounds')
+const { web3 } = require('../../../functions/web3')
 
 // Tests against Airtable against DB
 describe('Airtable test', () => {

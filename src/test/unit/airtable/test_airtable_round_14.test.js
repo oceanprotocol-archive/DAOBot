@@ -9,7 +9,7 @@ const {
   getDownvotedProposals,
   calculateFinalResults,
   completeEarstructuresValues
-} = require('../../airtable/rounds/funding_rounds')
+} = require('../../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []

@@ -4,14 +4,14 @@ global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 const {
   clearFundedRecords
-} = require('../../airtable/process_airtable_funding_round_complete')
+} = require('../../../airtable/process_airtable_funding_round_complete')
 dotenv.config()
 const should = require('chai').should()
 const {
   getWinningProposals,
   calculateFinalResults,
   completeEarstructuresValues
-} = require('../../airtable/rounds/funding_rounds')
+} = require('../../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []

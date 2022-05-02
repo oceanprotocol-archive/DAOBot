@@ -11,18 +11,18 @@ const moment = require('moment')
 const {
   getRoundsSelectQuery,
   getProposalsSelectQuery
-} = require('../../airtable/airtable_utils')
-const { getCurrentRound } = require('../../airtable/rounds/funding_rounds')
+} = require('../../../airtable/airtable_utils')
+const { getCurrentRound } = require('../../../airtable/rounds/funding_rounds')
 const {
   processAirtableNewProposals
-} = require('../../airtable/process_airtable_new_proposals')
+} = require('../../../airtable/process_airtable_new_proposals')
 const {
   prepareProposalsForSnapshot
-} = require('../../snapshot/prepare_snapshot_received_proposals_airtable')
+} = require('../../../snapshot/prepare_snapshot_received_proposals_airtable')
 const {
   submitProposalsToSnaphotGranular
-} = require('../../snapshot/submit_snapshot_accepted_proposals_airtable')
-const { sleep } = require('../../functions/utils')
+} = require('../../../snapshot/submit_snapshot_accepted_proposals_airtable')
+const { sleep } = require('../../../functions/utils')
 
 // To run these tests, you should setup the DB beforehand
 // Requirement:
