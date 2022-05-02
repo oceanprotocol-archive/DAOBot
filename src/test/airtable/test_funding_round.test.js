@@ -232,7 +232,7 @@ describe('Start Funding Round', function () {
     should.equal(curRound.fields['Round State'],RoundState.DueDiligence)
   })
 
-  /*it('Tests that current round is going into Voting state', async function (){
+  it('Tests that current round is going into Voting state', async function (){
     curRound = await getCurrentRound()
     const roundUpdate = {records: [
       {
@@ -246,5 +246,5 @@ describe('Start Funding Round', function () {
     await main()
     curRound = await getCurrentRound()
     should.equal(curRound.fields['Round State'],RoundState.Voting)
-  })*/
+  })
 })
