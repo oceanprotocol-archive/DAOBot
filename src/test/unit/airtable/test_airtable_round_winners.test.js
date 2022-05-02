@@ -3,7 +3,7 @@
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
 dotenv.config()
-const Logger = require('../../utils/logger')
+const Logger = require('../../../utils/logger')
 
 const should = require('chai').should()
 const {
@@ -14,7 +14,7 @@ const {
   dumpResultsToGSheet,
   completeEarstructuresValues,
   Earmarks
-} = require('../../airtable/rounds/funding_rounds')
+} = require('../../../airtable/rounds/funding_rounds')
 
 var fundingRound = {}
 var allProposals = []

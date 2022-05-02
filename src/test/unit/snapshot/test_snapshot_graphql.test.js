@@ -2,7 +2,7 @@
 
 global.fetch = require('cross-fetch')
 const fetch = require('cross-fetch')
-const Logger = require('../../utils/logger')
+const Logger = require('../../../utils/logger')
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -15,7 +15,7 @@ const {
   getProposalVotesGQL,
   getVoterScores,
   calculateMatch
-} = require('../../snapshot/snapshot_utils')
+} = require('../../../snapshot/snapshot_utils')
 
 afterAll(() => {
   jest.clearAllTimers()

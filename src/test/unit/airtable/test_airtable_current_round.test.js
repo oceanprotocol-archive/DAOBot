@@ -10,8 +10,8 @@ const {
   getCurrentRound,
   filterCurrentRound,
   Earmarks
-} = require('../../airtable/rounds/funding_rounds')
-const { getRoundsSelectQuery } = require('../../airtable/airtable_utils')
+} = require('../../../airtable/rounds/funding_rounds')
+const { getRoundsSelectQuery } = require('../../../airtable/airtable_utils')
 
 var allRounds = []
 

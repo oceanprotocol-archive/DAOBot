@@ -9,9 +9,9 @@
   "scripts": {
     "start": "node src/gsheets/index.js",
     "dev": "nodemon src/gsheets/index.js",
-    "test": "jest",
+    "test": "jest --testPathPattern=src/test/unit && AIRTABLE_BASEID='appe3NtI7wcUn7qqq' jest --testPathPattern=src/test/integration",
     "test-cov": "jest --coverage",
-    "test-github": "jest",
+    "test-github": "jest --testPathPattern=src/test/unit && AIRTABLE_BASEID='appe3NtI7wcUn7qqq' jest --testPathPattern=src/test/integration",
     "lint": "eslint --ignore-pattern node_modules/ .",
     "lint-fix": "eslint --ignore-pattern node_modules/ . --fix",
     "format": "prettier --ignore-path .gitignore './**/*.{yml,js,json}' --write"

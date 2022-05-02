@@ -123,7 +123,7 @@ const main = async () => {
         'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
       }
 
-      await lastRound.updateFields(roundUpdateData) // update the round record
+      await lastRound.updateFields(roundUpdateData) //  update the round record
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
@@ -148,35 +148,39 @@ const main = async () => {
         lastRoundNumber
       )
       // Start the next round
-      const roundUpdate = [
-        {
-          id: lastRound.id,
-          fields: {
-            'Round State': RoundState.Ended,
-            'Proposals Granted': proposalsFunded,
-            'OCEAN Burned': fundsBurned
+      const roundUpdate = {
+        records: [
+          {
+            id: lastRound.id,
+            fields: {
+              'Round State': RoundState.Ended,
+              'Proposals Granted': proposalsFunded || 0,
+              'OCEAN Burned': fundsBurned || 0
+            }
+          },
+          {
+            id: curRound.id,
+            fields: {
+              'Round State': RoundState.Started
+            }
           }
-        },
-        {
-          id: curRound.id,
-          fields: {
-            'Round State': RoundState.Started
-          }
-        }
-      ]
+        ]
+      }
       await updateRoundRecord(roundUpdate)
     } else if (now >= curRoundStartDate) {
       Logger.log('Start current round.')
 
       // Start the current round
-      const roundUpdate = [
-        {
-          id: curRound.id,
-          fields: {
-            'Round State': RoundState.Started
+      const roundUpdate = {
+        records: [
+          {
+            id: curRound.id,
+            fields: {
+              'Round State': RoundState.Started
+            }
           }
-        }
-      ]
+        ]
+      }
       await updateRoundRecord(roundUpdate)
     }
   } else {
@@ -205,7 +209,6 @@ const main = async () => {
       switch (basisCurrency) {
         case 'USD': {
           fundingAvailableUSD = curRound.get('Funding Available USD')
-
           fundingAvailable = fundingAvailableUSD / tokenPrice
           break
         }
@@ -223,21 +226,23 @@ const main = async () => {
           Logger.log('No Basis Currency was selected for this round.')
       }
 
-      const roundUpdate = [
-        {
-          id: curRound.id,
-          fields: {
-            'Round State': RoundState.DueDiligence,
-            Proposals: allProposals.length,
-            'OCEAN Price': tokenPrice,
-            Earmarks: JSON.stringify(
-              completeEarstructuresValues(curRound, tokenPrice, basisCurrency)
-            ),
-            'Funding Available': fundingAvailable,
-            'Funding Available USD': fundingAvailableUSD
+      const roundUpdate = {
+        records: [
+          {
+            id: curRound.id,
+            fields: {
+              'Round State': RoundState.DueDiligence,
+              Proposals: allProposals.length,
+              'OCEAN Price': tokenPrice,
+              Earmarks: JSON.stringify(
+                completeEarstructuresValues(curRound, tokenPrice, basisCurrency)
+              ),
+              'Funding Available': fundingAvailable,
+              'Funding Available USD': fundingAvailableUSD
+            }
           }
-        }
-      ]
+        ]
+      }
 
       try {
         await syncGSheetsActiveProposalVotes(curRoundNumber, curRoundBallotType)
@@ -265,14 +270,16 @@ const main = async () => {
         await submitProposalsToSnaphotBatch(curRoundNumber, curRoundVoteType)
       }
 
-      const roundUpdate = [
-        {
-          id: curRound.id,
-          fields: {
-            'Round State': RoundState.Voting
+      const roundUpdate = {
+        records: [
+          {
+            id: curRound.id,
+            fields: {
+              'Round State': RoundState.Voting
+            }
           }
-        }
-      ]
+        ]
+      }
       await updateRoundRecord(roundUpdate)
     } else if (
       curRoundState === RoundState.DueDiligence &&

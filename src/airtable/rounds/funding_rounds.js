@@ -1,5 +1,8 @@
 const moment = require('moment')
-const { getRoundsSelectQuery } = require('../airtable_utils')
+const {
+  getRoundsSelectQuery,
+  getRoundsSelectQueryByBase
+} = require('../airtable_utils')
 const Logger = require('../../utils/logger')
 
 // Let's track the state of various proposals
@@ -22,6 +25,18 @@ const getFundingRound = async (roundNum) => {
   try {
     const roundParameters = await getRoundsSelectQuery(
       `{Round} = "${roundNum}"`
+    )
+    return roundParameters[0]
+  } catch (err) {
+    Logger.error(err)
+  }
+}
+
+const getFundingRoundFromSpecificTable = async (roundNum, AirtableBaseId) => {
+  try {
+    const roundParameters = await getRoundsSelectQueryByBase(
+      `{Round} = "${roundNum}"`,
+      AirtableBaseId
     )
     return roundParameters[0]
   } catch (err) {
@@ -208,12 +223,6 @@ const calculateWinningProposalsForEarmark = (
       p.fields['OCEAN Granted'] = p.fundAmount()
     }
     p.fields['Proposal State'] = 'Granted'
-
-    console.log(
-      `${p.get('Project Name')},${p.fields.funded * oceanPrice},${
-        p.fields.totalFund * oceanPrice
-      },${p.fields.maxFund * oceanPrice},${earmark}`
-    )
 
     delete p.fields.funded
     delete p.fields.weight
@@ -465,5 +474,6 @@ module.exports = {
   calculateFinalResults,
   dumpResultsToGSheet,
   completeEarstructuresValues,
+  getFundingRoundFromSpecificTable,
   Earmarks
 }

@@ -7,14 +7,14 @@ dotenv.config()
 const {
   getRoundsSelectQuery,
   sumSnapshotVotesToAirtable
-} = require('../../airtable/airtable_utils')
+} = require('../../../airtable/airtable_utils')
 const {
   syncAirtableActiveProposalVotes
-} = require('../../airtable/sync_airtable_active_proposal_votes_snapshot')
+} = require('../../../airtable/sync_airtable_active_proposal_votes_snapshot')
 const {
   processFundingRoundComplete
-} = require('../../airtable/process_airtable_funding_round_complete')
-const { BallotType } = require('../../snapshot/snapshot_utils')
+} = require('../../../airtable/process_airtable_funding_round_complete')
+const { BallotType } = require('../../../snapshot/snapshot_utils')
 const { expect } = require('chai')
 
 // Tests Skip. Use them to verify that data is getting syncd/dumped properly.

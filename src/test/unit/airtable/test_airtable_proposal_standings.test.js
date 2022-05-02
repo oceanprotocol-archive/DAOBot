@@ -6,7 +6,7 @@ const should = require('chai').should()
 const { expect } = require('chai')
 const {
   validateProposal
-} = require('../../airtable/proposals/proposal_standings')
+} = require('../../../airtable/proposals/proposal_standings')
 const {
   State,
   Standings,
@@ -17,12 +17,12 @@ const {
   processHistoricalStandings,
   updateCurrentRoundStandings,
   getProposalState
-} = require('../../airtable/proposals/proposal_standings')
+} = require('../../../airtable/proposals/proposal_standings')
 const {
   WALLET_ADDRESS_WITH_ENOUGH_OCEANS,
   WALLET_ADDRESS_WITH_NOT_ENOUGH_OCEANS
-} = require('../config')
-const { levels } = require('../../airtable/project_summary')
+} = require('../../config')
+const { levels } = require('../../../airtable/project_summary')
 
 var currentProposals
 var allProposals = []

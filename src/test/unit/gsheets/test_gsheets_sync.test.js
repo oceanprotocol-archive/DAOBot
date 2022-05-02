@@ -6,8 +6,8 @@ dotenv.config()
 
 const {
   syncGSheetsActiveProposalVotes
-} = require('../../gsheets/sync_gsheets_active_proposal_votes_snapshot')
-const { BallotType } = require('../../snapshot/snapshot_utils')
+} = require('../../../gsheets/sync_gsheets_active_proposal_votes_snapshot')
+const { BallotType } = require('../../../snapshot/snapshot_utils')
 
 afterAll(() => {
   jest.clearAllTimers()

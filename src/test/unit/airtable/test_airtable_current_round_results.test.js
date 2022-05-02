@@ -2,7 +2,7 @@
 
 global.fetch = require('cross-fetch')
 const dotenv = require('dotenv')
-const Logger = require('../../utils/logger')
+const Logger = require('../../../utils/logger')
 dotenv.config()
 const {
   completeEarstructuresValues,
@@ -11,19 +11,19 @@ const {
   dumpResultsToGSheet,
   getDownvotedProposals,
   getCurrentRound
-} = require('../../airtable/rounds/funding_rounds')
-const { getProposalsSelectQuery } = require('../../airtable/airtable_utils')
-const { getTokenPrice } = require('../../functions/chainlink')
+} = require('../../../airtable/rounds/funding_rounds')
+const { getProposalsSelectQuery } = require('../../../airtable/airtable_utils')
+const { getTokenPrice } = require('../../../functions/chainlink')
 const {
   clearFundedRecords,
   dumpWiningProposalsByEarmarksToGSheet
-} = require('../../airtable/process_airtable_funding_round_complete')
+} = require('../../../airtable/process_airtable_funding_round_complete')
 const {
   getValues,
   addSheet,
   updateValues
-} = require('../../gsheets/gsheets_utils')
-const { initOAuthToken } = require('../../gsheets/gsheets')
+} = require('../../../gsheets/gsheets_utils')
+const { initOAuthToken } = require('../../../gsheets/gsheets')
 
 jest.setTimeout(900000)
 
