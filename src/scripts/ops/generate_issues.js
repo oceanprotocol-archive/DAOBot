@@ -97,6 +97,7 @@ async function generateRoundGithubIssues(
           Logger.error(`Something went wrong. Response: ${jsonString}`)
         }
       })
+    sleep(1000)
   })
   Logger.log('-----====== Generated OPS schedule issues =======-----')
 }
