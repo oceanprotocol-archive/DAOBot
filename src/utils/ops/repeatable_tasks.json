@@ -136,7 +136,7 @@
     "body": "## Overview\nThe PGWG reviews proposals every round as part of it's mission. We may need to prepare the PGWG, align participants, and help fill out the PGWG Backend Tools so that all proposals are ready for review.\n\n### DOD: PGWG\n- [ ] The Proposal Review Tracker is updated and ready to have proposals registered.\n- [ ] Any additional preparations for the review process have been made.\n- [ ] All Guides have been updated and prepared for the round.\n- [ ] All proposals have been reviewed and projects have been onboarded by the PGWG.",
     "assignees": ["malvonme", "idiom-bytes"],
     "labels": ["Type: OPS", "Project-Guidance WG"]
-  },,
+  },
   {
     "title": "R{{ROUND_NUMBER}} - PGWG OPS - Distribute Funds",
     "body": "## Overview\nThe PGWG has already determined the budget for each round, and voted on how to distribute GIVE. It is now time to distribute any funds that were made available from the treasury during this Epoch.\n\n### DOD: PGWG\n- [ ] Budget has been determined.\n- [ ] Coordinape voting has concluded.\n- [ ] Rewards have been calculated and updated inside of the [PGWG Backend - Coordinape Distributions](https://docs.google.com/spreadsheets/d/1BY6R8uazUmI8Q5m7K0zvqKJdoGiMP8_vcEm_vd4dSb0/edit?resourcekey#gid=1771586219) spreadsheet\n- [ ] Rewards have been distributed via [Disperse](https://disperse.app/)\n- [ ] Fund Distribution has been communicated inside of [PGWG Discord channel](https://discord.com/channels/612953348487905282/908016658239610920) so all Guides are in the know.",
