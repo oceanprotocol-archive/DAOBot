@@ -31,8 +31,8 @@ const networks = [
 const OCEAN_ERC20_ABI = require('../utils/oceanERC20ABI.json')
 const MIN_OCEAN_REQUIRED = 500.0
 
-const getWalletBalance = async (wallet0x) => {
-  const balances = []
+const getWalletBalance = async (wallet0x, required) => {
+  let totalBalance = 0
 
   for (const network of networks) {
     const provider = new ethers.providers.JsonRpcProvider(network.provider)
@@ -42,16 +42,16 @@ const getWalletBalance = async (wallet0x) => {
       provider
     )
     const balance = await contract.balanceOf(wallet0x)
-    balances.push(parseInt(ethers.utils.formatEther(balance)))
+    totalBalance += parseFloat(ethers.utils.formatEther(balance))
+    if (totalBalance >= required) return true
   }
 
-  return Math.max(...balances)
+  return false
 }
 
 const hasEnoughOceans = async (wallet_address) => {
   if (!wallet_address) return false
-  const balance = await getWalletBalance(wallet_address)
-  return balance >= MIN_OCEAN_REQUIRED
+  return await getWalletBalance(wallet_address, MIN_OCEAN_REQUIRED)
 }
 
 const strategy = {
