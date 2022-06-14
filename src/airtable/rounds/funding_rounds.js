@@ -145,7 +145,13 @@ const calculateWinningProposalsForEarmark = (
     x.fundAmount = () => x.fields.funded + x.fields.totalFund
   })
 
+  const maxTries = 100000
+  let tries = 0
   while (proposals.reduce((a, b) => a + b.fields.funded, 0) < totalPool) {
+    tries++
+    if (tries > maxTries) {
+      break
+    }
     const projectsWithoutFunding = proposals.filter((x) => !x.isFunded())
     if (projectsWithoutFunding.length === 0) break
     const sumWeights = projectsWithoutFunding.reduce(
