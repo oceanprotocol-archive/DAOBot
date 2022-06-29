@@ -6,6 +6,7 @@ const {
   getRoundsSelectQuery,
   updateRoundRecord
 } = require('../../airtable/airtable_utils')
+const { sleep } = require('../functions/utils')
 
 const organisation = process.env.GITHUB_ORGANISATION || 'oceanprotocol'
 const repo = process.env.GITHUB_REPOSITORY || 'oceandao'
