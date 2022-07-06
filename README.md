@@ -77,6 +77,11 @@ A simple example of this may be to redistribute funds at the end of a round in c
 
 For further details on this, please visit the `docs` folder.
 
+## Operations Playbook
+
+We might need to adjust the blockheight as required, if there are any issues when deploying the ballot.
+https://github.com/oceanprotocol/DAOBot/issues/202
+
 ## 🏛 License
 
 ```text
