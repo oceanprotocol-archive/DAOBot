@@ -55,24 +55,24 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 }
 
 // Function is responsible for retrieving all data required to set USD floor to 100k
-const updateFundingFloor = async (lastRound) => {
+const updateFundingFloor = async (fundingRound) => {
   Logger.log('...updateFundingFloor()')
   const oceanPrice = await getTokenPrice() // get the latest Ocean price
   const earmarkStructure = await completeEarstructuresValues(
-    lastRound,
+    fundingRound,
     oceanPrice,
-    lastRound.get('Basis Currency')
+    fundingRound.get('Basis Currency')
   ) // calculate the earmark values based on the updated Ocean price
   let roundUpdateData = {
     'OCEAN Price': oceanPrice,
     Earmarks: JSON.stringify(earmarkStructure),
-    'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
+    'Funding Available USD': fundingRound.get('Funding Available') * oceanPrice
   }
 
   if (roundUpdateData['Funding Available USD'] < 100000) {
     // if the amount is smaller than 100k
     const requiredFunding = 100000 / oceanPrice
-    const currentFunding = lastRound.get('Funding Available')
+    const currentFunding = fundingRound.get('Funding Available')
 
     const ratio = requiredFunding / currentFunding
 
@@ -91,7 +91,7 @@ const updateFundingFloor = async (lastRound) => {
     roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
   }
 
-  await lastRound.updateFields(roundUpdateData)
+  await fundingRound.updateFields(roundUpdateData)
 }
 
 // Split up functionality
@@ -151,8 +151,9 @@ const main = async () => {
     // TODO - Clean up results & gsheets
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
-      // Update funding floor and records
-      updateFundingFloor(lastRound);
+      // [curRound Ended] Apply final calcs
+      // Finalize funding floor if required
+      updateFundingFloor(curRound);
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
@@ -332,7 +333,7 @@ const main = async () => {
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
 
       // Update price, and other price-related values
-      updateFundingFloor(lastRound);
+      updateFundingFloor(curRound);
 
       // TODO - Clean up results & gsheets
       try {
