@@ -54,6 +54,46 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
   await prepareProposalsForSnapshot(curRound)
 }
 
+// Function is responsible for retrieving all data required to set USD floor to 100k
+const updateFundingFloor = async (lastRound) => {
+  Logger.log('...updateFundingFloor()')
+  const oceanPrice = await getTokenPrice() // get the latest Ocean price
+  const earmarkStructure = await completeEarstructuresValues(
+    lastRound,
+    oceanPrice,
+    lastRound.get('Basis Currency')
+  ) // calculate the earmark values based on the updated Ocean price
+  let roundUpdateData = {
+    'OCEAN Price': oceanPrice,
+    Earmarks: JSON.stringify(earmarkStructure),
+    'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
+  }
+
+  if (roundUpdateData['Funding Available USD'] < 100000) {
+    // if the amount is smaller than 100k
+    const requiredFunding = 100000 / oceanPrice
+    const currentFunding = lastRound.get('Funding Available')
+
+    const ratio = requiredFunding / currentFunding
+
+    for (const earmark in earmarkStructure) {
+      earmarkStructure[earmark].OCEAN = parseFloat(
+        Number.parseFloat(earmarkStructure[earmark].OCEAN * ratio).toFixed(
+          3
+        )
+      )
+      earmarkStructure[earmark].USD = parseFloat(
+        Number.parseFloat(earmarkStructure[earmark].USD * ratio).toFixed(3)
+      )
+    }
+
+    roundUpdateData['Funding Available USD'] = 100000
+    roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
+  }
+
+  await lastRound.updateFields(roundUpdateData)
+}
+
 // Split up functionality
 // Make it easy to debug/trigger events
 // DONE - End voting periods
@@ -111,19 +151,9 @@ const main = async () => {
     // TODO - Clean up results & gsheets
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
-      const oceanPrice = await getTokenPrice() // get the latest Ocean price
-      const earmarkStructure = await completeEarstructuresValues(
-        lastRound,
-        oceanPrice,
-        lastRound.get('Basis Currency')
-      ) // calculate the earmark values based on the updated Ocean price
-      const roundUpdateData = {
-        'OCEAN Price': oceanPrice,
-        Earmarks: JSON.stringify(earmarkStructure),
-        'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
-      }
+      // Update funding floor and records
+      updateFundingFloor(lastRound);
 
-      await lastRound.updateFields(roundUpdateData) // update the round record
       Logger.log('Start next round.')
       // Update votes and compute funds burned
       const fundsBurned = await computeBurnedFunds(lastRound, lastRoundNumber)
@@ -297,10 +327,12 @@ const main = async () => {
       ]
       await updateRoundRecord(roundUpdate)
     } else if (curRoundState === RoundState.Voting && now < curRoundVoteEnd) {
-      Logger.log('Update vote count.')
-
       // Update votes
+      Logger.log('Update vote count.')
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
+
+      // Update price, and other price-related values
+      updateFundingFloor(lastRound);
 
       // TODO - Clean up results & gsheets
       try {
