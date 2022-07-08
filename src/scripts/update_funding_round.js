@@ -123,6 +123,28 @@ const main = async () => {
         'Funding Available USD': lastRound.get('Funding Available') * oceanPrice
       }
 
+      if (roundUpdateData['Funding Available USD'] < 100000) {
+        // if the amount is smaller than 100k
+        const requiredFunding = 100000 / oceanPrice
+        const currentFunding = lastRound.get('Funding Available')
+
+        const ratio = requiredFunding / currentFunding
+
+        for (const earmark in earmarkStructure) {
+          earmarkStructure[earmark].OCEAN = parseFloat(
+            Number.parseFloat(earmarkStructure[earmark].OCEAN * ratio).toFixed(
+              3
+            )
+          )
+          earmarkStructure[earmark].USD = parseFloat(
+            Number.parseFloat(earmarkStructure[earmark].USD * ratio).toFixed(3)
+          )
+        }
+
+        roundUpdateData['Funding Available USD'] = 100000
+        roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
+      }
+
       await lastRound.updateFields(roundUpdateData) // update the round record
       Logger.log('Start next round.')
       // Update votes and compute funds burned
