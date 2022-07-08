@@ -554,7 +554,7 @@ const getVoteCountStrategy = (roundNumber) => {
   if (roundNumber < 9) return strategy.strategy_v0_2
   if (roundNumber < 14) return strategy.strategy_v0_3
   if (roundNumber < 15) return strategy.strategy_qv_v1
-  if (roundNumber < 20) return strategy.strategy_qv_v2
+  if (roundNumber < 19) return strategy.strategy_qv_v2
   return strategy.strategy_qf_marketplace_v4
 }
 
