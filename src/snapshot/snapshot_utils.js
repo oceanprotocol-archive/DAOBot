@@ -378,6 +378,7 @@ const strategy = {
         brightIdNetwork: '1',
         registry: '0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0',
         symbol: 'OCEAN',
+        delegationSpace: 'officialoceandao.eth',
         strategies: {
           1: [
             {
@@ -458,6 +459,13 @@ const strategy = {
                   stateMutability: 'view',
                   type: 'function'
                 }
+              }
+            },
+            {
+              name: 'h2o',
+              params: {
+                symbol: 'OCEAN',
+                collateralTypeId: 'OCEAN-A'
               }
             }
           ],
