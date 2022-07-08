@@ -69,6 +69,7 @@ const updateFundingFloor = async (fundingRound) => {
     'Funding Available USD': fundingRound.get('Funding Available') * oceanPrice
   }
 
+  let fundingAvailable = fundingRound.get('Funding Available')
   if (roundUpdateData['Funding Available USD'] < 100000) {
     // if the amount is smaller than 100k
     const requiredFunding = 100000 / oceanPrice
@@ -76,6 +77,7 @@ const updateFundingFloor = async (fundingRound) => {
 
     const ratio = requiredFunding / currentFunding
 
+    fundingAvailable = 0
     for (const earmark in earmarkStructure) {
       earmarkStructure[earmark].OCEAN = parseFloat(
         Number.parseFloat(earmarkStructure[earmark].OCEAN * ratio).toFixed(
@@ -85,8 +87,10 @@ const updateFundingFloor = async (fundingRound) => {
       earmarkStructure[earmark].USD = parseFloat(
         Number.parseFloat(earmarkStructure[earmark].USD * ratio).toFixed(3)
       )
+      fundingAvailable += earmarkStructure[earmark]['OCEAN']
     }
 
+    roundUpdateData['Funding Available'] = parseInt(fundingAvailable)
     roundUpdateData['Funding Available USD'] = 100000
     roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
   }
@@ -128,8 +132,8 @@ const main = async () => {
     curRoundBallotType = curRound.get('Ballot Type')
 
     // TODO-RA: This function will take longer and longer to process
-    await processAirtableProposalStandings(curRoundNumber) // process proposal standings
-    await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
+    // await processAirtableProposalStandings(curRoundNumber) // process proposal standings
+    // await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
   }
 
   const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
@@ -153,7 +157,7 @@ const main = async () => {
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
       // [curRound Ended] Apply final calcs
       // Finalize funding floor if required
-      updateFundingFloor(curRound);
+      await updateFundingFloor(curRound);
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
@@ -333,7 +337,7 @@ const main = async () => {
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
 
       // Update price, and other price-related values
-      updateFundingFloor(curRound);
+      await updateFundingFloor(curRound);
 
       // TODO - Clean up results & gsheets
       try {
