@@ -132,8 +132,8 @@ const main = async () => {
     curRoundBallotType = curRound.get('Ballot Type')
 
     // TODO-RA: This function will take longer and longer to process
-    // await processAirtableProposalStandings(curRoundNumber) // process proposal standings
-    // await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
+    await processAirtableProposalStandings(curRoundNumber) // process proposal standings
+    await checkAndGenerateNextRoundOpsSchedule(curRoundNumber)
   }
 
   const lastRoundNumber = parseInt(curRoundNumber, 10) - 1
