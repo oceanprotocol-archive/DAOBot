@@ -55,46 +55,35 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 }
 
 // Function is responsible for retrieving all data required to set USD floor to 100k
-const updateFundingFloor = async (fundingRound) => {
-  Logger.log('...updateFundingFloor()')
+const FLOOR_OCEAN = 200000
+const FLOOR_USD = 100000
+
+const updateFundingAvailable = async (fundingRound) => {
+  Logger.log('...updateFundingAvailable()')
   const oceanPrice = await getTokenPrice() // get the latest Ocean price
+  fundingRound.fields['Earmarks'] = fundingRound.get('Default Earmark')
   const earmarkStructure = await completeEarstructuresValues(
     fundingRound,
     oceanPrice,
-    fundingRound.get('Basis Currency')
+    FLOOR_OCEAN * oceanPrice < FLOOR_USD ? 'USD' : 'OCEAN'
   ) // calculate the earmark values based on the updated Ocean price
   let roundUpdateData = {
-    'OCEAN Price': oceanPrice,
-    Earmarks: JSON.stringify(earmarkStructure),
-    'Funding Available USD': fundingRound.get('Funding Available') * oceanPrice
+    'OCEAN Price': oceanPrice
   }
 
-  let fundingAvailable = fundingRound.get('Funding Available')
-  if (roundUpdateData['Funding Available USD'] < 100000) {
-    // if the amount is smaller than 100k
-    const requiredFunding = 100000 / oceanPrice
-    const currentFunding = fundingRound.get('Funding Available')
-
-    const ratio = requiredFunding / currentFunding
-
-    fundingAvailable = 0
-    for (const earmark in earmarkStructure) {
-      earmarkStructure[earmark].OCEAN = parseFloat(
-        Number.parseFloat(earmarkStructure[earmark].OCEAN * ratio).toFixed(
-          3
-        )
-      )
-      earmarkStructure[earmark].USD = parseFloat(
-        Number.parseFloat(earmarkStructure[earmark].USD * ratio).toFixed(3)
-      )
-      fundingAvailable += earmarkStructure[earmark]['OCEAN']
-    }
-
-    roundUpdateData['Funding Available'] = parseInt(fundingAvailable)
-    roundUpdateData['Funding Available USD'] = 100000
-    roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
+  // if the current amount is smaller than 200000/100k
+  if (FLOOR_OCEAN * oceanPrice < FLOOR_USD ) {
+    roundUpdateData['Funding Available'] = FLOOR_USD / oceanPrice
+    roundUpdateData['Funding Available USD'] = FLOOR_USD
+  } else if (FLOOR_OCEAN * oceanPrice > FLOOR_USD) {
+    roundUpdateData['Funding Available'] = FLOOR_OCEAN
+    roundUpdateData['Funding Available USD'] = FLOOR_OCEAN *  oceanPrice
+  } else {
+    roundUpdateData['Funding Available'] = FLOOR_OCEAN
+    roundUpdateData['Funding Available USD'] = FLOOR_USD
   }
 
+  roundUpdateData['Earmarks'] = earmarkStructure
   await fundingRound.updateFields(roundUpdateData)
 }
 
@@ -156,8 +145,8 @@ const main = async () => {
     // this is when the round is ending => switching to the next funding round
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
       // [curRound Ended] Apply final calcs
-      // Finalize funding floor if required
-      await updateFundingFloor(curRound);
+      // Update funding numbers to report how much is available
+      await updateFundingAvailable(curRound);
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
@@ -336,8 +325,8 @@ const main = async () => {
       Logger.log('Update vote count.')
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
 
-      // Update price, and other price-related values
-      await updateFundingFloor(curRound);
+      // Update funding numbers to report how much is available
+      await updateFundingAvailable(curRound);
 
       // TODO - Clean up results & gsheets
       try {
