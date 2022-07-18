@@ -61,29 +61,29 @@ const FLOOR_USD = 100000
 const updateFundingAvailable = async (fundingRound) => {
   Logger.log('...updateFundingAvailable()')
   const oceanPrice = await getTokenPrice() // get the latest Ocean price
-  fundingRound.fields['Earmarks'] = fundingRound.get('Default Earmark')
+  fundingRound.fields.Earmarks = fundingRound.get('Default Earmark')
   const earmarkStructure = await completeEarstructuresValues(
     fundingRound,
     oceanPrice,
     FLOOR_OCEAN * oceanPrice < FLOOR_USD ? 'USD' : 'OCEAN'
   ) // calculate the earmark values based on the updated Ocean price
-  let roundUpdateData = {
+  const roundUpdateData = {
     'OCEAN Price': oceanPrice
   }
 
   // if the current amount is smaller than 200000/100k
-  if (FLOOR_OCEAN * oceanPrice < FLOOR_USD ) {
+  if (FLOOR_OCEAN * oceanPrice < FLOOR_USD) {
     roundUpdateData['Funding Available'] = FLOOR_USD / oceanPrice
     roundUpdateData['Funding Available USD'] = FLOOR_USD
   } else if (FLOOR_OCEAN * oceanPrice > FLOOR_USD) {
     roundUpdateData['Funding Available'] = FLOOR_OCEAN
-    roundUpdateData['Funding Available USD'] = FLOOR_OCEAN *  oceanPrice
+    roundUpdateData['Funding Available USD'] = FLOOR_OCEAN * oceanPrice
   } else {
     roundUpdateData['Funding Available'] = FLOOR_OCEAN
     roundUpdateData['Funding Available USD'] = FLOOR_USD
   }
 
-  roundUpdateData['Earmarks'] = earmarkStructure
+  roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
   await fundingRound.updateFields(roundUpdateData)
 }
 
@@ -146,7 +146,7 @@ const main = async () => {
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
       // [curRound Ended] Apply final calcs
       // Update funding numbers to report how much is available
-      await updateFundingAvailable(curRound);
+      await updateFundingAvailable(lastRound)
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
@@ -326,7 +326,7 @@ const main = async () => {
       await syncAirtableActiveProposalVotes(curRoundNumber, curRoundBallotType)
 
       // Update funding numbers to report how much is available
-      await updateFundingAvailable(curRound);
+      await updateFundingAvailable(curRound)
 
       // TODO - Clean up results & gsheets
       try {
