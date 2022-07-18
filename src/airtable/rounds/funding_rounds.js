@@ -47,7 +47,7 @@ const completeEarstructuresValues = (curRound, tokenPrice, basisCurrency) => {
       }
       break
     default:
-      Logger.log('Basis currency value is wrong')
+      throw Error('Basis currency value is wrong')
   }
   return earmarks
 }
@@ -209,11 +209,11 @@ const calculateWinningProposalsForEarmark = (
     }
     p.fields['Proposal State'] = 'Granted'
 
-    console.log(
-      `${p.get('Project Name')},${p.fields.funded * oceanPrice},${
-        p.fields.totalFund * oceanPrice
-      },${p.fields.maxFund * oceanPrice},${earmark}`
-    )
+    // Logger.log(
+    //   `${p.get('Project Name')},${p.fields.funded * oceanPrice},${
+    //     p.fields.totalFund * oceanPrice
+    //   },${p.fields.maxFund * oceanPrice},${earmark}`
+    // )
 
     delete p.fields.funded
     delete p.fields.weight
@@ -347,12 +347,13 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
 
   if (proposalsNeverGonnaBeFunded.length > 0) {
     console.log(
-      'Dropping:',
+      '--------------- Dropping:',
       proposalsNeverGonnaBeFunded.map((x) => {
         console.log(
           x.get('Project Name'),
           x.get('USD Granted'),
-          x.get('Minimum USD Requested')
+          x.get('Minimum USD Requested'),
+          totalUsdReqButMin
         )
       })
     )
@@ -367,7 +368,10 @@ const calculateWinningAllProposals = (proposals, fundingRound, oceanPrice) => {
         proposalsNeverGonnaBeFunded.map((z) => z.id).includes(x.id) === false
     )
   } else {
-    console.log('Dropping:', proposalLostWithLeastVotes.get('Project Name'))
+    console.log(
+      '--------------- Dropping:',
+      proposalLostWithLeastVotes.get('Project Name')
+    )
     proposalLostWithLeastVotes.fields['USD Granted'] = 0
     proposalLostWithLeastVotes.fields['OCEAN Granted'] = 0
     proposalLostWithLeastVotes.fields['Proposal State'] = 'Not Granted'
