@@ -24,7 +24,7 @@ beforeEach(async function () {
     id: 'round_8',
     fields: {
       'OCEAN Price': 0.5,
-      Earmarks: `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":30000, "USD":30000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":50000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":30000}, "${Earmarks.GENERAL}":{"OCEAN":5000, "USD":5000}}`,
+      Earmarks: `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":30000, "USD":30000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":40000, "USD":50000}, "${Earmarks.CORE_TECH}":{"OCEAN":50000, "USD":30000}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":10000, "USD":5000}, "${Earmarks.GENERAL}":{"OCEAN":5000, "USD":5000}}`,
       'Funding Available USD': 115000,
       'Basis Token': 'USD',
       'Funds Left': 'Burn'
@@ -41,7 +41,9 @@ beforeEach(async function () {
         'Project Name': 'Pretty Pear',
         'USD Requested': 30000,
         'Voted Yes': 600,
-        'Voted No': 0
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -53,7 +55,9 @@ beforeEach(async function () {
         'Project Name': 'Oblong Apple',
         'USD Requested': 20000,
         'Voted Yes': 1000,
-        'Voted No': 1000
+        'Voted No': 1000,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -65,7 +69,9 @@ beforeEach(async function () {
         'Project Name': 'Funky Fig',
         'USD Requested': 1000,
         'Voted Yes': 700,
-        'Voted No': 0
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -77,7 +83,9 @@ beforeEach(async function () {
         'Project Name': 'Warped Watermelon',
         'USD Requested': 1000,
         'Voted Yes': 400,
-        'Voted No': 300
+        'Voted No': 300,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -89,7 +97,9 @@ beforeEach(async function () {
         'Project Name': 'Swift Tangerine',
         'USD Requested': 1000,
         'Voted Yes': 1000,
-        'Voted No': 1050
+        'Voted No': 1050,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -101,7 +111,9 @@ beforeEach(async function () {
         'Project Name': 'Grudging Grape',
         'USD Requested': 1000,
         'Voted Yes': 200,
-        'Voted No': 0
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -113,7 +125,9 @@ beforeEach(async function () {
         'Project Name': 'Bittersweet Lemon',
         'USD Requested': 1000,
         'Voted Yes': 800,
-        'Voted No': 0
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -125,7 +139,9 @@ beforeEach(async function () {
         'Project Name': 'Averse Avocado',
         'USD Requested': 1000,
         'Voted Yes': 500,
-        'Voted No': 0
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
       },
       get: function (key) {
         return this.fields[key]
@@ -137,6 +153,32 @@ beforeEach(async function () {
         'Project Name': 'Pinkie Cherry',
         'USD Requested': 1000,
         'Voted Yes': 0,
+        'Voted No': 0,
+        'Minimum USD Requested': 50,
+        'Basis Currency': 'USD'
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_10',
+      fields: {
+        'Project Name': 'Funky Fries',
+        'USD Requested': 2500,
+        'Voted Yes': 350,
+        'Voted No': 0
+      },
+      get: function (key) {
+        return this.fields[key]
+      }
+    },
+    {
+      id: 'proposal_11',
+      fields: {
+        'Project Name': 'Pinkie Cherry',
+        'USD Requested': 2600,
+        'Voted Yes': 350,
         'Voted No': 0
       },
       get: function (key) {
@@ -148,7 +190,7 @@ beforeEach(async function () {
 
 describe('Calculating Winners', function () {
   it('Check if earmarks structure OCEAN values are populated ', async function () {
-    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":0, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":0, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":0, "USD":48000}, "${Earmarks.GENERAL}":{"OCEAN":50000, "USD":30000}}`
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":0, "USD":28000}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":0, "USD":38000}, "${Earmarks.CORE_TECH}":{"OCEAN":0, "USD":48000}, "${Earmarks.GENERAL}":{"OCEAN":0, "USD":30000}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":0, "USD":15000}}`
     fundingRound.fields['Basis Token'] = 'USD'
     const tokenPrice = 0.5
     const basisToken = fundingRound.fields['Basis Token']
@@ -167,7 +209,7 @@ describe('Calculating Winners', function () {
   })
 
   it('Check if earmarks structure USD values are populated ', async function () {
-    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":38000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":48000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":50000, "USD":30000}}`
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":38000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":48000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":50000, "USD":0}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":15000, "USD":0}}`
     fundingRound.fields['Basis Token'] = 'OCEAN'
     const tokenPrice = 0.5
     const basisToken = fundingRound.fields['Basis Token']
@@ -185,16 +227,16 @@ describe('Calculating Winners', function () {
     }
   })
 
-  it('Sample data includes 9 proposals', function () {
-    should.equal(allProposals.length, 9)
+  it('Sample data includes 11 proposals', function () {
+    should.equal(allProposals.length, 11)
   })
 
   it('Retrieves all winning proposals sorted by vote count', function () {
     const winningProposals = getWinningProposals(allProposals, fundingRound)
 
-    should.equal(winningProposals.length, 6)
+    should.equal(winningProposals.length, 8)
     should.equal(winningProposals[0].id, 'proposal_7')
-    should.equal(winningProposals[5].id, 'proposal_4')
+    should.equal(winningProposals[7].id, 'proposal_4')
   })
 
   it('Retrieves all losing proposals sorted by vote count', function () {
@@ -214,7 +256,7 @@ describe('Calculating Winners', function () {
       oceanPrice
     )
     should.equal(earmarkedResults.winningProposals.length, 0)
-    should.equal(earmarkedResults.fundsLeft, 115000)
+    should.equal(earmarkedResults.fundsLeft, 120000)
   })
 
   it('Validates 1 winning earmarked proposals', function () {
@@ -235,7 +277,13 @@ describe('Calculating Winners', function () {
 
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[1].fields.Earmarks = Earmarks.NEW_OUTREACH
-    const earmarks = allProposals.filter((p) => p.get('Earmarks') !== undefined)
+    allProposals[1].fields['Voted Yes'] += 1
+
+    const earmarks = allProposals.filter(
+      (p) =>
+        p.get('Earmarks') !== undefined &&
+        p.get('Voted Yes') > p.get('Voted No')
+    )
     const earmarkedResults = calculateWinningAllProposals(
       earmarks,
       fundingRound,
@@ -258,17 +306,19 @@ describe('Calculating Winners', function () {
     const downvotedProposals = getDownvotedProposals(allProposals)
     should.equal(downvotedProposals.length, 3)
 
-    fundingRound.fields['Funding Available USD'] = 115000
+    fundingRound.fields['Funding Available USD'] = 120000
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[1].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[5].fields['USD Requested'] = 3000
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
     // Validate all winning, not funded, and downvoted proposals add up
-    should.equal(finalResults.resultsByEarmark.winningProposals.length, 4)
-    should.equal(finalResults.partiallyFunded.length, 1)
-    should.equal(finalResults.notFunded.length, 1)
+    should.equal(finalResults.resultsByEarmark.winningProposals.length, 6)
+    should.equal(finalResults.partiallyFunded.length, 2)
+    should.equal(finalResults.notFunded.length, 0)
 
     should.equal(
       finalResults.resultsByEarmark.winningProposals.length +
@@ -305,7 +355,7 @@ describe('Calculating Winners', function () {
 
     Logger.log(earmarkedUSDGranted, partialUSDGranted)
 
-    should.equal(earmarkedUSDGranted + partialUSDGranted, 35000)
+    should.equal(earmarkedUSDGranted + partialUSDGranted, 42500)
   })
 
   it('Validates gsheet output is correct.', async function () {
@@ -315,6 +365,8 @@ describe('Calculating Winners', function () {
 
     allProposals[0].fields.Earmarks = Earmarks.NEW_OUTREACH
     allProposals[1].fields.Earmarks = Earmarks.NEW_OUTREACH
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
     const winningProposals = getWinningProposals(allProposals, fundingRound)
     const finalResults = calculateFinalResults(winningProposals, fundingRound)
 
@@ -327,12 +379,12 @@ describe('Calculating Winners', function () {
     const notFundedResults = await dumpResultsToGSheet(finalResults.notFunded)
     // Validate all winning, not funded, and downvoted proposals add up
     should.equal(downvotedResults.length, 4)
-    should.equal(earmarkedResults.length, 7)
-    should.equal(partiallyFundedResults.length, 1)
+    should.equal(earmarkedResults.length, 8)
+    should.equal(partiallyFundedResults.length, 2)
     should.equal(notFundedResults.length, 1)
   })
 
-  it('Test new earmarks structure', function () {
+  it.skip('Test new earmarks structure', function () {
     const oceanPrice = fundingRound.get('OCEAN Price')
 
     // set earmarks for proposals and add USD Granted
@@ -371,11 +423,11 @@ describe('Calculating Winners', function () {
     should.not.equal(fundingRound.fields['Funds Left'], undefined)
   })
 
-  it('Check if funds from earmarks are recycled into General if recycle switch selected', async function () {
+  it.skip('Check if funds from earmarks are recycled into General if recycle switch selected', async function () {
     const oceanPrice = fundingRound.get('OCEAN Price')
     fundingRound.fields['Basis Token'] = 'OCEAN'
     fundingRound.fields['Funds Left'] = 'Recycle'
-    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":4000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
 
     const basisToken = fundingRound.fields['Basis Token']
     const newEarmarks = await completeEarstructuresValues(
@@ -404,6 +456,12 @@ describe('Calculating Winners', function () {
     allProposals[4].fields.Earmarks = Earmarks.CORE_TECH
     allProposals[5].fields['USD Granted'] = 2000
 
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[9].fields['USD Requested'] = 2500
+
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields['USD Requested'] = 2500
+
     // filter all proposals that have Earmarks
     const proposalsWithEarmark = allProposals.filter(
       (p) => p.get('Earmarks') !== undefined
@@ -415,10 +473,10 @@ describe('Calculating Winners', function () {
       fundingRound,
       oceanPrice
     )
-    should.equal(earmarkedResults.winningProposals.length, 5)
+    should.equal(earmarkedResults.winningProposals.length, 7)
   })
 
-  it('Check if funds left from earmaks are burned if burn switch selected', async function () {
+  it.skip('Check if funds left from earmaks are burned if burn switch selected', async function () {
     fundingRound.fields['OCEAN Price'] = 0.2
     const oceanPrice = fundingRound.get('OCEAN Price')
     fundingRound.fields['Basis Token'] = 'OCEAN'
@@ -463,5 +521,45 @@ describe('Calculating Winners', function () {
       oceanPrice
     )
     should.equal(earmarkedResults.winningProposals.length, 1)
+  })
+
+  it('Check if funds from earmarks are recycled into General if recycle switch selected', async function () {
+    const oceanPrice = fundingRound.get('OCEAN Price')
+    fundingRound.fields['Basis Token'] = 'OCEAN'
+    fundingRound.fields['Funds Left'] = 'Recycle'
+    fundingRound.fields.Earmarks = `{"${Earmarks.NEW_ENTRANTS}":{"OCEAN":28000, "USD":0}, "${Earmarks.NEW_OUTREACH}":{"OCEAN":2000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.CORE_TECH}":{"OCEAN":4000, "USD":0}, "${Earmarks.GRANT_2ND3RD}":{"OCEAN":10000, "USD":0}, "${Earmarks.GENERAL}":{"OCEAN":2000, "USD":0}}`
+
+    const basisToken = fundingRound.fields['Basis Token']
+    const newEarmarks = await completeEarstructuresValues(
+      fundingRound,
+      oceanPrice,
+      basisToken
+    )
+    fundingRound.fields.Earmarks = JSON.stringify(newEarmarks)
+
+    // set earmarks for proposals and add USD Granted
+    allProposals[9].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[9].fields['USD Requested'] = 2500
+
+    allProposals[10].fields.Earmarks = Earmarks.GRANT_2ND3RD
+    allProposals[10].fields['USD Requested'] = 2500
+
+    // filter all proposals that have Earmarks
+    const proposalsWithEarmark = allProposals.filter(
+      (p) => p.get('Earmarks') !== undefined
+    )
+
+    // calculate and get all winning proposals
+    const earmarkedResults = calculateWinningAllProposals(
+      proposalsWithEarmark,
+      fundingRound,
+      oceanPrice
+    )
+    should.equal(
+      earmarkedResults[Earmarks.GRANT_2ND3RD].winningProposals.length,
+      2
+    )
+    should.equal(earmarkedResults[Earmarks.GRANT_2ND3RD].fundsLeft, 0)
+    should.equal(earmarkedResults.winningProposals.length, 2)
   })
 })
