@@ -19,6 +19,6 @@ describe('Should get the Ocean balance for wallets', function () {
 
   it('Should get the balance for BSC', async function () {
     const hasEnough = await hasEnoughOceans(bsc)
-    expect(hasEnough).to.be.equal(true)
+    expect(hasEnough).to.be.equal(false)
   })
 })
