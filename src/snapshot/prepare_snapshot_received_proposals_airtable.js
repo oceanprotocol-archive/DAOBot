@@ -5,10 +5,7 @@ const {
   getProposalsSelectQuery,
   updateProposalRecords
 } = require('../airtable/airtable_utils')
-const {
-  calcTargetBlockHeight,
-  hasEnoughOceans
-} = require('../snapshot/snapshot_utils')
+const { hasEnoughOceans } = require('../snapshot/snapshot_utils')
 const { web3 } = require('../functions/web3')
 const Logger = require('../utils/logger')
 const {
@@ -18,7 +15,6 @@ const {
 
 // Script parameters - Should be changed each round
 // For instructions on calculating snapshot block height, read calcTargetBlockHeight() @ snapshot_utils.js
-const avgBlockTime = 13.4
 
 // TODO-RA: This function broke for R13.
 // Proposals were not successfully configured (Voting Starts, Voting Ends, Snapshot Block)
@@ -31,20 +27,12 @@ const prepareProposalsForSnapshot = async (curRound) => {
   const voteEndTime = curRound.get('Voting Ends')
 
   const currentBlock = await web3.eth.getBlock('latest')
-  const currentBlockHeight = currentBlock.number
-
-  const startDate = new Date(voteStartTime)
-  const voteStartTimestamp = startDate.getTime() / 1000 // get unix timestamp in seconds
+  const blockHeight = currentBlock.number
 
   // TODO-RA: Proposals are being set to "Accepted" ahead of time, and are not being found.
   // Changed to this for R13 to work => `AND({Round} = "${curRoundNumber}", OR({Proposal State} = "Accepted"), "true")`
   const proposals = await getProposalsSelectQuery(
     `AND({Round} = "${curRoundNumber}", {Proposal State} = "Accepted", "true")`
-  )
-  const estimatedBlockHeight = calcTargetBlockHeight(
-    currentBlockHeight,
-    voteStartTimestamp,
-    avgBlockTime
   )
 
   const recordsPayload = []
@@ -71,7 +59,7 @@ const prepareProposalsForSnapshot = async (curRound) => {
               'Proposal State': 'Accepted',
               'Voting Starts': voteStartTime,
               'Voting Ends': voteEndTime,
-              'Snapshot Block': Number(estimatedBlockHeight),
+              'Snapshot Block': Number(blockHeight),
               'Deployment Ready': 'Yes'
             }
           })
