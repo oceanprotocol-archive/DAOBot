@@ -50,7 +50,7 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
   await processAirtableNewProposals(curRoundNumber)
 
   // Review all standings for Snapshot
-  sleep(1000)
+  await sleep(1000)
   await prepareProposalsForSnapshot(curRound)
 }
 

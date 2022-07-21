@@ -6,6 +6,7 @@ const {
   getRoundsSelectQuery,
   updateRoundRecord
 } = require('../../airtable/airtable_utils')
+const { sleep } = require('../functions/utils')
 
 const organisation = process.env.GITHUB_ORGANISATION || 'oceanprotocol'
 const repo = process.env.GITHUB_REPOSITORY || 'oceandao'
@@ -97,6 +98,7 @@ async function generateRoundGithubIssues(
           Logger.error(`Something went wrong. Response: ${jsonString}`)
         }
       })
+    sleep(1000)
   })
   Logger.log('-----====== Generated OPS schedule issues =======-----')
 }
@@ -150,7 +152,11 @@ function fillIssueWithRoundParameters(
       .subtract(1, 'days')
       .utc()
       .toISOString(),
-    '{{ROUND_VOTING_END_DATE}}': roundVotingEndDate
+    '{{ROUND_VOTING_END_DATE}}': roundVotingEndDate,
+    '{{ROUND_CLAIM_GRANTS_DUE_DATE}}': moment(roundVotingEndDate)
+      .add(14, 'days')
+      .utc()
+      .toISOString()
   }
   for (const [pattern, value] of Object.entries(patterns)) {
     title = replaceAll(title, pattern, value)
