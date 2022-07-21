@@ -56,7 +56,7 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 
 // Function is responsible for retrieving all data required to set USD floor to 100k
 const FLOOR_OCEAN = 200000
-const FLOOR_USD = 100000
+const FLOOR_USD = 75000
 
 const updateFundingAvailable = async (fundingRound) => {
   Logger.log('...updateFundingAvailable()')
@@ -83,7 +83,7 @@ const updateFundingAvailable = async (fundingRound) => {
     roundUpdateData['Funding Available USD'] = FLOOR_USD
   }
 
-  roundUpdateData.Earmarks = earmarkStructure
+  roundUpdateData.Earmarks = JSON.stringify(earmarkStructure)
   await fundingRound.updateFields(roundUpdateData)
 }
 
@@ -146,7 +146,7 @@ const main = async () => {
     if (lastRoundState === RoundState.Voting && now >= lastRoundVoteEnd) {
       // [curRound Ended] Apply final calcs
       // Update funding numbers to report how much is available
-      await updateFundingAvailable(curRound)
+      await updateFundingAvailable(lastRound)
 
       Logger.log('Start next round.')
       // Update votes and compute funds burned
