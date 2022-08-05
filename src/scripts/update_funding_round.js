@@ -55,7 +55,7 @@ const prepareNewProposals = async (curRound, curRoundNumber) => {
 }
 
 // Function is responsible for retrieving all data required to set USD floor to 100k
-const FLOOR_OCEAN = 200000
+const FLOOR_OCEAN = 150000
 const FLOOR_USD = 75000
 
 const updateFundingAvailable = async (fundingRound) => {
