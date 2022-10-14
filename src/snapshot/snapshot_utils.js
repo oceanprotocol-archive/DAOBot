@@ -5,6 +5,7 @@ const fetch = require('cross-fetch')
 const snapshot = require('@snapshot-labs/snapshot.js')
 const { ethers } = require('ethers')
 const hubUrl = process.env.SNAPSHOT_HUB_URL || 'https://testnet.snapshot.org'
+const client = new snapshot.Client712(hubUrl)
 const network = '1'
 const provider = snapshot.utils.getProvider(network)
 const Logger = require('../utils/logger')
@@ -645,19 +646,17 @@ const local_broadcast_proposal = async (
       })
     }
 
-    var encodedMsg = bufferToHex(Buffer.from(msg.msg, 'utf8'))
-    msg.sig = await web3.eth.sign(encodedMsg, msg.address)
-
-    const url = pUrl === null ? `${hubUrl}/api/message` : `${pUrl}/api/message`
-    const init = {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(msg)
+  
+    const p = {
+      space: pSpace === null ? process.env.SNAPSHOT_SPACE : pSpace,
+      title: payload.name,
+      strategies: payload.metadata.strategies,
+      ...payload
     }
-    return send(url, init)
+    Logger.log(p);
+    const receipt = await client.proposal(web3, account, p);
+    Logger.log("Receipt:",receipt)
+    return receipt
   } catch (err) {
     Logger.error('ERROR: Broadcast Proposal: ', err)
   }
