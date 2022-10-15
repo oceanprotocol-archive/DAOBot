@@ -2,7 +2,8 @@ const Cron = require('croner')
 const updateFundingRound = require('./src/scripts/update_funding_round')
 let updating = false
 // runs every 5 minutes
-Cron('0 */5 * * * *', async () => {
+// Cron('0 */5 * * * *', async () => {
+const main = async () => {
   if (updating) return
   updating = true
 
@@ -13,6 +14,7 @@ Cron('0 */5 * * * *', async () => {
     console.error('An error occurred while updating funding rounds:', err)
   }
   updating = false
-})
+}
 
 // runs every hour
+main()
