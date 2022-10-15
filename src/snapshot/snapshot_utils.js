@@ -737,12 +737,6 @@ const getProposalVotesGQL = async (ipfsHash) => {
 }
 
 const getVoterScores = async (strategy, voters, blockHeight) => {
-  console.log("SPACE", process.env.SNAPSHOT_SPACE)
-  console.log("strategy", strategy)
-  console.log("network", network)
-  console.log("voters", voters)
-  console.log("blockHeight", blockHeight)
-
   return snapshot.utils
     .getScores(
       process.env.SNAPSHOT_SPACE,
@@ -752,7 +746,6 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
       blockHeight
     )
     .then((scores) => {
-      console.log("score:", scores)
       return scores
     })
 }
