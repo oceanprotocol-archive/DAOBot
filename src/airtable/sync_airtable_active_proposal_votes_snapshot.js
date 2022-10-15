@@ -32,10 +32,6 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
       try {
         const ipfsHash = proposal.get('ipfsHash')
         const proposalHash = proposal.get('proposalHash')
-
-        console.log("proposal", proposal)
-        console.log("ipfsHash", ipfsHash)
-        console.log("proposalHash", proposalHash)
         
         const strategy = getVoteCountStrategy(proposal.get('Round'))
 
