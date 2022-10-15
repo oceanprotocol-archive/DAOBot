@@ -13,6 +13,6 @@ Cron('0 */5 * * * *', async () => {
     console.error('An error occurred while updating funding rounds:', err)
   }
   updating = false
-}
+})
 
 // runs every hour
