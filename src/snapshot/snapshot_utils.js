@@ -742,7 +742,6 @@ const getVoterScores = async (strategy, voters, blockHeight) => {
       process.env.SNAPSHOT_SPACE,
       strategy,
       network,
-      provider,
       voters,
       blockHeight
     )

@@ -31,14 +31,16 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
     activeProposals.map(async (proposal) => {
       try {
         const ipfsHash = proposal.get('ipfsHash')
+        const proposalHash = proposal.get('proposalHash')
+        
         const strategy = getVoteCountStrategy(proposal.get('Round'))
 
-        await getProposalVotesGQL(ipfsHash).then((result) => {
-          proposalVotes[ipfsHash] = result.data?.votes
+        await getProposalVotesGQL(proposalHash).then((result) => {
+          proposalVotes[proposalHash] = result.data?.votes
         })
         const voters = []
-        for (var i = 0; i < proposalVotes[ipfsHash].length; ++i) {
-          voters.push(proposalVotes[ipfsHash][i].voter)
+        for (var i = 0; i < proposalVotes[proposalHash].length; ++i) {
+          voters.push(proposalVotes[proposalHash][i].voter)
         }
 
         const scores = await getVoterScores(
@@ -47,19 +49,19 @@ const getActiveProposalVotes = async (curRoundNumber, curRoundBallotType) => {
           proposal.get('Snapshot Block')
         )
 
-        voterScores[ipfsHash] = reduceVoterScores(
+        voterScores[proposalHash] = reduceVoterScores(
           strategy,
-          proposalVotes[ipfsHash],
+          proposalVotes[proposalHash],
           scores
         )
 
         if (curRoundNumber >= 14) {
-          proposalScores[ipfsHash] = calculateMatch(voterScores[ipfsHash])
+          proposalScores[proposalHash] = calculateMatch(voterScores[proposalHash])
         } else {
-          proposalScores[ipfsHash] = reduceProposalScores(
+          proposalScores[proposalHash] = reduceProposalScores(
             strategy,
-            proposalVotes[ipfsHash],
-            voterScores[ipfsHash]
+            proposalVotes[proposalHash],
+            voterScores[proposalHash]
           )
         }
       } catch (err) {
@@ -75,6 +77,7 @@ const syncAirtableActiveProposalVotes = async (
   curRoundNumber,
   curRoundBallotType
 ) => {
+  console.log("getActiveProposalVotes")
   const results = await getActiveProposalVotes(
     curRoundNumber,
     curRoundBallotType
@@ -82,10 +85,12 @@ const syncAirtableActiveProposalVotes = async (
   const activeProposals = results[0]
   const proposalScores = results[2]
 
+  console.log("sumSnapshotVotesToAirtable")
   const proposalVoteSummary = await sumSnapshotVotesToAirtable(
     activeProposals,
     proposalScores
   )
+  
   Logger.log('============')
   await updateProposalRecords(proposalVoteSummary)
   Logger.log(
